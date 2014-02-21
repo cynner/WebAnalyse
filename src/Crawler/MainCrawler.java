@@ -66,7 +66,7 @@ public class MainCrawler {
     public int Threads = 10;
     public int log_id = 2;
     public String Dirname;
-    public String Selcond = "";// "log_id is NULL";
+    public String Selcond = "(log_id is NULL OR location='TH')";// "log_id is NULL";
     public String Fixedcond = "status > 0";
     SQLiteQueue dbq;
     SQLiteQueue webdbq;
@@ -562,7 +562,7 @@ public class MainCrawler {
                         //"url","language",file_size,comment_size,js_size,style_size,content_size
                         while ((line = br.readLine()) != null) {
                             if(!line.isEmpty()){
-                                connection.exec("INSERT INTO webpage(url,language,file_size,comment_size,js_size,style_size,content_size) VALUES(" + line + ");");
+                                connection.exec("INSERT OR IGNORE INTO webpage(url,language,file_size,comment_size,js_size,style_size,content_size) VALUES(" + line + ");");
                             }
                         }
                         
