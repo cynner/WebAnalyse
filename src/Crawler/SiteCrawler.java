@@ -7,37 +7,28 @@ package Crawler;
 import ArcFileUtils.WebArcReader;
 import ArcFileUtils.WebArcRecord;
 import ArcFileUtils.WebArcWriter;
-import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.RandomAccessFile;
-import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.TimeZone;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import net.sf.samtools.util.BlockCompressedOutputStream;
-import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import projecttester.ProjectTester;
 import ArcFileUtils.WebUtils;
 import LanguageUtils.LanguageDetector;
-import Lexto.MyLexto;
 import com.almworks.sqlite4java.SQLiteQueue;
 
 /**
@@ -45,8 +36,9 @@ import com.almworks.sqlite4java.SQLiteQueue;
  * @author malang
  */
 public class SiteCrawler implements Runnable {
+
     public SQLiteQueue dbq;
-    
+
     public static DateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
     public static DateFormat webDateFormat = new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss z");
     public static String MyIP = GetMyIP();
@@ -57,9 +49,9 @@ public class SiteCrawler implements Runnable {
     public String AcceptOnlyPrefixPath = "/";
     public int MarginPage;
     public int MaxPage;
-    public ArrayList<String> URLQueue = new ArrayList<String>();
-    public ArrayList<String> URLCrash = new ArrayList<String>();
-    public ArrayList<String> URLLoaded = new ArrayList<String>();
+    public ArrayList<String> URLQueue = new ArrayList<>();
+    public ArrayList<String> URLCrash = new ArrayList<>();
+    public ArrayList<String> URLLoaded = new ArrayList<>();
     public Fetcher Fetch;
     private Robotstxt robots;
     //private BufferedWriter bw;
@@ -69,18 +61,21 @@ public class SiteCrawler implements Runnable {
     public File ArcFile;
     public File TmpFile;
     public File WebDBFile;
-    
+
     public BufferedWriter bwWeb;
     public WebArcWriter waw = null;
     public WebArcRecord record;
     public boolean PrintEnqueue = false;
-    
+
     public MainCrawler mainCrawl = null;
-    
-    public static enum Mode{preCrawl,Crawl};
+
+    public static enum Mode {
+
+        preCrawl, Crawl
+    };
     public Mode mode = Mode.Crawl;
-    
-    private WebUtils wu = new WebUtils();
+
+    private final WebUtils wu = new WebUtils();
 
     public static String GetMyIP() {
         String s = null;
@@ -91,8 +86,8 @@ public class SiteCrawler implements Runnable {
         }
         return s;
     }
-    
-    public SiteCrawler( String HostName, String HostIP, File ArcFile, int MaxPage, String AcceptOnlyPrefixPath, boolean isAppend, MainCrawler mainCrawl, Mode mode){
+
+    public SiteCrawler(String HostName, String HostIP, File ArcFile, int MaxPage, String AcceptOnlyPrefixPath, boolean isAppend, MainCrawler mainCrawl, Mode mode) {
         this.HostName = HostName;
         this.MaxPage = MaxPage;
         this.MarginPage = (int) (this.MaxPage * 3);
@@ -105,39 +100,40 @@ public class SiteCrawler implements Runnable {
         this.ArcGZFile = new File(ArcFile.getPath() + ".gz");
         this.WebDBFile = new File(ArcFile.getParent() + "/db/." + HostName + ".tmpDB");
         webDateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
-        if(HostIP != null){
+        if (HostIP != null) {
             this.HostIP = HostIP;
-        }else{
+        } else {
             try {
                 InetAddress address = InetAddress.getByName(HostName);
                 this.HostIP = address.getHostAddress();
-                if(mainCrawl != null)
+                if (mainCrawl != null) {
                     mainCrawl.UpdateIP(this.HostName, this.HostIP);
-            } catch (UnknownHostException e) {
+                }
+            } catch (UnknownHostException ex) {
                 this.HostIP = null;
             }
         }
     }
 
-    public SiteCrawler( String HostName, String DirName, int MaxPage, String AcceptOnlyPrefixPath, boolean isAppend) {
-        this(HostName,null,new File(DirName + "/crawl-" + HostName + ".arc"),MaxPage,AcceptOnlyPrefixPath, isAppend, null , Mode.Crawl);
+    public SiteCrawler(String HostName, String DirName, int MaxPage, String AcceptOnlyPrefixPath, boolean isAppend) {
+        this(HostName, null, new File(DirName + "/crawl-" + HostName + ".arc"), MaxPage, AcceptOnlyPrefixPath, isAppend, null, Mode.Crawl);
     }
-    
+
     public SiteCrawler(String HostName, String HostIP, String DirName, int MaxPage, String AcceptOnlyPrefixPath, boolean isAppend) {
-        this(HostName,HostIP,new File(DirName + "/crawl-" + HostName + ".arc"),MaxPage,AcceptOnlyPrefixPath, isAppend, null , Mode.Crawl);
+        this(HostName, HostIP, new File(DirName + "/crawl-" + HostName + ".arc"), MaxPage, AcceptOnlyPrefixPath, isAppend, null, Mode.Crawl);
     }
-    
-     public SiteCrawler(String HostName, String HostIP, String DirName, int MaxPage, String AcceptOnlyPrefixPath, boolean isAppend, MainCrawler mc, Mode mode) {
-        this(HostName,HostIP,new File(DirName + "/crawl-" + HostName + ".arc"),MaxPage,AcceptOnlyPrefixPath, isAppend, mc , mode);
+
+    public SiteCrawler(String HostName, String HostIP, String DirName, int MaxPage, String AcceptOnlyPrefixPath, boolean isAppend, MainCrawler mc, Mode mode) {
+        this(HostName, HostIP, new File(DirName + "/crawl-" + HostName + ".arc"), MaxPage, AcceptOnlyPrefixPath, isAppend, mc, mode);
     }
 
     @Override
     public void run() {
         System.out.println(Thread.currentThread().getName() + " " + HostName + " Start.");
         if (this.HostIP != null) {
-            
+
             processCommand();
-        } else if(mainCrawl != null) {
+        } else if (mainCrawl != null) {
             mainCrawl.UpdateStatus(HostName, MainCrawler.Status.NoHostIP);
         }
         System.out.println(Thread.currentThread().getName() + " " + HostName + " End.");
@@ -146,45 +142,54 @@ public class SiteCrawler implements Runnable {
     private void processCommand() {
         this.Fetch = new Fetcher(UserAgent);
         this.robots = new Robotstxt(HostName, UserAgent);
-        boolean tmpExists = TmpFile.exists(),arcExists = ArcFile.exists();
-        
-        
+        boolean tmpExists = TmpFile.exists(), arcExists = ArcFile.exists();
+
         // 1. Load Robots.txt
         Fetch.fetch("http://" + HostName + "/robots.txt");
         if (Fetch.Details.WebContent != null) {
             this.robots.AnalyseRobots(Fetch.Details.WebContent);
         }
-        
-        if(URLQueue.isEmpty())
-            URLQueue.add("http://" + HostName + AcceptOnlyPrefixPath);
 
-        if(!tmpExists && arcExists){
+        if (URLQueue.isEmpty()) {
+            URLQueue.add("http://" + HostName + AcceptOnlyPrefixPath);
+        }
+
+        if (!tmpExists && arcExists) {
             this.ArcFile.renameTo(TmpFile);
             tmpExists = true;
             arcExists = false;
         }
-        
-        if(this.waw == null){
+
+        try{
             if (this.isAppend && tmpExists) {
                 this.waw = new WebArcWriter(this.TmpFile, ReadFile());
-            }else{
+            } else {
                 this.waw = new WebArcWriter(this.TmpFile, this.ArcFile.getName(), this.isAppend, this.HostIP);
             }
-        }
-        try {
             bwWeb = new BufferedWriter(new FileWriter(WebDBFile));
         } catch (IOException ex) {
             Logger.getLogger(SiteCrawler.class.getName()).log(Level.SEVERE, null, ex);
+            try{
+                if(bwWeb != null){
+                    bwWeb.close();
+                }
+                if(waw !=null){
+                    waw.close();
+                }
+            } catch (IOException ex1) {
+                Logger.getLogger(SiteCrawler.class.getName()).log(Level.SEVERE, null, ex1);
+            }
+            return;
         }
+        
+        try {
+            if (mainCrawl != null && mode == Mode.preCrawl) {
 
-        try{
-            if(mainCrawl != null && mode == Mode.preCrawl){
-
-                if(preCrawl()){
+                if (preCrawl()) {
                     mainCrawl.UpdateStatus(HostName, MainCrawler.Status.Crawling);
-                }else{
-                    this.waw.close();
+                } else {
                     try {
+                        this.waw.close();
                         this.bwWeb.close();
                     } catch (IOException ex) {
                         Logger.getLogger(SiteCrawler.class.getName()).log(Level.SEVERE, null, ex);
@@ -196,53 +201,31 @@ public class SiteCrawler implements Runnable {
                 }
             }
             Crawl();
-        }finally{
-            this.waw.close();
+        } finally {
             try {
+                this.waw.close();
                 this.bwWeb.close();
             } catch (IOException ex) {
                 Logger.getLogger(SiteCrawler.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
-        
+
         mainCrawl.dumpWebDB(HostName);
-        
-        if(arcExists){
+
+        if (arcExists) {
             this.ArcFile.delete();
         }
         this.TmpFile.renameTo(ArcFile);
         Compress(ArcFile, ArcGZFile);
         this.ArcFile.delete();
-        
-        if(mainCrawl != null){
+
+        if (mainCrawl != null) {
             mainCrawl.UpdatePageCount(HostName, URLLoaded.size(), MainCrawler.Status.Finished);
         }
-        
+
     }
-    
-    public void Compress(File Src, File Dst){
-        BlockCompressedOutputStream BCOS;
-        
-        DataInputStream br;
-        try {
-            br = new DataInputStream(new FileInputStream(Src));
-            BCOS = new BlockCompressedOutputStream(Dst);
-            byte[] bytes = new byte[4096];
-            while(br.read(bytes) > 0)
-                BCOS.write(bytes);
-            
-            BCOS.close();
-            br.close();
-        } catch (FileNotFoundException ex) {
-            Logger.getLogger(SiteCrawler.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (IOException ex) {
-            Logger.getLogger(SiteCrawler.class.getName()).log(Level.SEVERE, null, ex);
-        }
-    }
-    
-    
-    
-    public boolean preCrawl(){
+
+    public boolean preCrawl() {
         String Url;
         while (!URLQueue.isEmpty() && URLLoaded.size() < mainCrawl.MaxPreCrawl) {
             // 2.1 Fetch
@@ -263,32 +246,34 @@ public class SiteCrawler implements Runnable {
                             Thread.sleep(this.CrawlDelay);
                         } catch (InterruptedException ex) {
                             System.err.println("Interupt while delay!...");
+                            Logger.getLogger(SiteCrawler.class.getName()).log(Level.SEVERE, null, ex);
                         }
-                        if(mainCrawl.isAccept(Fetch.Details)){
+                        if (mainCrawl.isAccept(Fetch.Details)) {
                             return true;
                         }
-                    }else{
+                    } else {
                         URLCrash.add(URLQueue.remove(0));
                     }
                 } else {
-                    if(!CodeHandler())
+                    if (!CodeHandler()) {
                         break;
+                    }
                 }
-            }else {
+            } else {
                 // Unknown and add to crash
                 URLCrash.add(URLQueue.remove(0));
             }
         }
         return false;
     }
-    
+
     public byte mySizeData;
     //public static byte mySizeSize;
     public int SizeOriginal;
     public int SizeData;
     public int SizeC;
-    
-    public void Crawl(){
+
+    public void Crawl() {
         String Url;
         while (!URLQueue.isEmpty() && URLLoaded.size() < MaxPage) {
             // 2.1 Fetch
@@ -309,23 +294,24 @@ public class SiteCrawler implements Runnable {
                             Thread.sleep(this.CrawlDelay);
                         } catch (InterruptedException ex) {
                             System.err.println("Interupt while delay!...");
+                            Logger.getLogger(SiteCrawler.class.getName()).log(Level.SEVERE, null, ex);
                         }
-                    }else{
+                    } else {
                         URLCrash.add(URLQueue.remove(0));
                     }
                 } else {
-                    if(!CodeHandler())
+                    if (!CodeHandler()) {
                         break;
+                    }
                 }
-            }else {
+            } else {
                 // Unknown and add to crash
                 URLCrash.add(URLQueue.remove(0));
             }
         }
     }
-    
-    
-    public void writeUpdateDB(String Url, String lang){
+
+    public void writeUpdateDB(String Url, String lang) {
         //"url","language",file_size,comment_size,js_size,style_size,content_size
         try {
             bwWeb.write("\"" + Url.replaceAll("\"", "\"\"") + "\"," + (lang == null ? "null" : "\"" + lang + "\"") + "," + wu.FileSize + "," + wu.CommentSize + "," + wu.ScriptSize + "," + wu.StyleSize + "," + wu.ContentSize);
@@ -335,17 +321,17 @@ public class SiteCrawler implements Runnable {
             Logger.getLogger(SiteCrawler.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
-    
-    public void removeUpdateDB(){
+
+    public void removeUpdateDB() {
         try {
             bwWeb.close();
         } catch (IOException ex) {
             Logger.getLogger(SiteCrawler.class.getName()).log(Level.SEVERE, null, ex);
         }
         WebDBFile.delete();
-        
+
     }
-    
+
     public boolean CodeHandler() {
         if (Fetch.ResponseCode == 0) {
             // 0 No Internet Connection -- Stop
@@ -379,26 +365,30 @@ public class SiteCrawler implements Runnable {
     public boolean isAllowedHeader() {
         return "text/html".equals(Fetch.Details.ArchiveContentType);
     }
-    
-    public boolean isAllowedPreFixPath(String Path){
+
+    public boolean isAllowedPreFixPath(String Path) {
         return Path.startsWith(AcceptOnlyPrefixPath);
     }
 
-
     public long ReadFile() {
-        
-        WebArcReader war = new WebArcReader(TmpFile,false);
-        while (war.Next()) {
-            try {
-                LinkFromRedir(war.Record.URL, war.Record.Doc);
-                AnalyseLink(war.Record.URL, war.Record.Doc);
-                URLQueue.remove(war.Record.URL);
-                URLLoaded.add(war.Record.URL);
-            } catch (Exception e) {
+        long LastPos = -1;
+        try (WebArcReader war = new WebArcReader(TmpFile, false)) {
+            war.Next();
+
+            while (war.Next()) {
+                try {
+                    LinkFromRedir(war.Record.URL, war.Record.Doc);
+                    AnalyseLink(war.Record.URL, war.Record.Doc);
+                    URLQueue.remove(war.Record.URL);
+                    URLLoaded.add(war.Record.URL);
+                } catch (Exception e) {
+                }
             }
+            LastPos = war.LastPos;
+        } catch (IOException ex) {
+            Logger.getLogger(SiteCrawler.class.getName()).log(Level.SEVERE, null, ex);
         }
-        war.close();
-        return war.LastPos;
+        return LastPos;
     }
 
     /*
@@ -413,8 +403,9 @@ public class SiteCrawler implements Runnable {
                     && !URLCrash.contains(url.UniqURL)
                     && !URLLoaded.contains(url.UniqURL)) {
                 URLQueue.add(url.UniqURL);
-                if(PrintEnqueue)
+                if (PrintEnqueue) {
                     System.out.println("Enqueue: " + url.UniqURL);
+                }
             }
         }
     }
@@ -441,8 +432,6 @@ public class SiteCrawler implements Runnable {
         } catch (Exception ex) {
         }
     }
-    
-    
 
     public void AnalyseLink(String url, Document doc) {
         if (URLQueue.size() < MarginPage) {
@@ -483,24 +472,40 @@ public class SiteCrawler implements Runnable {
 
     public static void main(String[] args) {
         /*
-        try {
-        MyURL u = new MyURL("http://www.sat.or.th/th/main/Default.aspx");
-        MyURL x = u.resolve("../main/sitemap.html");
-        System.out.println(x.UniqURL);
-        } catch (Exception ex) {
-        Logger.getLogger(Crawler.class.getName()).log(Level.SEVERE, null, ex);
-        }*/
+         try {
+         MyURL u = new MyURL("http://www.sat.or.th/th/main/Default.aspx");
+         MyURL x = u.resolve("../main/sitemap.html");
+         System.out.println(x.UniqURL);
+         } catch (Exception ex) {
+         Logger.getLogger(Crawler.class.getName()).log(Level.SEVERE, null, ex);
+         }*/
         //Crawler c = new Crawler("www.sat.or.th", ".", 200, true);
-        SiteCrawler c = new SiteCrawler("www.dek-d.com", "data/crawldata3/", 11, "/", true );
+        SiteCrawler c = new SiteCrawler("www.dek-d.com", "data/crawldata3/", 11, "/", true);
         c.run();
         /*
-        ArcUtils au = new ArcUtils("crawl-127.0.0.1.arc");
-        while(au.Next()){
-        System.out.println(au.GetHeader());
-        System.out.println();
-        System.out.println(au.GetContent());
-        System.out.println();
-        System.out.println();
-        }*/
+         ArcUtils au = new ArcUtils("crawl-127.0.0.1.arc");
+         while(au.Next()){
+         System.out.println(au.GetHeader());
+         System.out.println();
+         System.out.println(au.GetContent());
+         System.out.println();
+         System.out.println();
+         }*/
+    }
+
+    public void Compress(File Src, File Dst) {
+        try (DataInputStream br = new DataInputStream(new FileInputStream(Src))) {
+            try (BlockCompressedOutputStream BCOS = new BlockCompressedOutputStream(Dst)) {
+                byte[] bytes = new byte[4096];
+                int len;
+                while ((len = br.read(bytes)) >= 0) {
+                    BCOS.write(bytes, 0, len);
+                }
+            }
+        } catch (FileNotFoundException ex) {
+            Logger.getLogger(SiteCrawler.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IOException ex) {
+            Logger.getLogger(SiteCrawler.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 }

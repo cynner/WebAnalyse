@@ -6,8 +6,6 @@
 
 package Converter;
 
-import ArcFileUtils.ArcWriter;
-import ArcFileUtils.BGZFWriter;
 import ArcFileUtils.CompressedArcWriter;
 import ArcFileUtils.WebArcReader;
 import java.io.BufferedReader;
@@ -63,22 +61,20 @@ public class ConvertWeb2SnippedText {
             
             OutGZ = new File(OutDir + "/" + f.getName());
             if (!OutGZ.exists()) {
-                WebArcReader war = new WebArcReader(f, "utf-8");
-            //OutTMP = new File(OutDir + "/." + f.getName() + ".tmp");
-
                 System.out.println(OutGZ.getName());
-                CompressedArcWriter aw = new CompressedArcWriter(OutGZ);
-                while (war.Next()) {
-                    war.Record.ArchiveContent = war.Record.Doc.title() + "\n";
-                    if ((e = war.Record.Doc.body()) != null) {
-                        war.Record.ArchiveContent += e.text();
+                try (WebArcReader war = new WebArcReader(f, "utf-8"); 
+                        CompressedArcWriter aw = new CompressedArcWriter(OutGZ)) {
+                    System.out.println(OutGZ.getName());
+                    while (war.Next()) {
+                        war.Record.ArchiveContent = war.Record.Doc.title() + "\n";
+                        if ((e = war.Record.Doc.body()) != null) {
+                            war.Record.ArchiveContent += e.text();
+                        }
+                        aw.WriteRecordFromContent(war.Record);
                     }
-                    aw.WriteRecordFromContent(war.Record);
+                } catch (IOException ex) {
+                    Logger.getLogger(ConvertWeb2SnippedText.class.getName()).log(Level.SEVERE, null, ex);
                 }
-                aw.close();
-                war.close();
-            //BGZFWriter.Compress(OutTMP, OutGZ);
-                //OutTMP.delete();
             }
         }
     }

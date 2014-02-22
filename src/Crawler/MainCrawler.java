@@ -21,6 +21,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.Reader;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
@@ -48,10 +49,6 @@ public class MainCrawler {
                     return d;
             return null;
         }
-        /*
-        public int getValue(){
-            return value;
-        }*/
     };
     
     public String DBName = "resource/crawler.sqlite3";
@@ -72,17 +69,48 @@ public class MainCrawler {
     SQLiteQueue webdbq;
     SQLiteConnection dbc;
     
-    public ArrayList<String> HostNameQueue = new ArrayList<String>();
-    public ArrayList<String> HostIPQueue = new ArrayList<String>();
-    public ArrayList<String> LocationQueue = new ArrayList<String>();
-    public ArrayList<Status> StatusQueue = new ArrayList<Status>();
+    public ArrayList<String> HostNameQueue = new ArrayList<>();
+    public ArrayList<String> HostIPQueue = new ArrayList<>();
+    public ArrayList<String> LocationQueue = new ArrayList<>();
+    public ArrayList<Status> StatusQueue = new ArrayList<>();
     
+
     public MainCrawler(String DirName, int MaxPreCrawl, int MaxPagePerSite){
         this.Dirname = DirName;
         this.MaxPagePerSite = MaxPagePerSite;
         this.MaxPreCrawl = MaxPreCrawl;
     }
     
+    public static void main(String[] args) throws IOException{
+        String Dir = args.length > 0 ? args[0] : DefaultSitePath;
+        String DBDir = Dir + "/db";
+        LanguageDetector.init();
+        
+        MainCrawler mc = new MainCrawler(Dir,3,1000);
+        
+        //mc.ImportSeedSite(new File("Hop2.pure"));
+        //mc.RunExampleStatement();
+        //mc.MyImportSeedSite(new File("sumout.txt"));
+        //mc.RunExampleSelect();
+        
+        File dir = new File(Dir);
+        File DBDirf = new File(DBDir);
+        
+        if(!dir.isDirectory()){
+            if(dir.exists()){
+                System.err.println(Dir + " is not a directory");
+                System.exit(1);
+            }else{
+                System.out.println("Crawl data will stored in " + Dir);
+                dir.mkdir();
+            }
+        }
+        
+        if(!DBDirf.exists()){
+            DBDirf.mkdir();
+        }
+        mc.run();
+    }
     
     // 1. ImportSeedSite()
     // 2. Crawl() Crawl Loop
@@ -93,11 +121,105 @@ public class MainCrawler {
     //    2.3 Fetching() - Change status to crawling(1) Crawl 2.1
     //    2.4 Finishing() - if finished change status to finished(2)
     
+    public void run(){
+        String Location,HostName,HostIP;
+        Status stat;
+        int cycle=1;
+        
+        ExecutorService executor;
+        
+        /*db = new SQLiteConnection(new File(DBName));
+        try {
+            db.open(false);
+        } catch (SQLiteException ex) {
+            Logger.getLogger(MainCrawler.class.getName()).log(Level.SEVERE, null, ex);
+        }*/
+        
+        dbq = new SQLiteQueue(new File(DBName));
+        dbq.start();
+        webdbq = new SQLiteQueue(new File(WebDBName));
+        webdbq.start();
+            
+        while(NextCache()){
+            
+            System.out.println("====== newFixedThreadPool cycle #" + cycle +" ======");
+            
+            executor = Executors.newFixedThreadPool(this.Threads);
+            //System.out.println("gg");
+                
+            while(Next()){
+                Runnable worker; 
+                HostIP = HostIPQueue.remove(0);
+                HostName = HostNameQueue.remove(0);
+                Location = LocationQueue.remove(0);
+                stat = StatusQueue.remove(0);
+                System.out.println(HostName);
+                if(HostIP == null){
+                    HostIP = GeoIP.Domain2IP(HostName);
+                    if(HostIP != null){
+                        UpdateIP(HostName, HostIP);
+                    }else{
+                        UpdateStatus(HostName, Status.NoHostIP);
+                        continue;
+                    }
+                }
+                if(Location == null){
+                    Location = GeoIP.IP2ISOCountry(HostIP);
+                
+                    if(Location != null){
+                        UpdateLocation(HostName, Location);
+                    }else{
+                        UpdateStatus(HostName, Status.NoHostLocation);
+                        continue;
+                    }
+                    
+                }
+            
+                if(Location.equals("TH")){
+                    worker = new SiteCrawler(HostName, HostIP, Dirname, MaxPagePerSite, "/",true,this, SiteCrawler.Mode.Crawl);
+                }else{
+                    continue;
+                    /*
+                    worker = new SiteCrawler(HostName, HostIP, Dirname, MaxPagePerSite, 
+                       "/",true,this, 
+                       ((stat == Status.Crawling) ? SiteCrawler.Mode.Crawl :  SiteCrawler.Mode.preCrawl));
+                    */
+                
+                }
+                
+                executor.execute(worker);
+            }
+            
+            executor.shutdown();
+            
+            System.out.println("====== shutdown cycle #" + cycle +" ======");
+            cycle++;
+            while (!executor.isTerminated()) {
+            }
+            
+            try {
+                dbq.stop(true).join();
+                webdbq.stop(true).join();
+            } catch (InterruptedException ex) {
+                Logger.getLogger(MainCrawler.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            dbq = new SQLiteQueue(new File(DBName));
+            dbq.start();
+            webdbq = new SQLiteQueue(new File(WebDBName));
+            webdbq.start();
+        }
+        try {
+            dbq.stop(true).join();
+            webdbq.stop(true).join();
+        } catch (InterruptedException ex) {
+            Logger.getLogger(MainCrawler.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+    
     
     // Can't remove
     public boolean isAccept(WebArcRecord f){
         return "th".equals(LanguageDetector.Detect(f.Doc.text()));
-        
         //return true;
     }
     
@@ -193,13 +315,11 @@ public class MainCrawler {
     }
     
     
-    public void ImportSeedSite(File Seed){
+    public void ImportSeedSite(File Seed) throws FileNotFoundException, IOException{
         
         SQLiteConnection db = new SQLiteConnection(new File(DBName));
-        BufferedReader br;
-        
-        try {
-            br = new BufferedReader(new FileReader(Seed));
+        //BufferedReader br;
+        try (BufferedReader br = new BufferedReader(new FileReader(Seed))){
             try{
                 db.open(true);
                 String Line;
@@ -224,33 +344,19 @@ public class MainCrawler {
                 db.exec("COMMIT;");
                 System.out.println("Finished. ");
             
-            } catch (SQLiteException ex) {
+            } catch ( SQLiteException | IOException ex) {
                 Logger.getLogger(MainCrawler.class.getName()).log(Level.SEVERE, null, ex);
-            } catch (IOException e){
-            
             } finally{
-                try{
-                    br.close();
-                }catch(IOException e){
-                    
-                }
                 db.dispose();
-                
-                
             }
-            
-        } catch (FileNotFoundException ex) {
-            Logger.getLogger(MainCrawler.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
     
     public void MyImportSeedSite(File Seed) throws IOException{
         
         SQLiteConnection db = new SQLiteConnection(new File(DBName));
-        BufferedReader br;
         
-        try {
-            br = new BufferedReader(new FileReader(Seed));
+        try (BufferedReader br = new BufferedReader(new FileReader(Seed))){
             try{
                 db.open(true);
                 String Line;
@@ -278,17 +384,11 @@ public class MainCrawler {
                 db.exec("COMMIT;");
                 System.out.println("Finished. ");
             
-            } catch (SQLiteException ex) {
+            } catch ( SQLiteException | IOException ex) {
                 Logger.getLogger(MainCrawler.class.getName()).log(Level.SEVERE, null, ex);
-            } catch (IOException e){
-            
             } finally{
-            
-                br.close();
                 db.dispose();
-                
             }
-            
         } catch (FileNotFoundException ex) {
             Logger.getLogger(MainCrawler.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -358,118 +458,36 @@ public class MainCrawler {
     
     
     
-    
-    
-    
-    
-    
-    public void run(){
-        String Location,HostName,HostIP;
-        Status stat;
-        
-        ExecutorService executor;
-        
-        /*db = new SQLiteConnection(new File(DBName));
-        try {
-            db.open(false);
-        } catch (SQLiteException ex) {
-            Logger.getLogger(MainCrawler.class.getName()).log(Level.SEVERE, null, ex);
-        }*/
-        dbq = new SQLiteQueue(new File(DBName));
-        dbq.start();
-        webdbq = new SQLiteQueue(new File(WebDBName));
-        webdbq.start();
-        
-        while(NextCache()){
-            
-            executor = Executors.newFixedThreadPool(this.Threads);
-            //System.out.println("gg");
-                
-            while(Next()){
-                Runnable worker; 
-                HostIP = HostIPQueue.remove(0);
-                HostName = HostNameQueue.remove(0);
-                Location = LocationQueue.remove(0);
-                stat = StatusQueue.remove(0);
-                System.out.println(HostName);
-                if(HostIP == null){
-                    HostIP = GeoIP.Domain2IP(HostName);
-                    if(HostIP != null){
-                        UpdateIP(HostName, HostIP);
-                    }else{
-                        UpdateStatus(HostName, Status.NoHostIP);
-                        continue;
-                    }
-                }
-                if(Location == null){
-                    Location = GeoIP.IP2ISOCountry(HostIP);
-                
-                    if(Location != null){
-                        UpdateLocation(HostName, Location);
-                    }else{
-                        UpdateStatus(HostName, Status.NoHostLocation);
-                        continue;
-                    }
-                    
-                }
-            
-                if(Location.equals("TH")){
-                    worker = new SiteCrawler(HostName, HostIP, Dirname, MaxPagePerSite, "/",true,this, SiteCrawler.Mode.Crawl);
-                }else{
-                    continue;
-                    /*
-                    worker = new SiteCrawler(HostName, HostIP, Dirname, MaxPagePerSite, 
-                       "/",true,this, 
-                       ((stat == Status.Crawling) ? SiteCrawler.Mode.Crawl :  SiteCrawler.Mode.preCrawl));
-                    */
-                
-                }
-                
-                executor.execute(worker);
-            }
-            
-            executor.shutdown();
-            while (!executor.isTerminated()) {
-            }
-        }
-        try {
-            dbq.stop(true).join();
-            webdbq.stop(true).join();
-            //db.dispose();
-        } catch (InterruptedException ex) {
-            Logger.getLogger(MainCrawler.class.getName()).log(Level.SEVERE, null, ex);
-        }
-    }
-    
-    public boolean NextCache(){
+    public boolean NextCache() {
         dbq.execute(new SQLiteJob<Object>() {
             @Override
             protected Object job(SQLiteConnection connection) throws SQLiteException {
-        if(HostNameQueue.isEmpty()){
-            //SQLiteConnection db = new SQLiteConnection(new File(DBName));
-            try {
+                if (HostNameQueue.isEmpty()) {
+                    //SQLiteConnection db = new SQLiteConnection(new File(DBName));
+                    try {
                 //connection.open(false);
-                //SQLiteStatement st = db.prepare("SELECT id,hostname FROM website WHERE ip is null;");
-                String cond = Fixedcond + ((Selcond != null && !Selcond.isEmpty())? " AND " + Selcond : "");
-                SQLiteStatement st = connection.prepare("SELECT hostname,ip,location,status FROM website WHERE " + cond + " LIMIT " + CacheSize + ";");
-                try{
-                    while (st.step()) {
-                        HostNameQueue.add(st.columnString(0));
-                        HostIPQueue.add(st.columnString(1));
-                        LocationQueue.add(st.columnString(2));
-                        StatusQueue.add(Status.GetKey(st.columnInt(3)));
+                        //SQLiteStatement st = db.prepare("SELECT id,hostname FROM website WHERE ip is null;");
+                        String cond = Fixedcond + ((Selcond != null && !Selcond.isEmpty()) ? " AND " + Selcond : "");
+                        SQLiteStatement st = connection.prepare("SELECT hostname,ip,location,status FROM website WHERE " + cond + " LIMIT " + CacheSize + ";");
+                        try {
+                            while (st.step()) {
+                                HostNameQueue.add(st.columnString(0));
+                                HostIPQueue.add(st.columnString(1));
+                                LocationQueue.add(st.columnString(2));
+                                StatusQueue.add(Status.GetKey(st.columnInt(3)));
+                            }
+                        } finally {
+                            st.dispose();
+                        }
+                    } catch (SQLiteException ex) {
+                        Logger.getLogger(MainCrawler.class.getName()).log(Level.SEVERE, null, ex);
+                    } finally {
+                        //connection.dispose();
                     }
-                } finally {
-                    st.dispose();
                 }
-            } catch (SQLiteException ex) {
-                Logger.getLogger(MainCrawler.class.getName()).log(Level.SEVERE, null, ex);
-            } finally {
-                //connection.dispose();
+                return null;
             }
-        }
-        return null;
-            }}).complete();
+        }).complete();
         return !HostNameQueue.isEmpty();
     }
     
@@ -488,61 +506,7 @@ public class MainCrawler {
             FDB.deleteOnExit();
         }
     }
-    
-    public static void main(String[] args) throws IOException{
-        String Dir = args.length > 0 ? args[0] : DefaultSitePath;
-        String DBDir = Dir + "/db";
-        LanguageDetector.init();
-        
-        MainCrawler mc = new MainCrawler(Dir,3,1000);
-        
-        //mc.ImportSeedSite(new File("Hop2.pure"));
-        //mc.RunExampleStatement();
-        //mc.MyImportSeedSite(new File("sumout.txt"));
-        //mc.RunExampleSelect();
-        
-        File dir = new File(Dir);
-        File DBDirf = new File(DBDir);
-        
-        if(!dir.isDirectory()){
-            if(dir.exists()){
-                System.err.println(Dir + " is not a directory");
-                System.exit(1);
-            }else{
-                System.out.println("Crawl data will stored in " + Dir);
-                dir.mkdir();
-            }
-        }
-        
-        if(!DBDirf.exists()){
-            DBDirf.mkdir();
-        }
-        mc.run();
-        /*
-        SQLiteConnection db = new SQLiteConnection(new File("/var/www/web/testj.sqlite3"));
-        try {
-            db.open(true);
-            // Status 0 For not begin, 1 for crawling, 2 for finished.
-            db.exec("DROP TABLE host;");
-            db.exec("CREATE TABLE IF NOT EXISTS website(id INTEGER PRIMARY KEY AUTOINCREMENT, hostname VARCHAR(255), ip VARCHAR(40), country VARCHAR(2), page_count INTEGER, status TINYINT);");
-            
-            SQLiteStatement st = db.prepare("SELECT * FROM website WHERE status <= 1");
-            try {
-                while (st.step()) {
-                    System.out.println(st.columnString(0));
-                    System.out.println(st.columnValue(1));
-                }
-            } finally {
-                st.dispose();
-            }
-            
-            db.dispose();
-        } catch (SQLiteException ex) {
-            Logger.getLogger(MainCrawler.class.getName()).log(Level.SEVERE, null, ex);
-        }*/
-    }
-    
-    
+ 
     public class Webjob extends SQLiteJob<Object>{
         public File FileName;
         

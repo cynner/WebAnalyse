@@ -1,0 +1,187 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+
+package Analyse;
+
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.ArrayList;
+
+/**
+ *
+ * @author malang
+ */
+public class SCCTree {
+    public static int[][] mat1;
+    public static ArrayList<Integer>[] mat2;
+    public static int[] seq;
+    public static int seq_idx;
+    public static int gr;
+    public static int step;
+    public static int mat_size;
+    public static int SCC_SIZE;
+    public static String SCC_str;
+    
+    public static BufferedWriter[] bwGroup = new BufferedWriter[7];
+    
+    
+    
+    public static void dfs1(int id){
+        int[] Node = mat1[id];
+        if(Node[0] <= 0){
+            Node[0] = step++;
+            for(int i=2; i < Node.length; i++){
+                dfs1(Node[i]);
+            }
+            Node[1] = step++;
+            seq[seq_idx--] = id;
+        }
+    }
+    
+    public static void dfs2(int id){
+        ArrayList<Integer> Node = mat2[id];
+        if(Node.get(0) <= 0){
+            Node.set(0,step++);
+            SCC_str += id+";";
+            SCC_SIZE++;
+            for(int i=2; i < Node.size(); i++){
+                dfs2(Node.get(i));
+            }
+            Node.set(1,gr);
+        }
+    }
+    
+    
+    
+    public static void main(String[] args) throws FileNotFoundException, IOException{
+        mat_size = 5000000;
+        int src=0,tmpv,i;
+        String strInputCSV = args.length >= 1 ? args[0] : "data/Graph/PageLink.csv"; 
+        String strOutput = args.length >= 2 ? args[1] : "data/Graph/SCC.txt";
+        String strDirSCC = args.length >= 3 ? args[1] : "data/Graph";
+        File fileInputCsv = new File(strInputCSV);
+        BufferedReader br;
+        String[] strs;
+        String Line;
+        
+        for(i=0;i<bwGroup.length;i++){
+            bwGroup[i] = new BufferedWriter(new FileWriter(strDirSCC + "/SCCG-TPOW" + (i+1) + ".txt"));
+        }
+        
+        br = new BufferedReader(new FileReader(fileInputCsv));
+        //mat1 = new ArrayList[mat_size];
+        mat1 = new int[mat_size][];
+        mat2 = new ArrayList[mat_size];
+        for( i=1;i<mat_size;i++){
+            mat2[i] = new ArrayList<>();
+            mat2[i].add(0); // Foreward Tick
+            mat2[i].add(0); // Backward Tick
+        }
+        
+        // Matrix Format Group,ptr,Forward,Backword,Dst1,Dst2,Dst3,...
+        // Size 2(F/B) + n(D) = n + 2; 
+
+        while((Line = br.readLine()) != null){
+            strs = Line.split(";");
+            
+            src = Integer.parseInt(strs[0]);
+            mat1[src] = new int[strs.length+1];
+            //mat1[src].add(0); // Foreward Tick
+            //mat1[src].add(0); // Backward Tick
+            for(i=1;i<strs.length;i++){
+                tmpv = Integer.parseInt(strs[i]);
+                mat1[src][i+1] = tmpv; 
+                mat2[tmpv].add(src);
+            }
+        }
+        
+        br.close();
+        
+        
+        System.out.println("Read File Success");
+        
+        mat_size = src + 1;
+        seq = new int[mat_size];
+        
+        // Fill Missing box
+        for(i=1;i<mat_size;i++){
+            if(mat1[i] == null){
+                mat1[i] = new int[]{0,0};
+            }
+        }
+        
+        System.out.println("Allocation Success");
+        
+        // Init Config 
+        seq_idx = mat_size - 1;
+        step = 1;
+        
+        for(i=1;i<mat_size;i++){
+            dfs1(i);
+        }
+        
+        
+        System.out.println("Finished 1st Trace...");
+        
+        
+        
+        // Init Config 
+        seq_idx++;
+        System.out.println("SEQ idx : " + seq_idx);
+        step = 1;
+        gr = 1;
+        int org_step;
+        
+        while(seq_idx < mat_size){
+            org_step = step;
+            SCC_str = "";
+            SCC_SIZE = 0;
+            dfs2(seq[seq_idx]);
+            if(org_step != step){
+                gr++;
+                /*
+                if(SCC_SIZE < 10){
+                    bwGroup[0].write(SCC_str + "\n");
+                }else if(SCC_SIZE < 100){
+                    bwGroup[1].write(SCC_str + "\n");
+                }else if(SCC_SIZE < 1000){
+                    bwGroup[2].write(SCC_str + "\n");
+                }else if(SCC_SIZE < 10000){
+                    bwGroup[3].write(SCC_str + "\n");
+                }else if(SCC_SIZE < 100000){
+                    bwGroup[4].write(SCC_str + "\n");
+                }else if(SCC_SIZE < 1000000){
+                    bwGroup[5].write(SCC_str + "\n");
+                }else{
+                    bwGroup[6].write(SCC_str + "\n");
+                }*/
+            }
+            seq_idx++;
+        }
+        
+        
+        for(i=0;i<bwGroup.length;i++){
+            bwGroup[i].close();
+        }
+        System.out.println("Finished 2nd Trace...");
+        gr--;
+        System.out.println("Group no: " + gr);
+        System.out.println("Writing Result...");
+        BufferedWriter bw = new BufferedWriter(new FileWriter(strOutput));
+        for(i=1;i<mat_size;i++){
+            //if(mat1[i] != null){
+            bw.write(i + ":" + mat2[i].get(1) + "\n");
+            //}
+        }
+        bw.close();
+        System.out.println("Success.");
+    }
+}

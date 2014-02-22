@@ -18,6 +18,7 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import Crawler.SiteCrawler;
 import Crawler.MyURL;
+import java.io.IOException;
 
 /**
  *
@@ -29,12 +30,14 @@ public class ExtractLinkFromDMOZ {
     public static boolean isUTF8(String Dir, String Host){
         File f = new File(Dir + "/crawl-" + Host + ".arc" );
         if(f.exists()){
-            WebArcReader war = new WebArcReader(new File(Dir + "/crawl-" + Host + ".arc" ), true);
-            if(war.Next()){
-                war.close();
-                return war.Record.charset.equals("utf-8");
+            try (WebArcReader war = new WebArcReader(new File(Dir + "/crawl-" + Host + ".arc" ), true)) {
+                if(war.Next()){
+                    war.close();
+                    return war.Record.charset.equals("utf-8");
+                }
+            } catch (IOException ex) {
+                Logger.getLogger(ExtractLinkFromDMOZ.class.getName()).log(Level.SEVERE, null, ex);
             }
-            war.close();
         }
         return false;
     }
@@ -42,15 +45,13 @@ public class ExtractLinkFromDMOZ {
     public static boolean isUTF8(File f){
         //File f = new File(Dir + "/crawl-" + Host + ".arc" );
         //if(f.exists()){
-        WebArcReader war = new WebArcReader(f, true);
-        try{
+        try(WebArcReader war = new WebArcReader(f, true)){
             if(war.Next()){
                 war.close();
                 return war.Record.charset.equals("utf-8");
             }
-            war.close();
-        }catch(Exception e){
-            war.close();
+        } catch (IOException ex) {
+            Logger.getLogger(ExtractLinkFromDMOZ.class.getName()).log(Level.SEVERE, null, ex);
         }
         //}
         return false;
@@ -65,49 +66,52 @@ public class ExtractLinkFromDMOZ {
         File D;
         
         int cnt = 0;
-        WebArcReader ar = new WebArcReader(new File(InFile), false);
-        while (ar.Next()) {
-            //if (cnt >= skip) {
-            Elements es = ar.Record.Doc.select("ul.directory-url a");
-            try {
-                Dir = URLDecoder.decode(ar.Record.URL, "utf-8");
-                Dir = Dir.substring(Dir.indexOf('/', 20)).substring(1);
-                System.out.println(Dir);
-                D = new File(Dir);
-                if (!D.isDirectory()) {
-                    D.mkdirs();
-                }
-            SiteCrawler crwl;
-                for (Element e : es) {
-                    cnt++;
-
-                    if (cnt <= skip) {
-                        System.out.println("skip: " + cnt + ar.Record.URL);
-                    } else {
-                        try {
-                            URL = new MyURL(e.attr("href"));
-
-                            Link = URL.getHost();
-                            System.out.println(Dir + " " + cnt + " " + Link);
-                            /*
-                            crwl = new Crawler(Link, Dir, MaxPage, "/", true);
-                            crwl.run();
-                            */
+        try (WebArcReader ar = new WebArcReader(new File(InFile), false)) {
+            while (ar.Next()) {
+                //if (cnt >= skip) {
+                Elements es = ar.Record.Doc.select("ul.directory-url a");
+                try {
+                    Dir = URLDecoder.decode(ar.Record.URL, "utf-8");
+                    Dir = Dir.substring(Dir.indexOf('/', 20)).substring(1);
+                    System.out.println(Dir);
+                    D = new File(Dir);
+                    if (!D.isDirectory()) {
+                        D.mkdirs();
+                    }
+                    SiteCrawler crwl;
+                    for (Element e : es) {
+                        cnt++;
+                        
+                        if (cnt <= skip) {
+                            System.out.println("skip: " + cnt + ar.Record.URL);
+                        } else {
+                            try {
+                                URL = new MyURL(e.attr("href"));
+                                
+                                Link = URL.getHost();
+                                System.out.println(Dir + " " + cnt + " " + Link);
+                                /*
+                                crwl = new Crawler(Link, Dir, MaxPage, "/", true);
+                                crwl.run();
+                                */
                                 Runnable worker = new SiteCrawler(Link, Dir, MaxPage, "/", true);
                                 executor.execute(worker);
-                            
-                        } catch (Exception ex) {
-                            Logger.getLogger(ExtractLinkFromDMOZ.class.getName()).log(Level.SEVERE, null, ex);
+                                
+                            } catch (Exception ex) {
+                                Logger.getLogger(ExtractLinkFromDMOZ.class.getName()).log(Level.SEVERE, null, ex);
+                            }
                         }
                     }
+                } catch (UnsupportedEncodingException ex) {
+                    Logger.getLogger(ExtractLinkFromDMOZ.class.getName()).log(Level.SEVERE, null, ex);
                 }
-            } catch (UnsupportedEncodingException ex) {
-                Logger.getLogger(ExtractLinkFromDMOZ.class.getName()).log(Level.SEVERE, null, ex);
+                /*}else{
+                cnt++;
+                System.out.println("skip: " + cnt + ar.Record.URL );
+                }*/
             }
-            /*}else{
-            cnt++;
-            System.out.println("skip: " + cnt + ar.Record.URL );
-            }*/
+        } catch (IOException ex) {
+            Logger.getLogger(ExtractLinkFromDMOZ.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
     

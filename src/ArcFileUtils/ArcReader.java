@@ -6,6 +6,7 @@ package ArcFileUtils;
 
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -22,10 +23,10 @@ import net.sf.samtools.util.BlockCompressedFilePointerUtil;
  *
  * @author malang
  */
-public class ArcReader {
+public class ArcReader implements AutoCloseable{
 
     //public RandomAccessFile RAF;
-    public BGZFReader BGZFR;
+    public final BGZFReader BGZFR;
     public File ArcFile;
     public String FileDesc;
     public String FileIP;
@@ -36,53 +37,48 @@ public class ArcReader {
     public String FileVersion;
     public String FileReserved;
     public String FileOrigin;
-    public ArcRecord Record = new ArcRecord();
+    public ArcRecord Record;
     
 
 
-    public ArcReader(File ArcFile) {
+    public ArcReader(File ArcFile) throws FileNotFoundException, IOException {
         this.ArcFile = ArcFile;
-        
-        try {
-            BGZFR = new BGZFReader(this.ArcFile);
-            this.LastPos = 0;
-            String Line, Content;
-            String[] Fields;
+        Record = new ArcRecord();
+        BGZFR = new BGZFReader(this.ArcFile);
+        this.LastPos = 0;
+        String Line, Content;
+        String[] Fields;
 
-            // Header
-            if ((Line = BGZFR.readLine()) != null) {
-                Fields = Line.split(" ");
-                FileDesc = Fields[0];
-                FileIP = Fields[1];
-                FileDate = Fields[2];
-                FileContentType = Fields[3];
-                FileLength = Long.parseLong(Fields[4]);
+        // Header
+        if ((Line = BGZFR.readLine()) != null) {
+            Fields = Line.split(" ");
+            FileDesc = Fields[0];
+            FileIP = Fields[1];
+            FileDate = Fields[2];
+            FileContentType = Fields[3];
+            FileLength = Long.parseLong(Fields[4]);
 
-                Record.Data = null;
-                Record.Data = new byte[(int)FileLength];
-                BGZFR.read(Record.Data, 0, (int)FileLength);
-                Content = new String(Record.Data, "utf-8");
+            Record.Data = null;
+            Record.Data = new byte[(int) FileLength];
+            BGZFR.read(Record.Data, 0, (int) FileLength);
+            Content = new String(Record.Data, "utf-8");
 
-                Fields = Content.split("\n")[0].split(" ");
-                FileVersion = Fields[0];
-                FileReserved = Fields[1];
-                FileOrigin = Fields[2];
-                this.LastPos = BGZFR.getFilePointer();
-            }
-        } catch (IOException ex) {
-            System.err.println("IO err");
-            ex.printStackTrace();
+            Fields = Content.split("\n")[0].split(" ");
+            FileVersion = Fields[0];
+            FileReserved = Fields[1];
+            FileOrigin = Fields[2];
+            this.LastPos = BGZFR.getFilePointer();
         }
     }
     
     public boolean hasNext(){
         String Line;
-        String[] Fields = null;
+        String[] Fields;
         long orgPos;
 
         try {
             orgPos = BGZFR.getFilePointer();
-            
+            Fields = null;
             while ((Line = BGZFR.readLine()) != null) {
                 Fields = Line.split(" ");
                 if (Fields.length == 5) {
@@ -94,7 +90,9 @@ public class ArcReader {
                 BGZFR.seek(orgPos);
                 return true;
             }
-        }catch(IOException e){}
+        }catch(IOException ex){
+            Logger.getLogger(ArcReader.class.getName()).log(Level.SEVERE, null, ex);
+        }
         return false;
     }
 
@@ -134,7 +132,8 @@ public class ArcReader {
                         Integer.parseInt(Fields[2].substring(8, 10)),
                         Integer.parseInt(Fields[2].substring(10, 12)),
                         Integer.parseInt(Fields[2].substring(12, 14)));
-                }catch(Exception E){
+                }catch(Exception ex){
+                    Logger.getLogger(ArcReader.class.getName()).log(Level.SEVERE, null, ex);
                 }
                
                 Record.ArchiveContentType = Fields[3];
@@ -153,9 +152,11 @@ public class ArcReader {
             } else {
                 return false;
             }
-        } catch (IOException e) {
+        } catch (IOException ex) {
+            Logger.getLogger(ArcReader.class.getName()).log(Level.SEVERE, null, ex);
             return false;
         } catch (Exception ex){
+            Logger.getLogger(ArcReader.class.getName()).log(Level.SEVERE, null, ex);
             return false;
         }
         return true;
@@ -173,7 +174,7 @@ public class ArcReader {
                 }
             }
             //System.out.println(Line);
-            if (Line != null && Fields.length >= 5) {
+            if (Fields != null && Fields.length >= 5) {
                 int i;
                 Record.URL = Fields[0];
                 for(i=1; i < Fields.length - 4; i++){
@@ -188,8 +189,8 @@ public class ArcReader {
                         Integer.parseInt(Fields[i].substring(8, 10)),
                         Integer.parseInt(Fields[i].substring(10, 12)),
                         Integer.parseInt(Fields[i].substring(12, 14)));
-                }catch(Exception E){
-                    
+                }catch(Exception ex){
+                    Logger.getLogger(ArcReader.class.getName()).log(Level.SEVERE, null, ex);
                 }
                 i++;
                 Record.ArchiveContentType = Fields[i++];
@@ -203,8 +204,8 @@ public class ArcReader {
             } else {
                 return false;
             }
-        } catch (IOException e) {
-            e.printStackTrace();
+        } catch (IOException ex) {
+            Logger.getLogger(ArcReader.class.getName()).log(Level.SEVERE, null, ex);
             return false;
         }
         return true;
@@ -213,33 +214,28 @@ public class ArcReader {
     
     
 
-    public void close() {
-        try {
-            BGZFR.close();
-            BGZFR = null;
-        } catch (IOException ex) {
-            ex.printStackTrace();
-        }
+    @Override
+    public void close() throws IOException{
+        BGZFR.close();
     }
     
     
-    public static void main(String[] args){
-        ArcReader ar = new ArcReader(new File("data/data/crawl-amphan.com.arc.bgz"));
-        System.out.println(ar.FileOrigin);
-        try {
-            BufferedWriter bw = new BufferedWriter(new FileWriter("data/test.arc"));
-            while(ar.Next()){
-                System.out.println(ar.Record.URL);
-                bw.write(ar.Record.URL + "\n");
-                bw.write(ar.Record.ArchiveContent + "\n");
-            }   
-                bw.close();
+    public static void main(String[] args) throws IOException {
+        try (ArcReader ar = new ArcReader(new File("data/data/crawl-amphan.com.arc.bgz"))) {
+            System.out.println(ar.FileOrigin);
+            try {
+                try (BufferedWriter bw = new BufferedWriter(new FileWriter("data/test.arc"))) {
+                    while (ar.Next()) {
+                        System.out.println(ar.Record.URL);
+                        bw.write(ar.Record.URL + "\n");
+                        bw.write(ar.Record.ArchiveContent + "\n");
+                    }
+                }
             } catch (IOException ex) {
-            Logger.getLogger(ArcReader.class.getName()).log(Level.SEVERE, null, ex);
-        }
+                Logger.getLogger(ArcReader.class.getName()).log(Level.SEVERE, null, ex);
+            }
             //System.out.println(ar.Record.ArchiveContent);
-        
-        ar.close();
+        }
     }
     
     

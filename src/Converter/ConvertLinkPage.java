@@ -47,8 +47,7 @@ public class ConvertLinkPage {
         
         SQLiteConnection db = new SQLiteConnection(new File(DirName + DBName));
         File[] files = (new File(InputDirName)).listFiles();
-        ArcFileUtils.WebArcReader war = null;
-        
+        String url = null;
         try {
             db.open(true);
             db.exec("BEGIN;");
@@ -56,23 +55,22 @@ public class ConvertLinkPage {
             db.exec("CREATE TABLE IF NOT EXISTS webpage(id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, url VARCHAR(2048) UNIQUE NOT NULL);");
                 
             for(File f : files){
-                war = new WebArcReader(f, false, false);
-                while(war.Next()){
-                    db.exec("INSERT OR IGNORE INTO webpage(url) VALUES(\"" 
-                            + war.Record.URL.replace("\"", "\"\"")
-                            + "\");");
+                try (WebArcReader war = new WebArcReader(f, false, false)){
+                    while(war.Next()){
+                        url = war.Record.URL.replace("\"", "\"\"");
+                        db.exec("INSERT OR IGNORE INTO webpage(url) VALUES(\"" + url + "\");");
+                    }
+                } catch (IOException ex) {
+                    Logger.getLogger(ConvertLinkPage.class.getName()).log(Level.SEVERE, null, ex);
                 }
             }
             System.out.println("Executing. ");
             db.exec("COMMIT;");
             System.out.println("Finished. ");
         } catch (SQLiteException ex) {
-            if(war != null)
-                System.err.println("AT URL: " + war.Record.URL.replace("\"", "\"\""));
-            ex.printStackTrace();    
+            System.err.println("AT URL: " + url);
+            Logger.getLogger(ConvertLinkPage.class.getName()).log(Level.SEVERE, null, ex);
         } finally{
-            if(war != null)
-                war.close();
             db.dispose();
         }
             
@@ -90,148 +88,141 @@ public class ConvertLinkPage {
         try {
             
             db.openReadonly();
-            BufferedWriter bw = new BufferedWriter(new FileWriter(DirName + OutputName,false));
-            File[] files = (new File(InputDirName)).listFiles();
-        
-            for ( File f : files){
-                war = new WebArcReader(f, false);
-                while(war.Next()){
-                    st = db.prepare("SELECT id FROM webpage WHERE url=\"" + 
-                            war.Record.URL.replace("\"", "\"\"") + "\";");
-                    str = null;
-                    if(st.step())
-                        str = st.columnString(0);
-                    else
-                        continue;
-                    st.dispose();
-                    Elements es = war.Record.Doc.getElementsByTag("a");
-                    try {
-                        src = new MyURL(war.Record.URL);
-                        for(Element e : es){
-                            try{
-                                dst = src.resolve(e.attr("href"));
-                                st = db.prepare("SELECT id FROM webpage WHERE url=\"" + 
-                                dst.UniqURL.replace("\"", "\"\"") + "\";");
-                                if(st.step())
-                                    str += ";" + st.columnString(0);
-                                st.dispose();
-                            } catch (Exception ex) {
-                                //Logger.getLogger(ConvertLinkPage.class.getName()).log(Level.SEVERE, null, ex);
-                            }        
+            try (BufferedWriter bw = new BufferedWriter(new FileWriter(DirName + OutputName,false))) {
+                File[] files = (new File(InputDirName)).listFiles();
+                
+                for ( File f : files){
+                    war = new WebArcReader(f, false);
+                    while(war.Next()){
+                        st = db.prepare("SELECT id FROM webpage WHERE url=\"" +
+                                war.Record.URL.replace("\"", "\"\"") + "\";");
+                        str = null;
+                        if(st.step())
+                            str = st.columnString(0);
+                        else
+                            continue;
+                        st.dispose();
+                        Elements es = war.Record.Doc.getElementsByTag("a");
+                        try {
+                            src = new MyURL(war.Record.URL);
+                            for(Element e : es){
+                                try{
+                                    dst = src.resolve(e.attr("href"));
+                                    st = db.prepare("SELECT id FROM webpage WHERE url=\"" +
+                                            dst.UniqURL.replace("\"", "\"\"") + "\";");
+                                    if(st.step())
+                                        str += ";" + st.columnString(0);
+                                    st.dispose();
+                                } catch (Exception ex) {
+                                    //Logger.getLogger(ConvertLinkPage.class.getName()).log(Level.SEVERE, null, ex);
+                                }        
+                            }
+                            bw.write(str + "\n");
+                        } catch (Exception ex) {
+                            Logger.getLogger(ConvertLinkPage.class.getName()).log(Level.SEVERE, null, ex);
                         }
-                        bw.write(str + "\n");
-                    } catch (Exception ex) {
-                        Logger.getLogger(ConvertLinkPage.class.getName()).log(Level.SEVERE, null, ex);
                     }
+                    war.close();
                 }
-                war.close();
             }
-            bw.close();
-        } catch (IOException ex) {
-            Logger.getLogger(ConvertLinkPage.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (SQLiteException ex) {
+        } catch (IOException | SQLiteException ex) {
             Logger.getLogger(ConvertLinkPage.class.getName()).log(Level.SEVERE, null, ex);
         } finally {
-            if(war != null){
-                war.close();
-            }
+            db.dispose();
         }
     }
     
-    public static void ConvertHybride(){
-        HashMap<String, Integer> HM = new HashMap<String, Integer>();
-        WebArcReader war = null;
-        MyURL src,dst ;
+    public static void ConvertHybride() {
+        HashMap<String, Integer> HM = new HashMap<>();
+        MyURL src, dst;
         SQLiteConnection db = new SQLiteConnection(new File(DirName + DBName));
         SQLiteStatement st;
         String lnk;
         String str;
-        try {
-            
+        try (BufferedWriter bw = new BufferedWriter(new FileWriter(DirName + OutputName, true))){
+
             db.openReadonly();
-            BufferedWriter bw = new BufferedWriter(new FileWriter(DirName + OutputName,true));
             File[] files = (new File(InputDirName)).listFiles();
-        
+
             boolean skip = true;
-            for ( File f : files){
-                if(skip){
-                    if(f.getName().equals("crawl-camera.garagegadget.com.arc.gz")){
+            for (File f : files) {
+                if (skip) {
+                    if (f.getName().equals("crawl-camera.garagegadget.com.arc.gz")) {
                         skip = false;
                         System.out.println("Stop Skipppppppp");
-                    }else{
+                    } else {
                         continue;
                     }
                 }
-                war = new WebArcReader(f, false);
-                while(war.Next()){
-                    try {
-                        src = new MyURL(war.Record.URL);
-                        
+                try (WebArcReader war = new WebArcReader(f, false)) {
+                    while (war.Next()) {
+                        try {
+                            src = new MyURL(war.Record.URL);
+                        } catch (Exception ex) {
+                            Logger.getLogger(ConvertLinkPage.class.getName()).log(Level.SEVERE, null, ex);
+                            continue;
+                        }
+
                         Elements es = war.Record.Doc.getElementsByTag("a");
                         str = "";
-                        if(HM.containsKey(src.UniqURL)){
+                        if (HM.containsKey(src.UniqURL)) {
                             str += HM.get(src.UniqURL);
-                        }else{
-                        
-                            st = db.prepare("SELECT id FROM webpage WHERE url=\"" + 
-                                src.UniqURL.replace("\"", "\"\"") + "\";");
-                    
-                            if(st.step()){
-                                 HM.put(src.UniqURL, st.columnInt(0));
+                        } else {
+
+                            st = db.prepare("SELECT id FROM webpage WHERE url=\""
+                                    + src.UniqURL.replace("\"", "\"\"") + "\";");
+
+                            if (st.step()) {
+                                HM.put(src.UniqURL, st.columnInt(0));
                                 str += st.columnString(0);
-                            }else
+                            } else {
                                 continue;
+                            }
                             st.dispose();
                         }
-                        
-                        for(Element e : es){
-                            try{
+
+                        for (Element e : es) {
+                            try {
                                 dst = src.resolve(e.attr("href"));
-                                if(HM.containsKey(dst.UniqURL)){
+                                if (HM.containsKey(dst.UniqURL)) {
                                     str += ";" + HM.get(dst.UniqURL);
-                                }else{
+                                } else {
                                     //try{
-                                        st = db.prepare("SELECT id FROM webpage WHERE url=\"" + 
-                                        dst.UniqURL.replace("\"", "\"\"") + "\";");
-                                        if(st.step()){
-                                            HM.put(dst.UniqURL, st.columnInt(0));
-                                            str += ";" + st.columnString(0);
-                                        }
-                                        st.dispose();
-                                    //}catch(Exception Ex){
+                                    st = db.prepare("SELECT id FROM webpage WHERE url=\""
+                                            + dst.UniqURL.replace("\"", "\"\"") + "\";");
+                                    if (st.step()) {
+                                        HM.put(dst.UniqURL, st.columnInt(0));
+                                        str += ";" + st.columnString(0);
+                                    }
+                                    st.dispose();
+                                        //}catch(Exception Ex){
                                     //    Logger.getLogger(ConvertLinkPage.class.getName()).log(Level.SEVERE, null, Ex);
                                     //}
                                 }
-                            }catch(Exception Ex){
-                                //Logger.getLogger(ConvertLinkPage.class.getName()).log(Level.SEVERE, null, Ex);
-                                
+                            } catch (Exception ex) {
+                                Logger.getLogger(ConvertLinkPage.class.getName()).log(Level.SEVERE, null, ex);
+
                             }
-                            
+
                         }
                         bw.write(str + "\n");
-                    } catch (Exception ex) {
-                        Logger.getLogger(ConvertLinkPage.class.getName()).log(Level.SEVERE, null, ex);
+
                     }
+                } catch (IOException ex) {
+                    Logger.getLogger(ConvertLinkPage.class.getName()).log(Level.SEVERE, null, ex);
                 }
-                war.close();
                 bw.flush();
                 System.out.println(f.getName());
             }
-            bw.close();
-        } catch (IOException ex) {
-            Logger.getLogger(ConvertLinkPage.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (SQLiteException ex) {
+        } catch (SQLiteException | IOException ex) {
             Logger.getLogger(ConvertLinkPage.class.getName()).log(Level.SEVERE, null, ex);
         } finally {
-            if(war != null){
-                war.close();
-            }
+            db.dispose();
         }
     }
     
     public static void ConvertOnMem(){
-        HashMap<String, Integer> HM = new HashMap<String, Integer>();
-        WebArcReader war = null;
+        HashMap<String, Integer> HM = new HashMap<>();
         MyURL src,dst ;
         SQLiteConnection db = new SQLiteConnection(new File(DirName + DBName));
         SQLiteStatement st;
@@ -239,7 +230,7 @@ public class ConvertLinkPage {
         String str;
         
         
-        try {
+        try (BufferedWriter bw = new BufferedWriter(new FileWriter(DirName + OutputName,true))){
             
             db.openReadonly();
             
@@ -256,7 +247,6 @@ public class ConvertLinkPage {
             
             
             
-            BufferedWriter bw = new BufferedWriter(new FileWriter(DirName + OutputName,true));
             File[] files = (new File(InputDirName)).listFiles();
         
             boolean skip = true;
@@ -269,49 +259,45 @@ public class ConvertLinkPage {
                         continue;
                     }
                 }
-                war = new WebArcReader(f, false);
-                while(war.Next()){
-                    try {
-                        src = new MyURL(war.Record.URL);
-                        
-                        Elements es = war.Record.Doc.getElementsByTag("a");
-                        str = "";
-                        if(HM.containsKey(src.UniqURL)){
-                            str += HM.get(src.UniqURL);
-                        }else{
-                            continue;
-                        }
-                        
-                        for(Element e : es){
-                            try{
-                                dst = src.resolve(e.attr("href"));
-                                if(HM.containsKey(dst.UniqURL)){
-                                    str += ";" + HM.get(dst.UniqURL);
-                                }
-                            }catch(Exception Ex){
-                                //Logger.getLogger(ConvertLinkPage.class.getName()).log(Level.SEVERE, null, Ex);
-                                
+                try (WebArcReader war = new WebArcReader(f, false)) {
+                    while(war.Next()){
+                        try {
+                            src = new MyURL(war.Record.URL);
+                            
+                            Elements es = war.Record.Doc.getElementsByTag("a");
+                            str = "";
+                            if(HM.containsKey(src.UniqURL)){
+                                str += HM.get(src.UniqURL);
+                            }else{
+                                continue;
                             }
                             
+                            for(Element e : es){
+                                try{
+                                    dst = src.resolve(e.attr("href"));
+                                    if(HM.containsKey(dst.UniqURL)){
+                                        str += ";" + HM.get(dst.UniqURL);
+                                    }
+                                }catch(Exception Ex){
+                                    //Logger.getLogger(ConvertLinkPage.class.getName()).log(Level.SEVERE, null, Ex);
+                                    
+                                }
+                                
+                            }
+                            bw.write(str + "\n");                            
+                        } catch (Exception ex) {
+                            Logger.getLogger(ConvertLinkPage.class.getName()).log(Level.SEVERE, null, ex);
                         }
-                        bw.write(str + "\n");
-                    } catch (Exception ex) {
-                        Logger.getLogger(ConvertLinkPage.class.getName()).log(Level.SEVERE, null, ex);
                     }
+                } catch (IOException ex) {
+                    Logger.getLogger(ConvertLinkPage.class.getName()).log(Level.SEVERE, null, ex);
                 }
-                war.close();
                 bw.flush();
                 System.out.println(f.getName());
             }
-            bw.close();
-        } catch (IOException ex) {
-            Logger.getLogger(ConvertLinkPage.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (SQLiteException ex) {
+        } catch (SQLiteException | IOException ex) {
             Logger.getLogger(ConvertLinkPage.class.getName()).log(Level.SEVERE, null, ex);
         } finally {
-            if(war != null){
-                war.close();
-            }
         }
     }
     

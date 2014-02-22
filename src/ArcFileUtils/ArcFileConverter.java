@@ -6,7 +6,10 @@ package ArcFileUtils;
 
 import Lexto.LuceneLexicalTH;
 import java.io.File;
+import java.io.IOException;
 import java.util.HashMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import projecttester.ArgUtils;
 
 /**
@@ -34,54 +37,53 @@ public class ArcFileConverter {
     }
     
     public void WebToTextFile(File src, File dst){
-        WebArcReader war = new WebArcReader(src, AnalyseCharset);
-        ArcWriter aw = new ArcWriter(dst, false);
-        ArcRecord ar = new ArcRecord();
-        //Document doc;
-        while(war.Next()){
-            //doc = Jsoup.parse(war.Record.WebContent);
-            //System.out.println(war.Record.WebContent);
-            //System.out.println(war.Record.URL);
-            ar.ArchiveContent = thlexical.strSplitContent(war.Record.Doc.text());
-            ar.ArchiveDate = war.Record.ArchiveDate;
-            ar.ArchiveContentType = war.Record.ArchiveContentType;
-            ar.IPAddress = war.Record.IPAddress;
-            ar.URL = war.Record.URL;
-            aw.WriteRecord(ar);
+        try (WebArcReader war = new WebArcReader(src, AnalyseCharset) ; ArcWriter aw = new ArcWriter(dst, false)) {
+            ArcRecord ar = new ArcRecord();
+            while(war.Next()){
+                //doc = Jsoup.parse(war.Record.WebContent);
+                //System.out.println(war.Record.WebContent);
+                //System.out.println(war.Record.URL);
+                ar.ArchiveContent = thlexical.strSplitContent(war.Record.Doc.text());
+                ar.ArchiveDate = war.Record.ArchiveDate;
+                ar.ArchiveContentType = war.Record.ArchiveContentType;
+                ar.IPAddress = war.Record.IPAddress;
+                ar.URL = war.Record.URL;
+                aw.WriteRecord(ar);
+            }
+        } catch (IOException ex) {
+            Logger.getLogger(ArcFileConverter.class.getName()).log(Level.SEVERE, null, ex);
         }
-        war.close();
-        aw.close();
     }
     
     public void WebToTextFile(File src, File dst, boolean ShowInfo){
-        WebArcReader war = new WebArcReader(src, AnalyseCharset);
-        ArcWriter aw = new ArcWriter(dst, false);
-        ArcRecord ar = new ArcRecord();
-        //Document doc;
-        while(war.Next()){
-            if(ShowInfo){
-                System.out.println(war.Record.URL);
-                System.out.println(war.Record.FirstLineContentHeader);
-                System.out.println("Server: " + war.Record.Server);
-                System.out.println("ContentType: " + war.Record.WebContentType);
-                System.out.println("Charset: " + war.Record.charset);
-                System.out.println("LastModified: " + war.Record.LastModified);
-                System.out.println("ArchiveLength: " + war.Record.ArchiveLength);
-                System.out.println("ContentLength: " + war.Record.ContentLength);
-                System.out.println("---------------------------------------");
+        try (WebArcReader war = new WebArcReader(src, AnalyseCharset); ArcWriter aw= new ArcWriter(dst, false)) {
+
+            ArcRecord ar = new ArcRecord();
+            while(war.Next()){
+                if(ShowInfo){
+                    System.out.println(war.Record.URL);
+                    System.out.println(war.Record.FirstLineContentHeader);
+                    System.out.println("Server: " + war.Record.Server);
+                    System.out.println("ContentType: " + war.Record.WebContentType);
+                    System.out.println("Charset: " + war.Record.charset);
+                    System.out.println("LastModified: " + war.Record.LastModified);
+                    System.out.println("ArchiveLength: " + war.Record.ArchiveLength);
+                    System.out.println("ContentLength: " + war.Record.ContentLength);
+                    System.out.println("---------------------------------------");
+                }
+                
+                //doc = Jsoup.parse(war.Record.WebContent);
+                //System.out.println(war.Record.WebContent);
+                ar.ArchiveContent = thlexical.strSplitContent(war.Record.Doc.text());
+                ar.ArchiveDate = war.Record.ArchiveDate;
+                ar.ArchiveContentType = war.Record.ArchiveContentType;
+                ar.IPAddress = war.Record.IPAddress;
+                ar.URL = war.Record.URL;
+                aw.WriteRecord(ar);
             }
-            
-            //doc = Jsoup.parse(war.Record.WebContent);
-            //System.out.println(war.Record.WebContent);
-            ar.ArchiveContent = thlexical.strSplitContent(war.Record.Doc.text());
-            ar.ArchiveDate = war.Record.ArchiveDate;
-            ar.ArchiveContentType = war.Record.ArchiveContentType;
-            ar.IPAddress = war.Record.IPAddress;
-            ar.URL = war.Record.URL;
-            aw.WriteRecord(ar);
+        } catch (IOException ex) {
+            Logger.getLogger(ArcFileConverter.class.getName()).log(Level.SEVERE, null, ex);
         }
-        war.close();
-        aw.close();
     }
     
     public static void main(String[] args){

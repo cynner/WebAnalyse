@@ -56,30 +56,30 @@ public class MetaTag {
         for(File f : InputDir.listFiles()){
             
             System.out.println(f.getName());
-            WebArcReader war = new WebArcReader(f,"utf-8");
-            while(war.Next()){
-                Elements es = war.Record.Doc.getElementsByTag("meta");
-                if(es != null){
-                    cntdoc++;
-                    for(Element e : es){
-                        cntmeta++;
-                        MetName = e.attr("name").toLowerCase();
-                        Mi = hm.get(MetName);
-                        if(Mi != null){
-                            Mi.val++;
-                        }else{
-                            hm.put(MetName, new myInt());
-                        }
+            try (WebArcReader war = new WebArcReader(f,"utf-8")) {
+                while(war.Next()){
+                    Elements es = war.Record.Doc.getElementsByTag("meta");
+                    if(es != null){
+                        cntdoc++;
+                        for(Element e : es){
+                            cntmeta++;
+                            MetName = e.attr("name").toLowerCase();
+                            Mi = hm.get(MetName);
+                            if(Mi != null){
+                                Mi.val++;
+                            }else{
+                                hm.put(MetName, new myInt());
+                            }
                             
+                        }
                     }
                 }
+            } catch (IOException ex) {
+                Logger.getLogger(MetaTag.class.getName()).log(Level.SEVERE, null, ex);
             }
-            war.close();
         }
         System.out.println("Success");
-        FileWriter fw;
-        try {
-            fw = new FileWriter(OutputFile);
+        try (FileWriter fw = new FileWriter(OutputFile)){
 
             fw.write("Page Contains meta : " + cntdoc + "\n");
             fw.write("Meta Count : " + cntmeta + "\n");
@@ -87,7 +87,6 @@ public class MetaTag {
             for (Map.Entry<String,myInt> e : hm.entrySet()) {
                 fw.write(e.getKey() + " : " + e.getValue().val + "\n");
             }
-            fw.close();
         } catch (IOException ex) {
             Logger.getLogger(MetaTag.class.getName()).log(Level.SEVERE, null, ex);
         }

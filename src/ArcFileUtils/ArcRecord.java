@@ -5,6 +5,8 @@
 package ArcFileUtils;
 
 import java.util.Date;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -32,11 +34,11 @@ public class ArcRecord implements Cloneable{
     }
     
     @Override
-    public ArcRecord clone() {
+    public ArcRecord clone() throws CloneNotSupportedException {
         try {
             return (ArcRecord) super.clone();
-        } catch (CloneNotSupportedException e) {        
-            e.printStackTrace();
+        } catch (CloneNotSupportedException ex) {
+            Logger.getLogger(ArcRecord.class.getName()).log(Level.SEVERE, null, ex);
             throw new RuntimeException();
         }
     }

@@ -7,6 +7,8 @@ package ArcFileUtils;
 import java.io.RandomAccessFile;
 import java.nio.charset.Charset;
 import java.util.Date;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.jsoup.nodes.Document;
 
 /**
@@ -99,7 +101,8 @@ public class WebArcRecord extends ArcRecord{
                     End = true;
                 }
             }
-        }catch(Exception e){
+        }catch(Exception ex){
+            Logger.getLogger(WebArcRecord.class.getName()).log(Level.SEVERE, null, ex);
         }
         return HeaderLength;
     }
@@ -149,7 +152,8 @@ public class WebArcRecord extends ArcRecord{
             beg = end + 1;
             WebContent = ArchiveContent.substring(beg);
             //return new WebArcRecord(this);
-        }catch(Exception e){
+        }catch(Exception ex){
+            Logger.getLogger(WebArcRecord.class.getName()).log(Level.SEVERE, null, ex);
             WebContent = ArchiveContent;
         }
     }

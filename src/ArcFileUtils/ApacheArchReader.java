@@ -26,11 +26,13 @@ public class ApacheArchReader {
     private ARCReader arcr;
     
     public String GetContent(){
+        String res;
         ByteArrayOutputStream BAOS = new ByteArrayOutputStream();
         try {
             curAR.dump(BAOS);
+            res = BAOS.toString();
             BAOS.close();
-            return BAOS.toString();
+            return res;
         } catch (IOException ex) {
             Logger.getLogger(ApacheArchReader.class.getName()).log(Level.SEVERE, null, ex);
         }

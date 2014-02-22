@@ -22,9 +22,9 @@ import net.sf.samtools.util.BlockCompressedOutputStream;
  */
 public class BGZFWriter {
     public static void Compress(File Src, File Dst){
-        BlockCompressedOutputStream BCOS;
+        BlockCompressedOutputStream BCOS = null;
         
-        DataInputStream br;
+        DataInputStream br = null;
         try {
             br = new DataInputStream(new FileInputStream(Src));
             BCOS = new BlockCompressedOutputStream(Dst);
@@ -33,12 +33,19 @@ public class BGZFWriter {
             while( (len = br.read(bytes)) >= 0){
                 BCOS.write(bytes,0,len);
             }
-            BCOS.close();
-            br.close();
         } catch (FileNotFoundException ex) {
             Logger.getLogger(SiteCrawler.class.getName()).log(Level.SEVERE, null, ex);
         } catch (IOException ex) {
             Logger.getLogger(SiteCrawler.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            try {
+                if (BCOS != null) 
+                    BCOS.close();
+                if (br != null) 
+                    br.close();
+            } catch (IOException ex) {
+                Logger.getLogger(BGZFWriter.class.getName()).log(Level.SEVERE, null, ex);
+            }
         }
     }
     

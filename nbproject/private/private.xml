@@ -15,17 +15,20 @@
             <file>file:/C:/Users/malang/Documents/NetBeansProjects/WebAnalyse/src/Lexto/MyLexto.java</file>
             <file>file:/C:/Users/malang/Documents/NetBeansProjects/WebAnalyse/src/ArcFileUtils/BGZFWriter.java</file>
             <file>file:/C:/Users/malang/Documents/NetBeansProjects/WebAnalyse/src/ContentClassifier/MalletArcImport.java</file>
+            <file>file:/C:/Users/malang/Documents/NetBeansProjects/WebAnalyse/src/ArcFileUtils/CompressedArcWriter.java</file>
             <file>file:/C:/Users/malang/Documents/NetBeansProjects/WebAnalyse/src/LanguageUtils/LanguageDetector.java</file>
             <file>file:/C:/Users/malang/Documents/NetBeansProjects/WebAnalyse/src/Main/WebAPI/Search.java</file>
             <file>file:/C:/Users/malang/Documents/NetBeansProjects/WebAnalyse/src/Test/frmDBTest.java</file>
             <file>file:/C:/Users/malang/Documents/NetBeansProjects/WebAnalyse/src/Converter/ConvertWeb2SnippedText.java</file>
             <file>file:/C:/Users/malang/Documents/NetBeansProjects/WebAnalyse/src/Example/ExSQLite.java</file>
             <file>file:/C:/Users/malang/Documents/NetBeansProjects/WebAnalyse/src/Example/MainRunner.java</file>
+            <file>file:/C:/Users/malang/Documents/NetBeansProjects/WebAnalyse/src/Crawler/MyURL.java</file>
             <file>file:/C:/Users/malang/Documents/NetBeansProjects/WebAnalyse/src/Test/KillProcess.java</file>
             <file>file:/C:/Users/malang/Documents/NetBeansProjects/WebAnalyse/src/webanalyse/Main.java</file>
             <file>file:/C:/Users/malang/Documents/NetBeansProjects/WebAnalyse/src/Example/lucene/PageRankSimilarity.java</file>
             <file>file:/C:/Users/malang/Documents/NetBeansProjects/WebAnalyse/src/ContentClassifier/MalletClassifier.java</file>
             <file>file:/C:/Users/malang/Documents/NetBeansProjects/WebAnalyse/src/projecttester/ExampleThread.java</file>
+            <file>file:/C:/Users/malang/Documents/NetBeansProjects/WebAnalyse/src/Analyse/SCC.java</file>
             <file>file:/C:/Users/malang/Documents/NetBeansProjects/WebAnalyse/src/ArcFileUtils/ApacheArchReader.java</file>
             <file>file:/C:/Users/malang/Documents/NetBeansProjects/WebAnalyse/src/DBDriver/Qjob.java</file>
             <file>file:/C:/Users/malang/Documents/NetBeansProjects/WebAnalyse/src/Converter/ConvertLinkHost.java</file>
@@ -48,6 +51,7 @@
             <file>file:/C:/Users/malang/Documents/NetBeansProjects/WebAnalyse/src/Analyse/OutDegree.java</file>
             <file>file:/C:/Users/malang/Documents/NetBeansProjects/WebAnalyse/src/projecttester/ThreadPool.java</file>
             <file>file:/C:/Users/malang/Documents/NetBeansProjects/WebAnalyse/src/Converter/IDF.java</file>
+            <file>file:/C:/Users/malang/Documents/NetBeansProjects/WebAnalyse/src/Analyse/SCCTree.java</file>
             <file>file:/C:/Users/malang/Documents/NetBeansProjects/WebAnalyse/src/Crawler/GeoIP.java</file>
             <file>file:/C:/Users/malang/Documents/NetBeansProjects/WebAnalyse/src/Example/WebContentFilter.java</file>
             <file>file:/C:/Users/malang/Documents/NetBeansProjects/WebAnalyse/src/ArcFileUtils/WebArcRecord.java</file>
@@ -60,6 +64,7 @@
             <file>file:/C:/Users/malang/Documents/NetBeansProjects/WebAnalyse/src/Example/JGraphT.java</file>
             <file>file:/C:/Users/malang/Documents/NetBeansProjects/WebAnalyse/src/ArcFileUtils/ArcFileConverter.java</file>
             <file>file:/C:/Users/malang/Documents/NetBeansProjects/WebAnalyse/src/Analyse/WebClassified.java</file>
+            <file>file:/C:/Users/malang/Documents/NetBeansProjects/WebAnalyse/src/Crawler/Robotstxt.java</file>
             <file>file:/C:/Users/malang/Documents/NetBeansProjects/WebAnalyse/src/ContentClassifier/MalletTrainer.java</file>
             <file>file:/C:/Users/malang/Documents/NetBeansProjects/WebAnalyse/src/ArcFileUtils/WebArcReader.java</file>
             <file>file:/C:/Users/malang/Documents/NetBeansProjects/WebAnalyse/src/Test/JSOUPHtml.java</file>

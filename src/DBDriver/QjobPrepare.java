@@ -6,7 +6,6 @@
 
 package DBDriver;
 
-import Crawler.MainCrawler;
 import com.almworks.sqlite4java.SQLiteConnection;
 import com.almworks.sqlite4java.SQLiteJob;
 import com.almworks.sqlite4java.SQLiteQueue;

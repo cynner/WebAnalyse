@@ -12,13 +12,15 @@ import java.io.RandomAccessFile;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import net.sf.samtools.util.BlockCompressedOutputStream;
 
 /**
  *
  * @author malang
  */
-public class CompressedArcWriter {
+public class CompressedArcWriter implements AutoCloseable{
     public static DateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
     public static DateFormat webDateFormat = new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss z");
     
@@ -27,15 +29,14 @@ public class CompressedArcWriter {
     public String FileName;
     public String HostIP="0.0.0.0";
     
-    public CompressedArcWriter(File ArchiveFile){
+    public CompressedArcWriter(File ArchiveFile) throws IOException{
         boolean FileExist = ArchiveFile.exists();
         FileName = ArchiveFile.getName();
         bw = new BlockCompressedOutputStream(ArchiveFile);
         WriteHeaderFile();
     }
 
-    public void WriteHeaderFile() {
-        try {
+    public void WriteHeaderFile() throws IOException {
             String HeaderFileContent =  "1 0 InternetArchive\n" +
                     "URL IP-address Archive-date Content-type Archive-length\n";
             bw.write(("filedesc://" + FileName + " "
@@ -43,9 +44,6 @@ public class CompressedArcWriter {
                     + dateFormat.format(new Date()) + " text/plain "
                     + HeaderFileContent.getBytes("utf-8").length + "\n").getBytes());
             bw.write(HeaderFileContent.getBytes());
-        } catch (IOException ex) {
-            
-        }
     }
     
     
@@ -68,6 +66,7 @@ public class CompressedArcWriter {
             
             
         } catch (IOException ex) {
+            Logger.getLogger(CompressedArcWriter.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
     
@@ -90,15 +89,13 @@ public class CompressedArcWriter {
             
             
         } catch (IOException ex) {
+            Logger.getLogger(CompressedArcWriter.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
     
-    public void close(){
-        try {
-            bw.close();
-        } catch (IOException ex) {
-            //Logger.getLogger(ArcWriter.class.getName()).log(Level.SEVERE, null, ex);
-        }
+    @Override
+    public void close() throws IOException{
+        bw.close();
     }
     
 }

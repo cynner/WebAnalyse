@@ -8,6 +8,9 @@ package Test;
 
 import ArcFileUtils.WebArcReader;
 import java.io.File;
+import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -22,8 +25,10 @@ public class WebArcTest {
                 if(f.getName().endsWith(".gz")){
                     System.out.println("File No. " + j);
                     System.out.println(f.getName() + " Open. Round " + i);
-                    WebArcReader war = new WebArcReader(f, "utf-8");
-                    war.close();
+                    try(WebArcReader war = new WebArcReader(f, "utf-8")){
+                    } catch (IOException ex) {
+                        Logger.getLogger(WebArcTest.class.getName()).log(Level.SEVERE, null, ex);
+                    }
                     System.out.println(f.getName() + " Closed.");
                     j++;
                 }

@@ -9,6 +9,7 @@ package ArcFileUtils;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.RandomAccessFile;
@@ -22,7 +23,7 @@ import org.xml.sax.InputSource;
  *
  * @author malang
  */
-public class BGZFReader {
+public class BGZFReader implements AutoCloseable{
      private RandomAccessFile txt = null; //text reader
     private BlockCompressedInputStream bgzf = null; //Block compressed gzip reader
      //private GzippedInputStream bgzf = null;
@@ -32,7 +33,7 @@ public class BGZFReader {
     public long file_size = 0;
 
     
-    public BGZFReader (final File arcfile) throws IOException {
+    public BGZFReader (final File arcfile) throws FileNotFoundException, IOException {
         //Determine if file is ascii
         if(isBGZF(arcfile)){
             //fis = new FileInputStream(arcfile);
@@ -69,9 +70,8 @@ public class BGZFReader {
     }
     */
     
-    private boolean isBGZF(final File arcfile) throws IOException {
-        BufferedInputStream bufferedInput = new BufferedInputStream(new FileInputStream(arcfile));
-        try {
+    private boolean isBGZF(final File arcfile) throws FileNotFoundException, IOException {
+        try (BufferedInputStream bufferedInput = new BufferedInputStream(new FileInputStream(arcfile))) {
             boolean isValid = BlockCompressedInputStream.isValidFile(bufferedInput);
             bufferedInput.close();
             return isValid;
@@ -81,11 +81,10 @@ public class BGZFReader {
         return false;
     }
 
+     @Override
     public void close() throws IOException {
         if(bgzf != null) {
-            // System.out.println("BGZF Closed");
             bgzf.close();
-           
             bgzf = null;
         }
         if(txt != null){
@@ -171,7 +170,7 @@ public class BGZFReader {
                 return txt.readLine();
         } else if(bgzf != null) {
             String ans = "";
-            int i=0;
+            int i;
             int v;
             lastPos = bgzf.getFilePointer();
             byte[] b = new byte[8192];
@@ -223,6 +222,8 @@ public class BGZFReader {
         }
     }
     
+
+
     public void skip(long pos) throws IOException {
         if(isASCII){
             if(txt != null)
@@ -231,5 +232,9 @@ public class BGZFReader {
         } else if(bgzf != null) {
             bgzf.skip(pos);
         }
+    }
+
+    public int read() throws IOException {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 }

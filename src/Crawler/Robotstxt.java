@@ -5,11 +5,8 @@
 package Crawler;
 
 import java.io.BufferedReader;
-import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -20,7 +17,7 @@ import java.util.logging.Logger;
  */
 public class Robotstxt {
     
-    private RobotstxtAgent RA;
+    private final RobotstxtAgent RA;
     public String Host;
     public String UserAgent;
     
@@ -34,8 +31,8 @@ public class Robotstxt {
         boolean isInScope = false;
         String LastMatchPattern = "";
         String[] Lines = Content.split("\n");
-        for(int i=0; i<Lines.length; i++){
-            String[] cols = Lines[i].split(":", 2);
+        for (String Line : Lines) {
+            String[] cols = Line.split(":", 2);
             if(cols.length == 2){
                 cols[0] = cols[0].trim();
                 cols[1] = cols[1].trim();
@@ -43,7 +40,7 @@ public class Robotstxt {
                     if(cols[0].equals("User-agent")){
                         if(LastMatchPattern.length() < cols[1].length() && 
                                 UserAgent.matches(cols[1].replaceAll("\\?","\\\\?")
-                                .replaceAll("\\.", "\\\\.").replaceAll("\\*", ".*").replaceAll("\\+", ".+"))){
+                                        .replaceAll("\\.", "\\\\.").replaceAll("\\*", ".*").replaceAll("\\+", ".+"))){
                             LastMatchPattern = cols[1];
                             RA.Clear();
                             isInScope = true;
@@ -51,10 +48,13 @@ public class Robotstxt {
                             isInScope = false;
                         }
                     }else if(isInScope){
-                        if(cols[0].equals("Disallow")){
-                             RA.AddPattern(PatternToRegex(cols[1]),false);
-                        }else if(cols[0].equals("Allow")){
-                             RA.AddPattern(PatternToRegex(cols[1]),true);
+                        switch (cols[0]) {
+                            case "Disallow":
+                                RA.AddPattern(PatternToRegex(cols[1]),false);
+                                break;
+                            case "Allow":
+                                RA.AddPattern(PatternToRegex(cols[1]),true);
+                                break;
                         }
                     }
                 }
@@ -76,8 +76,8 @@ public class Robotstxt {
     
     public class RobotstxtAgent{
         public int length = 0;
-        public ArrayList<String> SortedPattern = new ArrayList<String>();
-        public ArrayList<Boolean> SortedAllowP = new ArrayList<Boolean>();
+        public ArrayList<String> SortedPattern = new ArrayList<>();
+        public ArrayList<Boolean> SortedAllowP = new ArrayList<>();
         public String UserAgent;
         
         
@@ -131,8 +131,9 @@ public class Robotstxt {
     }
     
     public static void main(String[] args){
-        try {
-            BufferedReader br = new BufferedReader(new FileReader("googlebots.txt"));
+        BufferedReader br = null;
+        try { 
+            br = new BufferedReader(new FileReader("googlebots.txt"));
             String Line,Content="";
             Robotstxt R = new Robotstxt("google.com", "malang");
             while((Line = br.readLine()) != null){
@@ -150,6 +151,14 @@ public class Robotstxt {
             //}
         } catch (IOException ex) {
             Logger.getLogger(Robotstxt.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            if(br != null){
+                try {
+                    br.close();
+                } catch (IOException ex) {
+                    Logger.getLogger(Robotstxt.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
         }
     }
 }

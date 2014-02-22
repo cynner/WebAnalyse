@@ -9,7 +9,10 @@ import ArcFileUtils.ArcWriter;
 import ArcFileUtils.WebArcRecord;
 import ArcFileUtils.WebArcWriter;
 import java.io.File;
+import java.io.IOException;
 import java.util.Date;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -45,9 +48,10 @@ public class CreateArcFile {
         arcrec.ArchiveDate = new Date();
         arcrec.ArchiveContentType = "text/html";
         arcrec.IPAddress = "192.168.1.1";
-        //arcrec.LastModified = "ddddd";
-        ArcWriter aw = new ArcWriter(f, true);
-        aw.WriteRecord(arcrec);
-        aw.close();
+        try (ArcWriter aw = new ArcWriter(f, true)) {
+            aw.WriteRecord(arcrec);
+        } catch (IOException ex) {
+            Logger.getLogger(CreateArcFile.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 }

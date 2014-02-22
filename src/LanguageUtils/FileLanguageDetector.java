@@ -94,30 +94,32 @@ public class FileLanguageDetector {
     }
     
     public void DetectFile(File f){
-        ArcReader ar = new ArcReader(f);
-        String lang;
-        while(ar.Next()){
-            if (ar.Record.ArchiveLength > 0) {
-                try {
-                    detector = null;
-                    detector = DetectorFactory.create();
-                    
-                    detector.append(ar.Record.ArchiveContent);
-                    lang = detector.detect();
-                    if (bw != null) {
-                        bw.write(lang + ";" + ar.Record.URL + "\n");
-                    } else {
-                        System.out.println(lang + ";" + ar.Record.URL);
+        try (ArcReader ar = new ArcReader(f)) {
+            String lang;
+            while(ar.Next()){
+                if (ar.Record.ArchiveLength > 0) {
+                    try {
+                        detector = null;
+                        detector = DetectorFactory.create();
+                        
+                        detector.append(ar.Record.ArchiveContent);
+                        lang = detector.detect();
+                        if (bw != null) {
+                            bw.write(lang + ";" + ar.Record.URL + "\n");
+                        } else {
+                            System.out.println(lang + ";" + ar.Record.URL);
+                        }
+                    } catch (LangDetectException ex) {
+                        System.err.println(ar.Record.URL);
+                        Logger.getLogger(FileLanguageDetector.class.getName()).log(Level.SEVERE, null, ex);
+                    } catch (IOException ex) {
+                        Logger.getLogger(FileLanguageDetector.class.getName()).log(Level.SEVERE, null, ex);
                     }
-                } catch (LangDetectException ex) {
-                    System.err.println(ar.Record.URL);
-                    Logger.getLogger(FileLanguageDetector.class.getName()).log(Level.SEVERE, null, ex);
-                } catch (IOException ex) {
-                    Logger.getLogger(FileLanguageDetector.class.getName()).log(Level.SEVERE, null, ex);
                 }
             }
+        } catch (IOException ex) {
+            Logger.getLogger(FileLanguageDetector.class.getName()).log(Level.SEVERE, null, ex);
         }
-        ar.close();
     }
 
 }
