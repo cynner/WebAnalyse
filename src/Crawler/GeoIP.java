@@ -75,13 +75,13 @@ public class GeoIP {
     }
     
     //"www.yahoo.com"
-    public static int Domain2Num (String HostName){
+    public static long Domain2Num (String HostName){
         try{
             InetAddress address = InetAddress.getByName(HostName);
             String [] addrs = address.getHostAddress().split("\\.");
-            return Integer.parseInt(addrs[0]) * 16777216 + 
-                Integer.parseInt(addrs[1]) * 65536 + 
-                Integer.parseInt(addrs[2]) * 256 +
+            return Integer.parseInt(addrs[0]) * 16777216L + 
+                Integer.parseInt(addrs[1]) * 65536L + 
+                Integer.parseInt(addrs[2]) * 256L +
                 Integer.parseInt(addrs[3]);
         }catch(UnknownHostException ex){
             System.err.println("Unknown host name : " + HostName);
@@ -94,11 +94,11 @@ public class GeoIP {
         return Num2ISOCountry(IP2Num(IP));
     }
     
-    public static int IP2Num(String IP){
+    public static long IP2Num(String IP){
         String [] addrs = IP.split("\\.");
-        return Integer.parseInt(addrs[0]) * 16777216 + 
-            Integer.parseInt(addrs[1]) * 65536 + 
-            Integer.parseInt(addrs[2]) * 256 +
+        return Integer.parseInt(addrs[0]) * 16777216L + 
+            Integer.parseInt(addrs[1]) * 65536L + 
+            Integer.parseInt(addrs[2]) * 256L +
             Integer.parseInt(addrs[3]);
     }
     
@@ -118,7 +118,7 @@ public class GeoIP {
         return Num2ISOCountry(Domain2Num(HostName));
     }
     
-    public static String Num2ISOCountry (int Num){
+    public static String Num2ISOCountry (long Num){
         if(Num < 0){
             return null;
         }
