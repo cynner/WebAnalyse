@@ -49,7 +49,7 @@ public class Fetcher {
     
     /* ConFig. */
     public int Timeout = 3000;
-    public int ReadTimeout = 2000;
+    public int ReadTimeout = 3000;
     public String UserAgent = "Mojfabbs-princeofvamp@gmail.com";
     public long MaxContentLength = 2000000;
     

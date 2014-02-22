@@ -52,7 +52,7 @@ public class MainCrawler {
     public int MaxPagePerSite = 1000;
     public int CacheSize = 1000;
     public int Threads = 10;
-    public int log_id = 2;
+    public int log_id = 3;
     public String Dirname;
     public String Selcond = "(log_id is NULL OR location='TH')";// "log_id is NULL";
     public String Fixedcond = "status > 0";
@@ -495,7 +495,6 @@ public class MainCrawler {
         
         if(FDB.exists()){
             webdbq.execute(new Webjob(FDB));
-            FDB.deleteOnExit();
         }
     }
  
@@ -511,10 +510,8 @@ public class MainCrawler {
         protected Object job(SQLiteConnection connection) throws Throwable {
             
                     String line;
-                    BufferedReader br = null;
                     connection.exec("BEGIN;");
-                    try {
-                        br = new BufferedReader(new FileReader(FileName));
+                    try (BufferedReader br = new BufferedReader(new FileReader(FileName))){
                         //"url","language",file_size,comment_size,js_size,style_size,content_size
                         while ((line = br.readLine()) != null) {
                             if(!line.isEmpty()){
@@ -526,11 +523,10 @@ public class MainCrawler {
                         Logger.getLogger(MainCrawler.class.getName()).log(Level.SEVERE, null, ex);
                     } catch (IOException ex) {
                         Logger.getLogger(MainCrawler.class.getName()).log(Level.SEVERE, null, ex);
-                    } finally{
-                        if(br!=null)
-                            br.close();
                     }
                     connection.exec("COMMIT;");
+                    
+                    FDB.delete();
                     return null;
                     
         }
