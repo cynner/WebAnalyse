@@ -19,12 +19,20 @@ public class GeoIP {
     static final int RecordSize = 20;
     static String BinPath = "resource/GeoIPCountry.bin";
     public static boolean isLoadToMem = false;
-    public static long [] MinValList, MaxValList;
-    public static char [][] CountryCodeList;
+    public static GeoIPNode[] Mem;
+    //public static long [] MinValList, MaxValList;
+    //public static char [][] CountryCodeList;
+    
+    public static class GeoIPNode{
+        long beg;
+        long end;
+        String ISOCode;
+    }
     
     public static void main(String[] args) throws IOException{
         //ConvertCSV2Bin("/home/malang/Desktop/GeoIPCountryWhois.csv", 82078);
-        System.out.println(IP2ISOCountry("202.183.235.2"));
+        LoadToMem();
+        System.out.println(IP2ISOCountry("128.0.0.1"));
     }
     
     public static void ConvertCSV2Bin(String CSVPath, int N) throws FileNotFoundException, IOException {
@@ -118,39 +126,82 @@ public class GeoIP {
         return Num2ISOCountry(Domain2Num(HostName));
     }
     
-    public static String Num2ISOCountry (long Num){
-        if(Num < 0){
+    public static String Num2ISOCountry(long Num) {
+        if (Num < 0) {
             return null;
         }
-        long CMin,CMax,POS,ORDER,ADDR;
-        String Result;
-        try(RandomAccessFile raf = new RandomAccessFile(BinPath, "r")){
-            ORDER = 2;
-            POS = 0;
-            while(true){
-                CMin = raf.readLong();
-                CMax = raf.readLong();
-                
-                if(Num < CMin){
-                    POS = (POS << 1) + 1;
-                }else if(Num > CMax){
-                    POS = (POS << 1);
-                }else{
-                    Result = "" + raf.readChar() + raf.readChar(); 
-                    break;
+        String Result = null;
+        if (isLoadToMem) {
+            int ORDER, POS, addr;
+            GeoIPNode node;
+            try{
+                ORDER = 2;
+                POS = 0;
+                addr = 0;
+                while (true) {
+                    node = Mem[addr];
+                    if (Num < node.beg) {
+                        POS = (POS << 1) + 1;
+                    } else if (Num > node.end) {
+                        POS = (POS << 1);
+                    } else {
+                        Result = node.ISOCode;
+                        break;
+                    }
+                    ORDER = ORDER << 1;
+                    addr = (ORDER - POS - 2);
                 }
-                ORDER = ORDER << 1;
-                ADDR = (ORDER - POS - 2) * RecordSize;
-                raf.seek(ADDR);
+                return Result;
+            }catch(IndexOutOfBoundsException ex){
+                Logger.getLogger(GeoIP.class.getName()).log(Level.SEVERE, null, ex);
             }
-            return Result;
-        } catch (FileNotFoundException ex) {
-            Logger.getLogger(GeoIP.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (IOException ex){
-            Logger.getLogger(GeoIP.class.getName()).log(Level.SEVERE, null, ex);
+        } else {
+            long CMin, CMax, POS, ORDER, ADDR;
+            try (RandomAccessFile raf = new RandomAccessFile(BinPath, "r")) {
+                ORDER = 2;
+                POS = 0;
+                while (true) {
+                    CMin = raf.readLong();
+                    CMax = raf.readLong();
+
+                    if (Num < CMin) {
+                        POS = (POS << 1) + 1;
+                    } else if (Num > CMax) {
+                        POS = (POS << 1);
+                    } else {
+                        Result = "" + raf.readChar() + raf.readChar();
+                        break;
+                    }
+                    ORDER = ORDER << 1;
+                    ADDR = (ORDER - POS - 2) * RecordSize;
+                    raf.seek(ADDR);
+                }
+            } catch (FileNotFoundException ex) {
+                Logger.getLogger(GeoIP.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (IOException ex) {
+                Logger.getLogger(GeoIP.class.getName()).log(Level.SEVERE, null, ex);
+            }
         }
-        return null;
+        return Result;
     }
     
-    
+    public static void LoadToMem() {
+        if (!isLoadToMem) {
+            File BinFile = new File(BinPath);
+            Mem = new GeoIPNode[(int) (BinFile.length() / RecordSize)];
+            try (DataInputStream dos = new DataInputStream(new FileInputStream(BinFile))) {
+                for (int i = 0; i < Mem.length; i++) {
+                    Mem[i] = new GeoIPNode();
+                    Mem[i].beg = dos.readLong();
+                    Mem[i].end = dos.readLong();
+                    Mem[i].ISOCode = "" + dos.readChar() + dos.readChar();
+                }
+                isLoadToMem = true;
+            } catch (FileNotFoundException ex) {
+                Logger.getLogger(GeoIP.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (IOException ex) {
+                Logger.getLogger(GeoIP.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+    }
 }

@@ -76,6 +76,7 @@ public class MainCrawler {
         String Dir = args.length > 0 ? args[0] : DefaultSitePath;
         String DBDir = Dir + "/db";
         LanguageDetector.init();
+        GeoIP.LoadToMem();
         
         MainCrawler mc = new MainCrawler(Dir,3,1000);
         
