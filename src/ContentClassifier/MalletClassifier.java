@@ -6,13 +6,10 @@ package ContentClassifier;
 
 import ArcFileUtils.MalletArcIterator;
 import cc.mallet.classify.*;
-import cc.mallet.pipe.iterator.CsvIterator;
 import cc.mallet.types.Instance;
 import cc.mallet.types.InstanceList;
 import cc.mallet.types.Labeling;
-import cc.mallet.util.Randoms;
 import java.io.*;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.logging.Level;
@@ -61,27 +58,16 @@ public final class MalletClassifier {
     
     public void saveClassifier( File serializedFile)
         throws IOException {
-
-        // The standard method for saving classifiers in                                                   
-        //  Mallet is through Java serialization. Here we                                                  
-        //  write the classifier object to the specified file.                                             
-
-        ObjectOutputStream oos =
-            new ObjectOutputStream(new FileOutputStream (serializedFile));
-        oos.writeObject (classifier);
-        oos.close();
+        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream (serializedFile))) {
+            oos.writeObject (classifier);
+        }
     }
     
     public void loadClassifier(File serializedFile)
         throws FileNotFoundException, IOException, ClassNotFoundException {
-
-        // The standard way to save classifiers and Mallet data                                            
-        //  for repeated use is through Java serialization.                                                
-        // Here we load a serialized classifier from a file.                                               
-
-        ObjectInputStream ois = new ObjectInputStream (new FileInputStream (serializedFile));
-        classifier = (Classifier) ois.readObject();
-        ois.close();
+        try (ObjectInputStream ois = new ObjectInputStream (new FileInputStream (serializedFile))) {
+            classifier = (Classifier) ois.readObject();
+        }
 
     }
     
@@ -235,12 +221,10 @@ public final class MalletClassifier {
             
             }
             */
-        } catch (IOException ex) {
+        } catch ( IOException | ClassNotFoundException ex) {
             Logger.getLogger(MalletClassifier.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (ClassNotFoundException ex) {
+        } catch (Exception ex){
             Logger.getLogger(MalletClassifier.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (Exception e){
-            
         } finally {
             if(MC != null)
                 MC.close();

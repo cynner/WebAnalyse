@@ -6,7 +6,7 @@ package Lexto;
 
 import java.io.*;
 import java.net.URI;
-import java.util.Vector;
+import java.net.URISyntaxException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -14,8 +14,10 @@ import java.util.logging.Logger;
  *
  * @author malang
  */
+@Deprecated
 public class MyLexto {
     public LongLexTo tokenizer;
+    
     
     public MyLexto(){
         //LongLexTo tokenizer = null;
@@ -34,8 +36,9 @@ public class MyLexto {
                 }
             }
             
-        } catch (Exception ex) {
-        }
+        } catch (IOException | URISyntaxException ex) {
+            Logger.getLogger(MyLexto.class.getName()).log(Level.SEVERE, null, ex);
+        } 
     }
     
     public String Split2Str(String Str){

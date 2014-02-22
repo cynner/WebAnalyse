@@ -5,16 +5,13 @@
  */
 package ContentClassifier;
 
-import cc.mallet.classify.Classification;
-import cc.mallet.classify.Classifier;
-import cc.mallet.classify.ClassifierTrainer;
 import cc.mallet.classify.NaiveBayes;
 import cc.mallet.classify.NaiveBayesTrainer;
 import cc.mallet.classify.Trial;
 import cc.mallet.types.InstanceList;
-import cc.mallet.types.Labeling;
 import java.io.File;
-import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -60,7 +57,8 @@ public class MalletTrainer {
                 }
             }
         */
-        } catch (Exception e) {
+        } catch (Exception ex) {
+                Logger.getLogger(MalletTrainer.class.getName()).log(Level.SEVERE, null, ex);
 
         }
     }

@@ -7,19 +7,10 @@ package ArcFileUtils;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.RandomAccessFile;
-import java.io.UnsupportedEncodingException;
-import java.nio.charset.Charset;
 import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.apache.lucene.index.Fields;
 import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
-import net.sf.samtools.util.BlockCompressedInputStream;
-import net.sf.samtools.util.BlockCompressedFilePointerUtil;
 
 /**
  *
@@ -27,7 +18,7 @@ import net.sf.samtools.util.BlockCompressedFilePointerUtil;
  */
 public class WebArcReader extends ArcReader{
 
-    public WebArcRecord Record;
+    public final WebArcRecord Record;
     public boolean AnalyseCharset ;
     public String FixedCharset = null ;
     public boolean AnalyseWebContent = true;
@@ -40,14 +31,12 @@ public class WebArcReader extends ArcReader{
     
     public WebArcReader(File ArcFile, boolean AnalyseCharset, boolean AnalyseWebContent) throws FileNotFoundException, IOException{
         this(ArcFile,null);
-        
         this.AnalyseCharset = AnalyseCharset;
         this.AnalyseWebContent = AnalyseWebContent;
     }
     
     public WebArcReader(File ArcFile, boolean AnalyseCharset) throws FileNotFoundException, IOException{
         this(ArcFile,null);
-       
         this.AnalyseCharset = AnalyseCharset;
     }
     
@@ -73,7 +62,7 @@ public class WebArcReader extends ArcReader{
                 //System.out.println("Didn't Match offset!!!");
             }
             //System.out.println(Line);
-            if (Line != null && Fields.length >= 5) {
+            if (Fields != null && Fields.length >= 5) {
                 int i;
                 Record.URL = Fields[0];
                 for(i=1; i < Fields.length - 4; i++){

@@ -94,9 +94,7 @@ public class ArcUtils {
         ArcUtils a = new ArcUtils();
         try {
             ArcUtils.AnalyseAll(FileName,a, ArcUtils.class.getMethod("CatContent", String.class, String.class)) ;
-        } catch (NoSuchMethodException ex) {
-            Logger.getLogger(ArcUtils.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (SecurityException ex) {
+        } catch (NoSuchMethodException | SecurityException ex) {
             Logger.getLogger(ArcUtils.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
@@ -130,11 +128,7 @@ public class ArcUtils {
                 // System.out.println(BAOS.toString());
             }
             a.close();
-        } catch (IllegalAccessException ex) {
-            Logger.getLogger(ArcUtils.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (IllegalArgumentException ex) {
-            Logger.getLogger(ArcUtils.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (InvocationTargetException ex) {
+        } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
             Logger.getLogger(ArcUtils.class.getName()).log(Level.SEVERE, null, ex);
         } catch (MalformedURLException ex) {
             Logger.getLogger(ArcUtils.class.getName()).log(Level.SEVERE, null, ex);
@@ -167,11 +161,7 @@ public class ArcUtils {
                 // System.out.println(BAOS.toString());
             }
             a.close();
-        } catch (IllegalAccessException ex) {
-            Logger.getLogger(ArcUtils.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (IllegalArgumentException ex) {
-            Logger.getLogger(ArcUtils.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (InvocationTargetException ex) {
+        } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
             Logger.getLogger(ArcUtils.class.getName()).log(Level.SEVERE, null, ex);
         } catch (MalformedURLException ex) {
             Logger.getLogger(ArcUtils.class.getName()).log(Level.SEVERE, null, ex);
@@ -197,11 +187,7 @@ public class ArcUtils {
             }
             a.close();
             
-        } catch (IllegalAccessException ex) {
-            Logger.getLogger(ArcUtils.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (IllegalArgumentException ex) {
-            Logger.getLogger(ArcUtils.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (InvocationTargetException ex) {
+        } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
             Logger.getLogger(ArcUtils.class.getName()).log(Level.SEVERE, null, ex);
         } catch (MalformedURLException ex) {
             Logger.getLogger(ArcUtils.class.getName()).log(Level.SEVERE, null, ex);

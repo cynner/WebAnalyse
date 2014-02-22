@@ -7,17 +7,11 @@ package ArcFileUtils;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.io.StringWriter;
-import java.io.Writer;
 import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import net.sf.samtools.util.BlockCompressedFilePointerUtil;
 
 /**
  *
@@ -37,7 +31,7 @@ public class ArcReader implements AutoCloseable{
     public String FileVersion;
     public String FileReserved;
     public String FileOrigin;
-    public ArcRecord Record;
+    public final ArcRecord Record;
     
 
 

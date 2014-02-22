@@ -6,9 +6,10 @@ package Example;
 
 import Lexto.MyLexto;
 import java.io.*;
-import org.archive.util.FileUtils;
 import projecttester.MyFileUtils;
 import ArcFileUtils.WebUtils;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -33,8 +34,8 @@ public class WebContentFilter {
         try{
             MyLexto ml = new MyLexto();
             MyFileUtils.WriteFile(d, ml.Split2Str(wu.doc.text()));
-        }catch (IOException e){
-            
+        }catch (IOException ex){
+            Logger.getLogger(WebContentFilter.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 }

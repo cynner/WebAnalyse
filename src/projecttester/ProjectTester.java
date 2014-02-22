@@ -4,24 +4,15 @@
  */
 package projecttester;
 
-import Example.MainRunner;
 import java.io.BufferedReader;
-import java.io.DataInputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.RandomAccessFile;
-import java.net.InetAddress;
-import java.net.URI;
-import java.net.UnknownHostException;
-import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import sun.misc.Signal;
-import sun.misc.SignalHandler;
 
 /**
  *
@@ -184,7 +175,7 @@ public class ProjectTester {
         BufferedReader br = new BufferedReader(new FileReader(baseDir + confPath));
         String Line;
         String[] Sp;
-        HashMap<String, String> kv = new HashMap<String, String>();
+        HashMap<String, String> kv = new HashMap<>();
         try {
             while ((Line = br.readLine()) != null) {
                 Sp = Line.split("=", 2);
@@ -212,24 +203,21 @@ public class ProjectTester {
 
     public static long TestRead(String Filename, int LineNo) {
         long a = 0;
-        try {
-            RandomAccessFile raf = new RandomAccessFile(Filename, "r");
+        try (RandomAccessFile raf = new RandomAccessFile(Filename, "r")) {
             String Line;
-            try {
-                while ((Line = raf.readLine()) != null) {
-                    if (LineNo == 1) {
-                        a = raf.getFilePointer();
-                        System.out.println(a);
-                        break;
-                    }
-                    LineNo--;
+            while ((Line = raf.readLine()) != null) {
+                if (LineNo == 1) {
+                    a = raf.getFilePointer();
+                    System.out.println(a);
+                    break;
                 }
-                System.out.println(Line);
-                raf.close();
-            } catch (IOException ex) {
-                Logger.getLogger(ProjectTester.class.getName()).log(Level.SEVERE, null, ex);
+                LineNo--;
             }
-        } catch (Exception e) {
+            System.out.println(Line);
+        } catch (FileNotFoundException ex) {
+            Logger.getLogger(ProjectTester.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IOException ex) {
+            Logger.getLogger(ProjectTester.class.getName()).log(Level.SEVERE, null, ex);
         }
         return a;
     }
@@ -280,41 +268,28 @@ public class ProjectTester {
     }
 
     public static void TestRead(String Filename, long LineNo) {
-        try {
-            RandomAccessFile raf = new RandomAccessFile(Filename, "r");
-            raf.seek(LineNo);
-            String Line = raf.readLine();
-            System.out.println(Line);
-            raf.close();
-        } catch (Exception e) {
-        }
+        try (RandomAccessFile raf = new RandomAccessFile(Filename, "r")) {
+                raf.seek(LineNo);
+                String Line = raf.readLine();
+                System.out.println(Line);
+        } catch (FileNotFoundException ex) {
+            Logger.getLogger(ProjectTester.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IOException ex) {
+            Logger.getLogger(ProjectTester.class.getName()).log(Level.SEVERE, null, ex);
+        } 
     }
 
     public static void myhandler() {
-        Signal.handle(new Signal("INT"), new SignalHandler() {
-
+        /*
+        SignalHandler handle;
+        handle = Signal.handle(new Signal("INT"), new SignalHandler() {
+            
+            @Override
             public void handle(Signal sig) {
                 System.out.println("Received SIGINT: Process will run only remaining assigned...");
                 SIGINT = true;
             }
         });
-
-        Signal.handle(new Signal("HUP"), new SignalHandler() {
-
-            public void handle(Signal sig) {
-                System.out.println("Received SIGHUP: Process will run only remaining assigned...");
-                SIGINT = true;
-            }
-        });
-
-        // Force stop and saving before exit
-        Signal.handle(new Signal("TERM"), new SignalHandler() {
-
-            public void handle(Signal sig) {
-
-                System.out.println("Received SIGTERM: Process will force shut down shortly...");
-                SIGTERM = true;
-            }
-        });
+                */
     }
 }

@@ -5,27 +5,10 @@
 package ContentClassifier;
 
 import ArcFileUtils.MalletArcIterator;
-import cc.mallet.classify.AdaBoostTrainer;
-import cc.mallet.classify.BaggingTrainer;
-import cc.mallet.classify.BalancedWinnowTrainer;
-import cc.mallet.classify.C45Trainer;
-import cc.mallet.classify.Classifier;
-import cc.mallet.classify.ClassifierTrainer;
-import cc.mallet.classify.ConfidencePredictingClassifierTrainer;
-import cc.mallet.classify.DecisionTreeTrainer;
-import cc.mallet.classify.MCMaxEntTrainer;
-import cc.mallet.classify.MaxEntPRTrainer;
-import cc.mallet.classify.MaxEntTrainer;
-import cc.mallet.classify.NaiveBayes;
-import cc.mallet.classify.NaiveBayesTrainer;
-import cc.mallet.classify.PRAuxClassifierOptimizable;
-import cc.mallet.classify.Trial;
-import cc.mallet.classify.WinnowTrainer;
 import cc.mallet.pipe.CharSequence2TokenSequence;
 import cc.mallet.pipe.FeatureSequence2FeatureVector;
 import cc.mallet.pipe.Input2CharSequence;
 import cc.mallet.pipe.Pipe;
-import cc.mallet.pipe.PrintInputAndTarget;
 import cc.mallet.pipe.SerialPipes;
 import cc.mallet.pipe.Target2Label;
 import cc.mallet.pipe.TokenSequence2FeatureSequence;
@@ -33,11 +16,11 @@ import cc.mallet.pipe.TokenSequenceLowercase;
 import cc.mallet.pipe.TokenSequenceRemoveStopwords;
 import cc.mallet.types.Instance;
 import cc.mallet.types.InstanceList;
-import cc.mallet.types.Labeling;
-import java.beans.DesignMode;
 import java.io.*;
 import java.io.File;
 import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.regex.*;
 
 /**
@@ -55,7 +38,7 @@ public class MalletArcImport {
         instances = new InstanceList(pipe);
     }
 
-    public Pipe buildPipe() {
+    public final Pipe buildPipe() {
         ArrayList pipeList = new ArrayList();
 
         // Read data from File objects
@@ -119,10 +102,14 @@ public class MalletArcImport {
             if(Arc.isDirectory() && recursive)
                 readDirectory(Arc, Category, recursive);
             else{
-                System.out.println(Arc.getPath());
-                Iterator<Instance> L = new MalletArcIterator(Arc, Category);
-                instances.addThruPipe(L);
-                L.remove();
+                try {
+                    System.out.println(Arc.getPath());
+                    Iterator<Instance> L = new MalletArcIterator(Arc, Category);
+                    instances.addThruPipe(L);
+                    L.remove();
+                } catch (IOException ex) {
+                    Logger.getLogger(MalletArcImport.class.getName()).log(Level.SEVERE, null, ex);
+                }
                 
             }
         }

@@ -68,42 +68,38 @@ public class SCCTree {
         String strOutput = args.length >= 2 ? args[1] : "data/Graph/SCC.txt";
         String strDirSCC = args.length >= 3 ? args[1] : "data/Graph";
         File fileInputCsv = new File(strInputCSV);
-        BufferedReader br;
         String[] strs;
         String Line;
         
         for(i=0;i<bwGroup.length;i++){
             bwGroup[i] = new BufferedWriter(new FileWriter(strDirSCC + "/SCCG-TPOW" + (i+1) + ".txt"));
         }
-        
-        br = new BufferedReader(new FileReader(fileInputCsv));
-        //mat1 = new ArrayList[mat_size];
-        mat1 = new int[mat_size][];
-        mat2 = new ArrayList[mat_size];
-        for( i=1;i<mat_size;i++){
-            mat2[i] = new ArrayList<>();
-            mat2[i].add(0); // Foreward Tick
-            mat2[i].add(0); // Backward Tick
-        }
-        
-        // Matrix Format Group,ptr,Forward,Backword,Dst1,Dst2,Dst3,...
-        // Size 2(F/B) + n(D) = n + 2; 
-
-        while((Line = br.readLine()) != null){
-            strs = Line.split(";");
+        try (BufferedReader br = new BufferedReader(new FileReader(fileInputCsv))) {
+            mat1 = new int[mat_size][];
+            mat2 = new ArrayList[mat_size];
+            for( i=1;i<mat_size;i++){
+                mat2[i] = new ArrayList<>();
+                mat2[i].add(0); // Foreward Tick
+                mat2[i].add(0); // Backward Tick
+            }
             
-            src = Integer.parseInt(strs[0]);
-            mat1[src] = new int[strs.length+1];
-            //mat1[src].add(0); // Foreward Tick
-            //mat1[src].add(0); // Backward Tick
-            for(i=1;i<strs.length;i++){
-                tmpv = Integer.parseInt(strs[i]);
-                mat1[src][i+1] = tmpv; 
-                mat2[tmpv].add(src);
+            // Matrix Format Group,ptr,Forward,Backword,Dst1,Dst2,Dst3,...
+            // Size 2(F/B) + n(D) = n + 2;
+            
+            while((Line = br.readLine()) != null){
+                strs = Line.split(";");
+                
+                src = Integer.parseInt(strs[0]);
+                mat1[src] = new int[strs.length+1];
+                //mat1[src].add(0); // Foreward Tick
+                //mat1[src].add(0); // Backward Tick
+                for(i=1;i<strs.length;i++){
+                    tmpv = Integer.parseInt(strs[i]);
+                    mat1[src][i+1] = tmpv;
+                    mat2[tmpv].add(src);
+                }
             }
         }
-        
-        br.close();
         
         
         System.out.println("Read File Success");
@@ -175,13 +171,13 @@ public class SCCTree {
         gr--;
         System.out.println("Group no: " + gr);
         System.out.println("Writing Result...");
-        BufferedWriter bw = new BufferedWriter(new FileWriter(strOutput));
-        for(i=1;i<mat_size;i++){
-            //if(mat1[i] != null){
-            bw.write(i + ":" + mat2[i].get(1) + "\n");
-            //}
+        try (BufferedWriter bw = new BufferedWriter(new FileWriter(strOutput))) {
+            for(i=1;i<mat_size;i++){
+                //if(mat1[i] != null){
+                bw.write(i + ":" + mat2[i].get(1) + "\n");
+                //}
+            }
         }
-        bw.close();
         System.out.println("Success.");
     }
 }

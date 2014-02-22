@@ -7,11 +7,11 @@
 package Example;
 
 import java.net.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.jgrapht.*;
-import org.jgrapht.alg.StrongConnectivityInspector;
 import org.jgrapht.graph.*;
-import org.jgrapht.util.MathUtil;
 
 /**
  *
@@ -54,7 +54,7 @@ public class JGraphT {
     private static DirectedGraph <URL, DefaultEdge> createHrefGraph()
     {
         DirectedGraph<URL, DefaultEdge> g =
-            new DefaultDirectedGraph<URL, DefaultEdge>(DefaultEdge.class);
+            new DefaultDirectedGraph<>(DefaultEdge.class);
 
         try {
             URL amazon = new URL("http://www.amazon.com");
@@ -72,9 +72,9 @@ public class JGraphT {
             g.addEdge(yahoo, amazon);
             g.addEdge(yahoo, ebay);
             
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
-        }
+        } catch (MalformedURLException ex) {
+            Logger.getLogger(JGraphT.class.getName()).log(Level.SEVERE, null, ex);
+        } 
 
         return g;
     }

@@ -5,7 +5,6 @@
 package LanguageUtils;
 
 import ArcFileUtils.ArcReader;
-import ArcFileUtils.WebArcReader;
 import com.cybozu.labs.langdetect.Detector;
 import com.cybozu.labs.langdetect.DetectorFactory;
 import com.cybozu.labs.langdetect.LangDetectException;
@@ -13,8 +12,6 @@ import java.io.*;
 import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
 import projecttester.ArgUtils;
 
 /**

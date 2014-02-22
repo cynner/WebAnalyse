@@ -8,24 +8,21 @@ package Analyse;
 
 /**
  *
- * @author malang
+ * @author pramote
  */
 
-import com.sun.corba.se.impl.orbutil.ObjectWriter;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.sql.Time;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.apache.commons.lang.time.DateUtils;
 
 public class PageRank {
 	/*
@@ -37,7 +34,7 @@ public class PageRank {
 	private HashSet<Integer> zeroOutdegree;
 
 	private void getZeroOutdegree() {
-		HashSet<Integer> hasOutlink = new HashSet<Integer>();
+		HashSet<Integer> hasOutlink = new HashSet<>();
 		for (Map.Entry<Integer, HashMap<Integer, Double>> t1 : linkedlist.entrySet())
 			if (!hasOutlink.contains(t1.getKey()) && t1.getValue().size() > 0)
 				hasOutlink.add(t1.getKey());
@@ -56,7 +53,7 @@ public class PageRank {
 	public double[] cal(HashMap<Integer, HashMap<Integer, Double>> linkedList, int Size) {
 		linkedlist = linkedList;
 		maxSize = Size;
-		zeroOutdegree = new HashSet<Integer>();
+		zeroOutdegree = new HashSet<>();
 		getZeroOutdegree();
 
 		System.out.println("ZERO OUTLINK SIZE: " + zeroOutdegree.size());
@@ -68,7 +65,7 @@ public class PageRank {
 		double[] dest;
 		double threshold = 1E-7;
 		double c = 0.85;
-		double err = 0;
+		double err;
 		do {
 			dest = new double[maxSize];
 			for (int i = 0; i < maxSize; i++)
@@ -96,13 +93,13 @@ public class PageRank {
         
         private HashMap<Integer, HashMap<Integer, Double>> importCSVFreq() throws FileNotFoundException{
             String CSVPath = "data/Graph/PageLink.csv";
-            HashMap<Integer, HashMap<Integer, Double>> linkedList = new HashMap<Integer, HashMap<Integer, Double>>();
-            HashMap<Integer, Double> SubLink = null;
+            HashMap<Integer, HashMap<Integer, Double>> linkedList = new HashMap<>();
+            HashMap<Integer, Double> SubLink;
             BufferedReader br = new BufferedReader(new FileReader(CSVPath));
             String Line = null;
             String[] strs;
-            ArrayList<Integer> k = new ArrayList<Integer>();
-            ArrayList<Double> v = new ArrayList<Double>();
+            ArrayList<Integer> k = new ArrayList<>();
+            ArrayList<Double> v = new ArrayList<>();
             Integer val;
             double pts;
             int idx;
@@ -122,7 +119,7 @@ public class PageRank {
                             v.add(pts);
                         }
                     }
-                    SubLink = new HashMap<Integer, Double>();
+                    SubLink = new HashMap<>();
                     for(int i=0;i<k.size();i++){
                         SubLink.put(k.get(i), v.get(i));
                     }
@@ -146,11 +143,11 @@ public class PageRank {
             System.out.println("ReadCSV Finished" );
             double[] d = pr.cal(HM,4001000);
             try {
-                BufferedWriter bw = new BufferedWriter(new FileWriter("data/PR.txt"));
-                for(int i=0;i<d.length;i++){
-                    bw.write(d[i]+"\n");
+                try (BufferedWriter bw = new BufferedWriter(new FileWriter("data/PR.txt"))) {
+                    for(int i=0;i<d.length;i++){
+                        bw.write(d[i]+"\n");
+                    }
                 }
-                bw.close();
             } catch (IOException ex) {
                 
                 Logger.getLogger(PageRank.class.getName()).log(Level.SEVERE, null, ex);

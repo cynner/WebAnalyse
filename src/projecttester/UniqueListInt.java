@@ -14,7 +14,7 @@ public class UniqueListInt{
     public ArrayList<UElementInt> UList;
     
     public UniqueListInt(){
-        UList = new ArrayList<UElementInt>();
+        UList = new ArrayList<>();
     }
     
     public void Clear(){

@@ -7,7 +7,6 @@
 package ContentClassifier;
 
 import ArcFileUtils.ArcReader;
-import ArcFileUtils.MalletArcIterator;
 import ArcFileUtils.MalletArcIteratorLimit;
 import cc.mallet.classify.NaiveBayes;
 import cc.mallet.classify.NaiveBayesTrainer;
@@ -21,11 +20,12 @@ import cc.mallet.pipe.Target2Label;
 import cc.mallet.pipe.TokenSequence2FeatureSequence;
 import cc.mallet.pipe.TokenSequenceLowercase;
 import cc.mallet.pipe.TokenSequenceRemoveStopwords;
-import cc.mallet.types.Instance;
 import cc.mallet.types.InstanceList;
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Iterator;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.regex.Pattern;
 
 /**
@@ -35,15 +35,17 @@ import java.util.regex.Pattern;
 public class MalletEval {
     public int   CatNo = 0;
     public int   NFold = 10;
-    public ArrayList<Integer> CatCount = new ArrayList<Integer>();
+    public ArrayList<Integer> CatCount = new ArrayList<>();
     public int tmpCnt;
     
     public void CountRec(File f){
-        ArcReader ar = new ArcReader(f);
-        while(ar.Skip()){
-            tmpCnt++;
+        try (ArcReader ar = new ArcReader(f)) {
+            while(ar.Skip()){
+                tmpCnt++;
+            }
+        } catch (IOException ex) {
+            Logger.getLogger(MalletEval.class.getName()).log(Level.SEVERE, null, ex);
         }
-        ar.close();
     }
     
     public void Count(File Dir){
@@ -154,13 +156,13 @@ public class MalletEval {
             instances[i] = new InstanceList(pipe);
         
         CurCatNo = 0;
-        for(int i=0; i < Files.length; i++){
-            if(Files[i].isDirectory()){
+        for (File File : Files) {
+            if (File.isDirectory()) {
                 curFold = 0;
                 curRec = 0;
                 avgRec = CatCount.get(CurCatNo) / NFold;
                 maxRec = avgRec;
-                readSep(Files[i], Files[i].getName());
+                readSep(File, File.getName());
                 CurCatNo++;
             }
         }
@@ -221,34 +223,32 @@ public class MalletEval {
             if(f.isDirectory()){
                 readSep(f, Category);
             }else{
-                System.out.println(f.getPath() + " Lim: " +  (maxRec - curRec) + " Fold: " + curFold + " Prog: (" + curRec + "/" + maxRec +  ")");
-                
-                MalletArcIteratorLimit L = new MalletArcIteratorLimit(f, Category, maxRec - curRec);
-                instances[curFold].addThruPipe(L);
-                curRec += L.Current;
-                if(curRec >= maxRec){
-                    curFold++;
-                    if(curFold < NFold - 1){
-                        maxRec = (curFold + 1) * avgRec;
-                    }else{
-                        curFold = 9;
-                        maxRec = CatCount.get(CurCatNo) + 1;
+                try {
+                    System.out.println(f.getPath() + " Lim: " +  (maxRec - curRec) + " Fold: " + curFold + " Prog: (" + curRec + "/" + maxRec +  ")");
+                    
+                    MalletArcIteratorLimit L = new MalletArcIteratorLimit(f, Category, maxRec - curRec);
+                    instances[curFold].addThruPipe(L);
+                    curRec += L.Current;
+                    if(curRec >= maxRec){
+                        curFold++;
+                        if(curFold < NFold - 1){
+                            maxRec = (curFold + 1) * avgRec;
+                        }else{
+                            curFold = 9;
+                            maxRec = CatCount.get(CurCatNo) + 1;
+                        }
+                        if(L.ARhasNext()){
+                            int c = L.Current;
+                            L.Limit = c + maxRec - curRec;
+                            instances[curFold].addThruPipe(L);
+                            curRec += L.Current - c;
+                        }
                     }
-                    if(L.ARhasNext()){
-                        int c = L.Current;
-                        L.Limit = c + maxRec - curRec;
-                        instances[curFold].addThruPipe(L);
-                        curRec += L.Current - c;
-                    }
+                    L.remove();
+                } catch (IOException ex) {
+                    Logger.getLogger(MalletEval.class.getName()).log(Level.SEVERE, null, ex);
                 }
-                L.remove();
             }
         }
     }
-    
-    
-    
-    
-        
-    
 }

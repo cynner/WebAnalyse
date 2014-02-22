@@ -10,16 +10,12 @@ package Example;
  *
  * @author malang
  */
-import java.util.*;
 import java.io.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import net.sf.samtools.util.BlockCompressedInputStream;
 import net.sf.samtools.util.BlockCompressedFilePointerUtil;
 import java.util.zip.GZIPInputStream;
-import org.archive.io.GzippedInputStream;
-import org.archive.io.RandomAccessInputStream;
-
 
 
 public class GZip {

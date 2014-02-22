@@ -10,11 +10,9 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.io.StringReader;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.lucene.analysis.Analyzer;
-import org.apache.lucene.analysis.Token;
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.th.ThaiAnalyzer;
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
@@ -63,16 +61,17 @@ public class LuceneLexicalTH {
     
     public String strSplitContent(File F){
         String result="";
-        try {
-            BufferedReader br = new BufferedReader(new FileReader(F));
+        try (BufferedReader br = new BufferedReader(new FileReader(F))) {
             TokenStream tokenStream = analyzer.tokenStream(null, br);
             CharTermAttribute charTermAttribute = tokenStream.addAttribute(CharTermAttribute.class);
             tokenStream.reset();
             while (tokenStream.incrementToken()) {
                 result += charTermAttribute.toString() + " ";
             }
-        }catch (IOException ex) {
-            
+        } catch (FileNotFoundException ex) {
+            Logger.getLogger(LuceneLexicalTH.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IOException ex) {
+            Logger.getLogger(LuceneLexicalTH.class.getName()).log(Level.SEVERE, null, ex);
         }
         return result;
     }

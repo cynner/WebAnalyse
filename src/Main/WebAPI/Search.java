@@ -5,7 +5,6 @@
  */
 package Main.WebAPI;
 
-import Example.lucene.*;
 import java.io.File;
 import java.io.IOException;
 import org.apache.lucene.analysis.Analyzer;
@@ -16,7 +15,6 @@ import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.queryparser.classic.MultiFieldQueryParser;
 import org.apache.lucene.queryparser.classic.ParseException;
-import org.apache.lucene.queryparser.classic.QueryParser;
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.TopDocs;
@@ -76,10 +74,9 @@ public class Search {
             TokenStream tokenStream = TokenSources.getAnyTokenStream(searcher.getIndexReader(), id, "content", analyzer);
             TextFragment[] frag = highlighter.getBestTextFragments(tokenStream, text, false, 10);//highlighter.getBestFragments(tokenStream, text, 3, "...");
             int k=0;
-            for (int j = 0; j < frag.length; j++) {
-                
-                if ((frag[j] != null) && (frag[j].getScore() > 0)) {
-                    Preview += (frag[j].toString()) + "...<br>";
+            for (TextFragment frag1 : frag) {
+                if ((frag1 != null) && (frag1.getScore() > 0)) {
+                    Preview += (frag1.toString()) + "...<br>";
                     k++;
                     // Get 2 Line Preview
                     if(k>=2)

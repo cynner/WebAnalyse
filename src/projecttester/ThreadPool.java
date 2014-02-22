@@ -18,7 +18,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.commons.io.filefilter.WildcardFileFilter;
@@ -29,7 +28,7 @@ import org.apache.commons.io.filefilter.WildcardFileFilter;
  */
 public class ThreadPool{
     public static DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-    public static ArrayList<String> KEYs = new ArrayList<String>();
+    public static ArrayList<String> KEYs = new ArrayList<>();
     
     public static void RunHostExtract(){
         File dir = new File(ProjectTester.inputDir);
@@ -197,6 +196,7 @@ public class ThreadPool{
         System.out.println("Finished all threads");
     }
     
+    @SuppressWarnings("empty-statement")
     public static boolean getNextKey() {
         File l = new File(ProjectTester.assignedPath + ".lock");
         File f = new File(ProjectTester.assignedPath);
@@ -230,8 +230,7 @@ public class ThreadPool{
         int i=0;
         String key;
         //int idx;
-        try {
-            RandomAccessFile raf = new RandomAccessFile(file, "r");
+        try (RandomAccessFile raf = new RandomAccessFile(file, "r")){
             raf.seek(startfrom);
             if((Line = raf.readLine()) != null){
                 key = Line.split("\t")[0];
@@ -243,7 +242,6 @@ public class ThreadPool{
                 }
                 SaveAssign(key, i, raf.getFilePointer());
             }
-            raf.close();
         } catch (FileNotFoundException ex) {
             Logger.getLogger(ThreadPool.class.getName()).log(Level.SEVERE, null, ex);
         } catch (IOException ex) {
@@ -253,20 +251,16 @@ public class ThreadPool{
     }
     
     public static void SaveAssign(String key,int no,long nextoffset){
-        try {
-            BufferedWriter bw = new BufferedWriter(new FileWriter(ProjectTester.assignedPath, true));
+        try (BufferedWriter bw = new BufferedWriter(new FileWriter(ProjectTester.assignedPath, true))){
             bw.newLine();
             bw.write(dateFormat.format(new Date()) + "\t" + ProjectTester.hostName + "\t" + key + "\t" + no + "\t" + nextoffset);
-            bw.close();
         } catch (IOException ex) {
             Logger.getLogger(ThreadPool.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
     
     public static String lastline(File file) {
-        RandomAccessFile fileHandler = null;
-        try {
-            fileHandler = new RandomAccessFile(file, "r");
+        try (RandomAccessFile fileHandler = new RandomAccessFile(file, "r")){
             long fileLength = file.length() - 1;
             StringBuilder sb = new StringBuilder();
 
@@ -293,32 +287,22 @@ public class ThreadPool{
 
             String lastLine = sb.reverse().toString();
             return lastLine;
-        } catch (java.io.FileNotFoundException e) {
-            e.printStackTrace();
+        } catch (java.io.FileNotFoundException ex) {
+            Logger.getLogger(ThreadPool.class.getName()).log(Level.SEVERE, null, ex);
             return null;
-        } catch (java.io.IOException e) {
-            e.printStackTrace();
+        } catch (java.io.IOException ex) {
+            Logger.getLogger(ThreadPool.class.getName()).log(Level.SEVERE, null, ex);
             return null;
-        } finally {
-            if (fileHandler != null) {
-                try {
-                    fileHandler.close();
-                } catch (IOException e) {
-                    /* ignore */
-                }
-            }
-        }
+        } 
     }
     
     public static void InputDirToKey(String InputDir, String Format){
         File dir = new File(InputDir);
         File[] lst = dir.listFiles((FileFilter)(new WildcardFileFilter(Format)));
-        try {
-            BufferedWriter bw = new BufferedWriter(new FileWriter(ProjectTester.keyPath));
+        try (BufferedWriter bw = new BufferedWriter(new FileWriter(ProjectTester.keyPath))){
             for(File f : lst){
                 bw.write(f.getName() + "\n");
             }
-            bw.close();
         } catch (IOException ex) {
             Logger.getLogger(ThreadPool.class.getName()).log(Level.SEVERE, null, ex);
         }

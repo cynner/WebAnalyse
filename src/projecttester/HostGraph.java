@@ -7,7 +7,6 @@ package projecttester;
 import java.io.*;
 import java.net.IDN;
 import java.util.*;
-import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.jsoup.Jsoup;
@@ -65,10 +64,8 @@ public class HostGraph implements Runnable {
             bw.close();
             ULI.Clear();
             ULI = null;
-        } catch (SecurityException ex) {
+        } catch (SecurityException | IOException ex) {
             Logger.getLogger(HostGraph.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (Exception ex){
-            
         }
     }
     
@@ -112,7 +109,7 @@ public class HostGraph implements Runnable {
             String Line;
             String[] KV;
             BufferedReader br = new BufferedReader(new FileReader(FileName));
-            Mapper = new HashMap<String, Integer>();
+            Mapper = new HashMap<>();
             
             while((Line = br.readLine())!=null){
                 KV = Line.split(" ");
@@ -130,7 +127,7 @@ public class HostGraph implements Runnable {
     public static void CreateHostMap(String InputDirectory){
         File[] dir = (new File(InputDirectory)).listFiles();
         int i=1;
-        Mapper = new HashMap<String, Integer>();
+        Mapper = new HashMap<>();
         for(File f : dir){
             Mapper.put(HostFromFile(f), i++);
         }
@@ -145,9 +142,7 @@ public class HostGraph implements Runnable {
     }
     
     public static void SaveHostMap(String OutputFileName){
-        BufferedWriter bw;
-        try {
-            bw = new BufferedWriter(new FileWriter(OutputFileName, false));
+        try (BufferedWriter bw = new BufferedWriter(new FileWriter(OutputFileName, false))){
             for(Map.Entry<String, Integer> e : Mapper.entrySet()){
                 bw.write(e.getKey() + " " + e.getValue() + "\n");
             }

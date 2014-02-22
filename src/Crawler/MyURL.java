@@ -6,10 +6,8 @@ package Crawler;
 
 import java.io.CharArrayWriter;
 import java.io.UnsupportedEncodingException;
-import java.lang.Exception;
 import java.net.IDN;
 import java.net.MalformedURLException;
-import java.net.URI;
 import java.nio.charset.Charset;
 import java.nio.charset.IllegalCharsetNameException;
 import java.nio.charset.UnsupportedCharsetException;
@@ -155,14 +153,14 @@ public class MyURL {
         String[] dir = Path.split("/");
         String Result;
         int cur = 0;
-        for (int i = 0; i < dir.length; i++) {
-            if (!(dir[i].equals("") || dir[i].equals("."))) {
-                if (dir[i].equals("..")) {
+        for (String dir1 : dir) {
+            if (!(dir1.equals("") || dir1.equals("."))) {
+                if (dir1.equals("..")) {
                     if (cur > 0) {
                         cur--;
                     }
                 } else {
-                    dir[cur++] = dir[i];
+                    dir[cur++] = dir1;
                 }
             }
         }
@@ -212,7 +210,7 @@ public class MyURL {
         
         boolean needToChange = false;
         int numChars = Path.length();
-        StringBuffer sb = new StringBuffer(numChars > 500 ? numChars / 2 : numChars);
+        StringBuilder sb = new StringBuilder(numChars > 500 ? numChars / 2 : numChars);
         int i = 0;
 
         char c,t;
@@ -329,7 +327,7 @@ public class MyURL {
 
         boolean needToChange = false;
         int numChars = s.length();
-        StringBuffer sb = new StringBuffer(numChars > 500 ? numChars / 2 : numChars);
+        StringBuilder sb = new StringBuilder(numChars > 500 ? numChars / 2 : numChars);
         int i = 0;
 
         if (enc.length() == 0) {
@@ -424,7 +422,7 @@ public class MyURL {
             throws UnsupportedEncodingException {
 
         boolean needToChange = false;
-        StringBuffer out = new StringBuffer(s.length());
+        StringBuilder out = new StringBuilder(s.length());
         Charset charset;
         CharArrayWriter charArrayWriter = new CharArrayWriter();
 
@@ -434,9 +432,7 @@ public class MyURL {
 
         try {
             charset = Charset.forName(enc);
-        } catch (IllegalCharsetNameException e) {
-            throw new UnsupportedEncodingException(enc);
-        } catch (UnsupportedCharsetException e) {
+        } catch (IllegalCharsetNameException | UnsupportedCharsetException e) {
             throw new UnsupportedEncodingException(enc);
         }
 

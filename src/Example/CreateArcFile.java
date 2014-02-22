@@ -6,8 +6,6 @@ package Example;
 
 import ArcFileUtils.ArcRecord;
 import ArcFileUtils.ArcWriter;
-import ArcFileUtils.WebArcRecord;
-import ArcFileUtils.WebArcWriter;
 import java.io.File;
 import java.io.IOException;
 import java.util.Date;

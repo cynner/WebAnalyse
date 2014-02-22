@@ -4,17 +4,13 @@
  */
 package Lexto;
 
-import com.sun.corba.se.spi.orbutil.fsm.Input;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.logging.Level;
@@ -74,7 +70,7 @@ public class ThaiDictCompare  implements Comparator<String>{
         try {
             String FileIn = "country.txt";
             String FileOut = "countrys.txt";
-            ArrayList<String> s = new ArrayList<String>();
+            ArrayList<String> s = new ArrayList<>();
             BufferedReader br = new BufferedReader(new FileReader(FileIn));
             BufferedWriter bw = new BufferedWriter(new FileWriter(FileOut));
             String Line;
@@ -92,7 +88,7 @@ public class ThaiDictCompare  implements Comparator<String>{
         } catch (FileNotFoundException ex) {
             Logger.getLogger(ThaiDictCompare.class.getName()).log(Level.SEVERE, null, ex);
         } catch( IOException ex){
-            
+            Logger.getLogger(ThaiDictCompare.class.getName()).log(Level.SEVERE, null, ex);
         }
          
          

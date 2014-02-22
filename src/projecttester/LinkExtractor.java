@@ -9,9 +9,6 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.Writer;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -47,13 +44,21 @@ public class LinkExtractor implements Runnable {
             bw = new BufferedWriter(new FileWriter(OutputFile, false));
             ArcUtils.AnalyseAll(InputFile, this, LinkExtractor.class.getMethod("Extract", String.class, String.class)) ;
             bw.close();
-        } catch (NoSuchMethodException ex) {
-            Logger.getLogger(JSoupExample.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (SecurityException ex) {
-            Logger.getLogger(JSoupExample.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (Exception ex){
-            
+        } catch (NoSuchMethodException | SecurityException | IOException ex) {
+            Logger.getLogger(LinkExtractor.class.getName()).log(Level.SEVERE, null, ex);
         }
+        /*
+        try {
+        Thread.sleep(5000);
+        } catch (InterruptedException e) {
+        e.printStackTrace();
+        }*/ 
+        /*
+        try {
+        Thread.sleep(5000);
+        } catch (InterruptedException e) {
+        e.printStackTrace();
+        }*/ 
         /*
         try {
             Thread.sleep(5000);
@@ -68,7 +73,7 @@ public class LinkExtractor implements Runnable {
             String srcURL = ArcUtils.URLFromHeader(Header);
             MyURL src = new MyURL(srcURL);
             MyURL dst = null;
-            ArrayList<String> chkUniq = new ArrayList<String>();
+            ArrayList<String> chkUniq = new ArrayList<>();
             
             bw.write(src.UniqURL);
             Document doc = Jsoup.parse(Content);

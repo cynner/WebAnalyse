@@ -9,7 +9,9 @@ package Converter;
 import ArcFileUtils.ArcReader;
 import ArcFileUtils.CompressedArcWriter;
 import java.io.File;
-import java.io.FilenameFilter;
+import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import net.sf.samtools.util.BlockCompressedOutputStream;
 
 /**
@@ -21,30 +23,29 @@ public class FixedBGZOneFile {
         String InDirname = "data/arc/crawl-202.142.219.162.arc.bgz";
         String OutDirname = "data/arcgz";
         
-        ArcReader war;
-        CompressedArcWriter waw;
         String Filename;
         File OutArcBGZF;
         File f = new File(InDirname);
             BlockCompressedOutputStream BCOS;
-            war = new ArcReader(f);
-            Filename = war.ArcFile.getName().replaceAll(".bgz", "");
-            System.out.println(Filename);
-            //OutArc = new File(OutDirname + "/" + Filename);
-            OutArcBGZF = new File(OutDirname + "/" + Filename + ".gz");
-            
-            waw = new CompressedArcWriter(OutArcBGZF);
-            try{
-                while(war.Next()){
-                    waw.WriteRecordFromData(war.Record);
+         try (ArcReader war = new ArcReader(f)) {
+             Filename = war.ArcFile.getName().replaceAll(".bgz", "");
+             System.out.println(Filename);
+             //OutArc = new File(OutDirname + "/" + Filename);
+             OutArcBGZF = new File(OutDirname + "/" + Filename + ".gz");
+            try (CompressedArcWriter waw = new CompressedArcWriter(OutArcBGZF)) {
+                try{
+                    while(war.Next()){
+                        waw.WriteRecordFromData(war.Record);
+                    }
+                }catch(Exception e){
+                    System.err.println("Skip error...");
                 }
-            }catch(Exception e){
-                System.err.println("Skip error...");
+            } catch (IOException ex) {
+                Logger.getLogger(FixedBGZOneFile.class.getName()).log(Level.SEVERE, null, ex);
             }
-            waw.close();
-            war.close();
-            //BGZFWriter.Compress(OutArc, OutArcBGZF);
-            //OutArc.delete();
+         } catch (IOException ex) {
+             Logger.getLogger(FixedBGZOneFile.class.getName()).log(Level.SEVERE, null, ex);
+         }
             
         
     }

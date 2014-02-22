@@ -9,7 +9,6 @@ package Analyse;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -61,39 +60,37 @@ public class SCC {
         String strInputCSV = args.length >= 1 ? args[0] : "data/Graph/PageLink.csv"; 
         String strOutput = args.length >= 2 ? args[1] : "data/Graph/SCC.txt";
         File fileInputCsv = new File(strInputCSV);
-        BufferedReader br;
         String[] strs;
         String Line;
-        br = new BufferedReader(new FileReader(fileInputCsv));
-        mat1 = new int[mat_size][];
-        mat2 = new ArrayList[mat_size];
-        for( i=1;i<mat_size;i++){
-            mat2[i] = new ArrayList<>();
-            mat2[i].add(3); // PTR
-            mat2[i].add(0); // Foreward Tick
-            mat2[i].add(0); // Backward Tick
-        }
-        
-        // Matrix Format Group,ptr,Forward,Backword,Dst1,Dst2,Dst3,...
-        // Size 1(ptr) + 2(F/B) + 1(Group) + n(D) = n + 4; 
-
-        while((Line = br.readLine()) != null){
-            strs = Line.split(";");
-            tmprow = new int[strs.length + 3];
-            src = Integer.parseInt(strs[0]);
-            for(i=1;i<strs.length;i++){
-                tmpv = Integer.parseInt(strs[i]);
-                tmprow[i+3] = tmpv; 
-                mat2[tmpv].add(src);
+        try (BufferedReader br = new BufferedReader(new FileReader(fileInputCsv))) {
+            mat1 = new int[mat_size][];
+            mat2 = new ArrayList[mat_size];
+            for( i=1;i<mat_size;i++){
+                mat2[i] = new ArrayList<>();
+                mat2[i].add(3); // PTR
+                mat2[i].add(0); // Foreward Tick
+                mat2[i].add(0); // Backward Tick
             }
-            tmprow[0] = 4;
-            mat1[src] = tmprow;
+            
+            // Matrix Format Group,ptr,Forward,Backword,Dst1,Dst2,Dst3,...
+            // Size 1(ptr) + 2(F/B) + 1(Group) + n(D) = n + 4;
+            
+            while((Line = br.readLine()) != null){
+                strs = Line.split(";");
+                tmprow = new int[strs.length + 3];
+                src = Integer.parseInt(strs[0]);
+                for(i=1;i<strs.length;i++){
+                    tmpv = Integer.parseInt(strs[i]);
+                    tmprow[i+3] = tmpv;
+                    mat2[tmpv].add(src);
+                }
+                tmprow[0] = 4;
+                mat1[src] = tmprow;
+            }
+            mat_size = src + 1;
+            seq = new int[mat_size];
+            seq_idx = mat_size - 1;
         }
-        mat_size = src + 1;
-        seq = new int[mat_size];
-        seq_idx = mat_size - 1;
-        
-        br.close();
         System.out.println("Read File Success");
         TraceMap = new int[mat_size];
         step=1;
@@ -226,13 +223,13 @@ public class SCC {
         gr--;
         System.out.println("Group no: " + gr);
         System.out.println("Writing Result...");
-        BufferedWriter bw = new BufferedWriter(new FileWriter(strOutput));
-        for(i=1;i<mat_size;i++){
-            if(mat1[i] != null){
-                bw.write(i + ":" + mat1[i][3] + "\n");
+        try (BufferedWriter bw = new BufferedWriter(new FileWriter(strOutput))) {
+            for(i=1;i<mat_size;i++){
+                if(mat1[i] != null){
+                    bw.write(i + ":" + mat1[i][3] + "\n");
+                }
             }
         }
-        bw.close();
         System.out.println("Success.");
     }
 }

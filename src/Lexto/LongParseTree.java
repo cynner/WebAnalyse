@@ -17,10 +17,10 @@ package Lexto;
 // Author: Choochart Haruechaiyasak
 // Last update: 28 March 2006
 
-import Lexto.Trie;
 import java.io.*;
 import java.util.*;
 
+@Deprecated
 public class LongParseTree {
 
   //Private variables

@@ -11,6 +11,7 @@ import com.almworks.sqlite4java.SQLiteConnection;
 import com.almworks.sqlite4java.SQLiteException;
 import com.almworks.sqlite4java.SQLiteStatement;
 import java.io.File;
+import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -52,16 +53,17 @@ public class PageCount {
                 host = stmt.columnString(0);
                 File f = new File(lexDirName + "/crawl-" + host + ".arc.gz");
                 if(f.exists()){
-                    ArcFileUtils.ArcReader ar = new ArcReader(f);
-                    cnt = 0;
-                    while (ar.Skip()) {
-                        cnt++;
+                    try (ArcFileUtils.ArcReader ar = new ArcReader(f)) {
+                        cnt = 0;
+                        while (ar.Skip()) {
+                            cnt++;
+                        }
+                        System.out.println(host);
+                        //db.exec("BEGIN;");
+                        db.exec("UPDATE host SET page_count=" + cnt + ", mark=1 WHERE hostname='"+host+"';");
+                    } catch (IOException ex) {
+                        Logger.getLogger(PageCount.class.getName()).log(Level.SEVERE, null, ex);
                     }
-                    System.out.println(host);
-                    //db.exec("BEGIN;");
-                    db.exec("UPDATE host SET page_count=" + cnt + ", mark=1 WHERE hostname='"+host+"';");
-                
-                    ar.close();
                 }else{
                     System.err.println(host + "!!!");
                 }

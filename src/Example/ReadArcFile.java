@@ -4,9 +4,6 @@
  */
 package Example;
 
-import ArcFileUtils.ApacheArchReader;
-import ArcFileUtils.ArcReader;
-import ArcFileUtils.ArcRecord;
 import ArcFileUtils.WebArcReader;
 import ArcFileUtils.WebArcRecord;
 import java.io.File;

@@ -5,7 +5,6 @@
 package Crawler;
 
 import ArcFileUtils.WebArcRecord;
-import com.sun.org.apache.xerces.internal.util.URI.MalformedURIException;
 import java.io.*;
 import java.net.*;
 import java.text.DateFormat;
@@ -14,13 +13,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.apache.commons.io.IOUtils;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
 
 /**
  *

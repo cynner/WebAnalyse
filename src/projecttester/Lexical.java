@@ -4,15 +4,12 @@
  */
 package projecttester;
 
-import it.unimi.dsi.fastutil.Hash;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Dictionary;
-import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -21,6 +18,10 @@ import java.util.logging.Logger;
  * @author malang
  */
 public class Lexical {
+
+    public Lexical() {
+        this.WhiteSpace = new ArrayList<>();
+    }
     public class CharNode{
         public char key;
         public boolean val;
@@ -47,7 +48,7 @@ public class Lexical {
     
     //private HashMap<Character, Integer> Mid;
     //private HashMap<Character, Integer> Last;
-    public ArrayList<Character> WhiteSpace = new ArrayList<Character>();
+    public ArrayList<Character> WhiteSpace;
     
     public void InitialWhiteSpace(){
         WhiteSpace.add(' ');
@@ -125,19 +126,20 @@ public class Lexical {
         } // else {/*do nothing*/}
     }
     
-    public void ConstructWordTree(File f){
+    public void ConstructWordTree(File f) {
         BeginInsert();
-        try {
-            BufferedReader br = new BufferedReader(new FileReader(f));
+        try (BufferedReader br = new BufferedReader(new FileReader(f))) {
             String Line;
-            while((Line = br.readLine()) != null){
-                if(!Line.equals(""))
+            while ((Line = br.readLine()) != null) {
+                if (!Line.equals("")) {
                     InsertWordTree(Line);
+                }
             }
-            br.close();
-        }catch (FileNotFoundException ex) {
-        }catch (IOException ex){
-        }
+        } catch (FileNotFoundException ex) {
+            Logger.getLogger(Lexical.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IOException ex) {
+            Logger.getLogger(Lexical.class.getName()).log(Level.SEVERE, null, ex);
+        } 
         EndInsert();
         InitialWhiteSpace();
     }

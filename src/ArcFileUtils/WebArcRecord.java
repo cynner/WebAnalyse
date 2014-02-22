@@ -4,9 +4,6 @@
  */
 package ArcFileUtils;
 
-import java.io.RandomAccessFile;
-import java.nio.charset.Charset;
-import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.jsoup.nodes.Document;

@@ -16,9 +16,9 @@ public class MyFileUtils {
     }
     
     public static void WriteFile(File f, String Content) throws IOException{
-        FileWriter fw = new FileWriter(f);
-        fw.write(Content);
-        fw.close();
+        try (FileWriter fw = new FileWriter(f)) {
+            fw.write(Content);
+        }
     }
     
 }

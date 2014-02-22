@@ -4,7 +4,9 @@
  */
 package projecttester;
 
-import java.lang.InterruptedException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 
 /**
  *
@@ -32,8 +34,8 @@ public class ExampleThread implements Runnable{
                     break;
                 }
             }
-        } catch (InterruptedException e) {
-            System.err.println("Interupted while sleep" + Thread.currentThread().getName() );
-        }
+        } catch (java.lang.InterruptedException ex) {
+            Logger.getLogger(ExampleThread.class.getName()).log(Level.SEVERE, null, ex);
+        } 
     }
 }

@@ -56,17 +56,17 @@ public class ConvertWeb2SnippedTextOneFile {
         OutGZ = new File(OutDir + "/" + f.getName());
         try (WebArcReader war = new WebArcReader(f, "utf-8")) {
             System.out.println(OutGZ.getName());
-            CompressedArcWriter aw = new CompressedArcWriter(OutGZ);
-            while (war.Next()) {
-
-                war.Record.ArchiveContent = war.Record.Doc.title() + "\n";
-                if ((e = war.Record.Doc.body()) != null) {
-                    war.Record.ArchiveContent += e.text();
+            try (CompressedArcWriter aw = new CompressedArcWriter(OutGZ)) {
+                while (war.Next()) {
+                    
+                    war.Record.ArchiveContent = war.Record.Doc.title() + "\n";
+                    if ((e = war.Record.Doc.body()) != null) {
+                        war.Record.ArchiveContent += e.text();
+                    }
+                    aw.WriteRecordFromContent(war.Record);
+                    
                 }
-                aw.WriteRecordFromContent(war.Record);
-
             }
-            aw.close();
         } catch (IOException ex) {
             Logger.getLogger(ConvertWeb2SnippedTextOneFile.class.getName()).log(Level.SEVERE, null, ex);
         }

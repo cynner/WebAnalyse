@@ -7,13 +7,11 @@ package projecttester;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.jsoup.Jsoup;
-import org.jsoup.nodes.Comment;
 import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
-import org.jsoup.nodes.Entities.EscapeMode;
 import org.jsoup.nodes.Node;
 
 /**
@@ -31,12 +29,8 @@ public class JSoupExample {
             s = s.resolve("../../../../kuu");
             System.out.println(s.toString());
             
-        } catch (NoSuchMethodException ex) {
+        } catch (NoSuchMethodException | SecurityException | URISyntaxException ex) {
             Logger.getLogger(JSoupExample.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (SecurityException ex) {
-            Logger.getLogger(JSoupExample.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (Exception ex){
-            
         }
             
     }

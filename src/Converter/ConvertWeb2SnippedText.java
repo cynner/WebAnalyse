@@ -30,16 +30,11 @@ public class ConvertWeb2SnippedText {
         String InDir=null,OutDir=null;
         args = new String[]{"data/arcgz","data/snipped"};
         if(args.length < 2){
-            BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-            
-            
-            try {
+            try (BufferedReader br = new BufferedReader(new InputStreamReader(System.in))) {
                 System.out.print("Indir: ");
                 InDir = br.readLine();
                 System.out.print("Outdir: ");
                 OutDir = br.readLine();
-                
-                br.close();
             } catch (IOException ex) {
                 Logger.getLogger(ConvertWeb2SnippedText.class.getName()).log(Level.SEVERE, null, ex);
             }

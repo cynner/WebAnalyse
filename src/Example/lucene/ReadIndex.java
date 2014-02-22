@@ -14,14 +14,9 @@ import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.index.Fields;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.MultiFields;
-import org.apache.lucene.index.SlowCompositeReaderWrapper;
-import org.apache.lucene.index.Term;
 import org.apache.lucene.index.Terms;
 import org.apache.lucene.index.TermsEnum;
-import org.apache.lucene.queryparser.classic.MultiFieldQueryParser;
 import org.apache.lucene.queryparser.classic.ParseException;
-import org.apache.lucene.search.IndexSearcher;
-import org.apache.lucene.search.Query;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.util.BytesRef;
@@ -53,7 +48,7 @@ public class ReadIndex {
         Fields fields = MultiFields.getFields(reader);
         Terms terms = fields.terms("content");
         TermsEnum iterator = terms.iterator(null);
-        BytesRef byteRef = null;
+        BytesRef byteRef;
         while ((byteRef = iterator.next()) != null) {
             String term = new String(byteRef.bytes, byteRef.offset, byteRef.length);
             int docFreq = iterator.docFreq();

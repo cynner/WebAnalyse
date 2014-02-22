@@ -27,38 +27,35 @@ public class HostExtractor implements Runnable {
     //public static boolean HostLock = false;
     //public static int HostIdx = 0;
     public static String OutFileName;
-    
 
     public static void initial(String OutputFile) {
         HostExtractor.OutFileName = OutputFile;
         /*
-        try {
-            //HostName = new HashMap<String, Integer>();
-            bw = new BufferedWriter(new FileWriter(OutputFile));
-        } catch (IOException ex) {
-            Logger.getLogger(HostExtractor.class.getName()).log(Level.SEVERE, null, ex);
-        }
+         try {
+         //HostName = new HashMap<String, Integer>();
+         bw = new BufferedWriter(new FileWriter(OutputFile));
+         } catch (IOException ex) {
+         Logger.getLogger(HostExtractor.class.getName()).log(Level.SEVERE, null, ex);
+         }
          * 
          */
     }
 
     public static void finishing() {
-        try {
-            BufferedWriter bw = new BufferedWriter(new FileWriter(OutFileName,false));
-            for(String k : HostName.keySet()){
+        try (BufferedWriter bw = new BufferedWriter(new FileWriter(OutFileName, false))) {
+            for (String k : HostName.keySet()) {
                 bw.write(k + "\n");
             }
-            bw.close();
         } catch (IOException ex) {
             Logger.getLogger(HostExtractor.class.getName()).log(Level.SEVERE, null, ex);
         }
-         
+
     }
 
     public HostExtractor(File InputFile) {
         this.InputFile = InputFile;
     }
-    private File InputFile;
+    private final File InputFile;
 
     @Override
     public void run() {
@@ -116,15 +113,15 @@ public class HostExtractor implements Runnable {
 
     public void addHost(String Host) {
         if (!HostExtractor.HostName.containsKey(Host)) {
-            
+
             HostExtractor.HostName.put(Host, 0);
             /*
-            try {
-                while (HostLock);
-                bw.write(Host + "\n");
-            } catch (IOException ex) {
-                Logger.getLogger(HostExtractor.class.getName()).log(Level.SEVERE, null, ex);
-            }
+             try {
+             while (HostLock);
+             bw.write(Host + "\n");
+             } catch (IOException ex) {
+             Logger.getLogger(HostExtractor.class.getName()).log(Level.SEVERE, null, ex);
+             }
              * 
              */
 

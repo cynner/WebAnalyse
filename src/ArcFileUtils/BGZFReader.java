@@ -11,13 +11,9 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.RandomAccessFile;
-import java.util.zip.GZIPInputStream;
 import net.sf.samtools.util.BlockCompressedFilePointerUtil;
 import net.sf.samtools.util.BlockCompressedInputStream;
-import org.archive.io.GzippedInputStream;
-import org.xml.sax.InputSource;
 
 /**
  *

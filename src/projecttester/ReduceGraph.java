@@ -39,19 +39,19 @@ public class ReduceGraph implements Runnable{
         UniqueListInt ULI = new UniqueListInt();
         String src;
         try {
-            BufferedReader br = new BufferedReader(new FileReader(Inp));
-            x = br.readLine().split(";");
-            br.close();
+            try (BufferedReader br = new BufferedReader(new FileReader(Inp))) {
+                x = br.readLine().split(";");
+            }
             src = x[0];
             for(int i=1;i<x.length;i++){
                 ULI.Add(Integer.parseInt(x[i]));
             }
             System.out.println("Reduce finished.");
-            BufferedWriter bw = new BufferedWriter(new FileWriter(Out,false));
-            for(UniqueListInt.UElementInt e : ULI.UList){
-                bw.write(src + ";" + e.ID + ";" + e.count + "\n");
+            try (BufferedWriter bw = new BufferedWriter(new FileWriter(Out,false))) {
+                for(UniqueListInt.UElementInt e : ULI.UList){
+                    bw.write(src + ";" + e.ID + ";" + e.count + "\n");
+                }
             }
-            bw.close();
             System.out.println("Write file finished.");
         } catch (FileNotFoundException ex) {
             Logger.getLogger(ReduceGraph.class.getName()).log(Level.SEVERE, null, ex);

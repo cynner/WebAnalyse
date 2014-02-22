@@ -7,9 +7,7 @@
 package Analyse;
 
 import ArcFileUtils.WebArcReader;
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.HashMap;

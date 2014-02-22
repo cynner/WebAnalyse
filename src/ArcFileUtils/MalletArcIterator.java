@@ -7,7 +7,10 @@ package ArcFileUtils;
 import cc.mallet.types.Instance;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Iterator;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -18,12 +21,12 @@ public class MalletArcIterator implements Iterator<Instance> {
     public String Label;
     ArcReader AR;
     
-    public MalletArcIterator(File ArcFile, String Label){
+    public MalletArcIterator(File ArcFile, String Label) throws IOException{
         AR = new ArcReader(ArcFile);
         this.Label = Label;
     }
     
-    public MalletArcIterator(File ArcFile){
+    public MalletArcIterator(File ArcFile) throws IOException{
         this(ArcFile, "unknown");
     }
     /*
@@ -46,8 +49,12 @@ public class MalletArcIterator implements Iterator<Instance> {
 
     @Override
     public void remove() {
-        AR.close();
-        //throw new UnsupportedOperationException("Not supported yet.");
+        try {
+            AR.close();
+            //throw new UnsupportedOperationException("Not supported yet.");
+        } catch (IOException ex) {
+            Logger.getLogger(MalletArcIterator.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
     
 }

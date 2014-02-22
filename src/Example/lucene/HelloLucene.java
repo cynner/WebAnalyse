@@ -11,7 +11,6 @@ package Example.lucene;
  * @author malang
  */
 import java.io.File;
-import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
 import org.apache.lucene.document.StringField;
@@ -27,15 +26,12 @@ import org.apache.lucene.search.Query;
 import org.apache.lucene.search.ScoreDoc;
 import org.apache.lucene.search.TopScoreDocCollector;
 import org.apache.lucene.store.Directory;
-import org.apache.lucene.store.RAMDirectory;
 import org.apache.lucene.util.Version;
 
 import java.io.IOException;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.th.ThaiAnalyzer;
 import org.apache.lucene.store.FSDirectory;
-import org.apache.lucene.store.IOContext;
-import org.apache.lucene.store.IndexInput;
 
 public class HelloLucene {
   public static void main(String[] args) throws IOException, ParseException {
@@ -48,14 +44,13 @@ public class HelloLucene {
     Directory index = FSDirectory.open(new File("indexing"));
 
     IndexWriterConfig config = new IndexWriterConfig(Version.LUCENE_45, analyzer);
-
-    IndexWriter w = new IndexWriter(index, config);
-    addDoc(w, "Lucene in Action 123.456", "193398817");
-    addDoc(w, "Lucene for Dummies 123 456", "55320055Z");
-    addDoc(w, "Managing Gigabytes 123456", "55063554A");
-    addDoc(w, "พระพรหมพระพราย", "9900333X");
-    addDoc(w, "พระมหากษัตริย์ไทยผู้ทรงวัยมาหานามะประเทศชาิตพัฒนาราวี", "9900333X");
-    w.close();
+      try (IndexWriter w = new IndexWriter(index, config)) {
+          addDoc(w, "Lucene in Action 123.456", "193398817");
+          addDoc(w, "Lucene for Dummies 123 456", "55320055Z");
+          addDoc(w, "Managing Gigabytes 123456", "55063554A");
+          addDoc(w, "พระพรหมพระพราย", "9900333X");
+          addDoc(w, "พระมหากษัตริย์ไทยผู้ทรงวัยมาหานามะประเทศชาิตพัฒนาราวี", "9900333X");
+      }
 
     // 2. query
     String querystr = args.length > 0 ? args[0] : "พรหม";
@@ -66,23 +61,19 @@ public class HelloLucene {
 
     // 3. search
     int hitsPerPage = 10;
-    IndexReader reader = DirectoryReader.open(index);
-    IndexSearcher searcher = new IndexSearcher(reader);
-    TopScoreDocCollector collector = TopScoreDocCollector.create(hitsPerPage, true);
-    searcher.search(q, collector);
-    ScoreDoc[] hits = collector.topDocs().scoreDocs;
-    
-    // 4. display results
-    System.out.println("Found " + hits.length + " hits.");
-    for(int i=0;i<hits.length;++i) {
-      int docId = hits[i].doc;
-      Document d = searcher.doc(docId);
-      System.out.println((i + 1) + ". " + d.get("isbn") + "\t" + d.get("title"));
-    }
-
-    // reader can only be closed when there
-    // is no need to access the documents any more.
-    reader.close();
+      try (IndexReader reader = DirectoryReader.open(index)) {
+          IndexSearcher searcher = new IndexSearcher(reader);
+          TopScoreDocCollector collector = TopScoreDocCollector.create(hitsPerPage, true);
+          searcher.search(q, collector);
+          ScoreDoc[] hits = collector.topDocs().scoreDocs;
+          
+          // 4. display results
+          System.out.println("Found " + hits.length + " hits.");
+          for(int i=0;i<hits.length;++i) {
+              int docId = hits[i].doc;
+              Document d = searcher.doc(docId);
+              System.out.println((i + 1) + ". " + d.get("isbn") + "\t" + d.get("title"));
+          } }
   }
 
   private static void addDoc(IndexWriter w, String title, String isbn) throws IOException {

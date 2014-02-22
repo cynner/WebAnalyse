@@ -7,8 +7,6 @@ package Crawler;
 import java.io.*;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-//import java.nio.ByteBuffer;
-//import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 

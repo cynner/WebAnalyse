@@ -5,9 +5,7 @@
 package Example;
 
 import ArcFileUtils.ArcFileConverter;
-import ArcFileUtils.WebArcReader;
 import java.io.File;
-import java.nio.charset.Charset;
 
 /**
  *

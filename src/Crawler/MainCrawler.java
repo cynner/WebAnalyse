@@ -8,30 +8,21 @@ package Crawler;
 
 import ArcFileUtils.WebArcRecord;
 import LanguageUtils.LanguageDetector;
-import com.almworks.sqlite4java.SQLiteBlob;
 import com.almworks.sqlite4java.SQLiteConnection;
 import com.almworks.sqlite4java.SQLiteException;
 import com.almworks.sqlite4java.SQLiteJob;
 import com.almworks.sqlite4java.SQLiteQueue;
 import com.almworks.sqlite4java.SQLiteStatement;
-import com.cybozu.labs.langdetect.Command;
-import com.cybozu.labs.langdetect.Detector;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.io.Reader;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import projecttester.ProjectTester;
-import static projecttester.ThreadPool.KEYs;
-import static projecttester.ThreadPool.getNextKey;
 
 /**
  *
