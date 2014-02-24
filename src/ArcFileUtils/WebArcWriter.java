@@ -67,5 +67,41 @@ public class WebArcWriter extends ArcWriter{
         }
     }
     
+    public void WriteRecordKeepDate(WebArcRecord record){
+        try {
+            /* Prepare Content */
+            record.ContentLength = record.WebContent.getBytes("utf-8").length;
+            
+            /* Prepare Content Header */
+            String ContentHeader = record.FirstLineContentHeader + "\n"
+                + "Date: " + (record.ServerTime != 0 ? 
+                    WebArcRecord.webDateFormat.format(new Date(record.ServerTime)) : null ) + "\n"
+                + "Server: " + record.Server + "\n"
+                + "Content-Type: " + record.WebContentType + (record.LastModified != 0 ?
+                    " Last-Modified: " + WebArcRecord.webDateFormat.format(new Date(record.LastModified)) : "");
+            ContentHeader += "\n" + "Content-Length: " + record.ContentLength + "\n";
+        
+            /* Prepare Record Header */
+            record.ArchiveLength = ContentHeader.getBytes("utf-8").length + record.ContentLength;
+            
+            /* Write Record Header */
+            bw.write(("\n" + record.URL + " "
+                        + record.IPAddress + " "
+                        + dateFormat.format(record.ArchiveDate) + " "
+                        + record.ArchiveContentType + " " // DEFAULT "text/html"
+                        + record.ArchiveLength + "\n").getBytes());
+            
+            /* Write Content Header */
+            bw.write(ContentHeader.getBytes());
+            
+            /* Write Content */
+            bw.write(record.WebContent.getBytes());
+            
+            
+        } catch (IOException ex) {
+            Logger.getLogger(WebArcWriter.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+    
     
 }

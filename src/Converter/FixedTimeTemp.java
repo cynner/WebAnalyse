@@ -19,7 +19,7 @@ import java.util.logging.Logger;
  *
  * @author malang
  */
-public class FixedBGZ {
+public class FixedTimeTemp {
     
     
     public static void main(String[] args) {
@@ -45,7 +45,7 @@ public class FixedBGZ {
         };
 
         String Filename;
-        File OutArc, OutArcBGZF;
+        File OutArc, OutArcBGZF, IN2;
         Long Diff;
         //boolean run = false;
         Fetcher fet = new Fetcher(SiteCrawler.UserAgent);
@@ -53,34 +53,29 @@ public class FixedBGZ {
             try (WebArcReader_Old war = new WebArcReader_Old(f, "utf-8")) {
                 Filename = war.ArcFile.getName();
                 System.out.println(Filename);
-                OutArcBGZF = new File(OutDirname + "/" + Filename);
-                if (!OutArcBGZF.exists()) {
-                    try (CompressedWebArcWriter waw = new CompressedWebArcWriter(OutArcBGZF)) {
+                OutArcBGZF = new File(OutDirname + "/." + Filename );
+                IN2 = new File(OutDirname + "/" + Filename );
+                if (IN2.exists()) {
+                    try (WebArcReader_Old war2 = new WebArcReader_Old(IN2, "utf-8") ; CompressedWebArcWriter waw = new CompressedWebArcWriter(OutArcBGZF)) {
                         waw.HostIP = war.FileIP;
                         try {
-                            if (war.Next()) {
-                                Diff = fet.diffServerDateTime(war.Record.URL);
-                                if (Diff != null) {
-                                    war.Record.ServerTime = war.Record.ArchiveDate.getTime() + Diff;
-                                }
+                            if (war2.Next()) {
+                                war.Next();
+                                war2.Record.ArchiveDate = war.Record.ArchiveDate;
                                 waw.WriteRecordKeepDate(war.Record);
-                                while (war.Next()) {
-                                    if (Diff != null) {
-                                        war.Record.ServerTime = war.Record.ArchiveDate.getTime() + Diff;
-                                    }
-                                    waw.WriteRecordKeepDate(war.Record);
-                                }
                             }
                         } catch (Exception e) {
                             System.err.println("Skip error...");
                         }
 
                     } catch (IOException ex) {
-                        Logger.getLogger(FixedBGZ.class.getName()).log(Level.SEVERE, null, ex);
+                        Logger.getLogger(FixedTimeTemp.class.getName()).log(Level.SEVERE, null, ex);
                     }
+                    IN2.delete();
+                    OutArcBGZF.renameTo(IN2);
                 }
             } catch (IOException ex) {
-                Logger.getLogger(FixedBGZ.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(FixedTimeTemp.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
     }

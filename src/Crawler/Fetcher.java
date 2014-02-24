@@ -288,7 +288,7 @@ public class Fetcher {
         //f.fetch("http://www.splendith.com/");
         //f.fetch("https://pirun.ku.ac.th/pirun-tools/pirun-chkquota.php");
         //f.fetch("https://pirun.ku.ac.th/pirun-tools/pirun-chkquota.php");
-        String url =  "http://3dsthai.exteen.com/";
+        String url =  "http://bueds.bu.ac.th/";
         f.getHeader(url);
         
             for(Entry<String,List<String>> e : f.Headers.entrySet()){
