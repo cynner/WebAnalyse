@@ -70,13 +70,14 @@ public class WebArcReader extends ArcReader{
                 }
                 Record.IPAddress = Fields[i++];
                 try{
-                    Record.ArchiveDate = new Date(
+                    cal.set(
                         Integer.parseInt(Fields[i].substring(0, 4)),
                         Integer.parseInt(Fields[i].substring(4, 6)),
                         Integer.parseInt(Fields[i].substring(6, 8)),
                         Integer.parseInt(Fields[i].substring(8, 10)),
                         Integer.parseInt(Fields[i].substring(10, 12)),
                         Integer.parseInt(Fields[i].substring(12, 14)));
+                    Record.ArchiveDate = cal.getTime();
                 }catch(Exception ex){
                     Logger.getLogger(WebArcReader.class.getName()).log(Level.SEVERE, null, ex);
                 }

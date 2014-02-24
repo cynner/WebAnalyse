@@ -9,6 +9,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -21,6 +22,7 @@ public class ArcReader implements AutoCloseable{
 
     //public RandomAccessFile RAF;
     public final BGZFReader BGZFR;
+    public Calendar cal; 
     public File ArcFile;
     public String FileDesc;
     public String FileIP;
@@ -120,13 +122,14 @@ public class ArcReader implements AutoCloseable{
                // System.out.println(Record.URL);
                 Record.IPAddress = Fields[1];
                 try{
-                    Record.ArchiveDate = new Date(
+                    cal.set(
                         Integer.parseInt(Fields[2].substring(0, 4)),
                         Integer.parseInt(Fields[2].substring(4, 6)),
                         Integer.parseInt(Fields[2].substring(6, 8)),
                         Integer.parseInt(Fields[2].substring(8, 10)),
                         Integer.parseInt(Fields[2].substring(10, 12)),
                         Integer.parseInt(Fields[2].substring(12, 14)));
+                    Record.ArchiveDate = cal.getTime();
                 }catch(Exception ex){
                     Logger.getLogger(ArcReader.class.getName()).log(Level.SEVERE, null, ex);
                 }
@@ -177,13 +180,14 @@ public class ArcReader implements AutoCloseable{
                 }
                 Record.IPAddress = Fields[i++];
                 try{
-                    Record.ArchiveDate = new Date(
+                    cal.set(
                         Integer.parseInt(Fields[i].substring(0, 4)),
                         Integer.parseInt(Fields[i].substring(4, 6)),
                         Integer.parseInt(Fields[i].substring(6, 8)),
                         Integer.parseInt(Fields[i].substring(8, 10)),
                         Integer.parseInt(Fields[i].substring(10, 12)),
                         Integer.parseInt(Fields[i].substring(12, 14)));
+                    Record.ArchiveDate = cal.getTime();
                 }catch(Exception ex){
                     Logger.getLogger(ArcReader.class.getName()).log(Level.SEVERE, null, ex);
                 }
