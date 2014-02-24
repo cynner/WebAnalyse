@@ -120,7 +120,7 @@ public class ArcReader implements AutoCloseable{
                // System.out.println(Record.URL);
                 Record.IPAddress = Fields[1];
                 try{
-                    dateFormat.parse(Fields[2]);
+                    Record.ArchiveDate = dateFormat.parse(Fields[2]);
                 }catch(Exception ex){
                     Logger.getLogger(ArcReader.class.getName()).log(Level.SEVERE, null, ex);
                 }
@@ -171,7 +171,7 @@ public class ArcReader implements AutoCloseable{
                 }
                 Record.IPAddress = Fields[i++];
                 try{
-                    dateFormat.parse(Fields[i]);
+                    Record.ArchiveDate = dateFormat.parse(Fields[i]);
                 }catch(Exception ex){
                     Logger.getLogger(ArcReader.class.getName()).log(Level.SEVERE, null, ex);
                 }

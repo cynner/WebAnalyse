@@ -71,7 +71,7 @@ public class WebArcReader extends ArcReader{
                 }
                 Record.IPAddress = Fields[i++];
                 try{
-                    dateFormat.parse(Fields[i]);
+                    Record.ArchiveDate = dateFormat.parse(Fields[i]);
                 }catch(Exception ex){
                     Logger.getLogger(WebArcReader.class.getName()).log(Level.SEVERE, null, ex);
                 }
