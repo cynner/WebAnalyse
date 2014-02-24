@@ -4,14 +4,12 @@
  */
 package ArcFileUtils;
 
+import static ArcFileUtils.ArcRecord.dateFormat;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -20,9 +18,6 @@ import java.util.logging.Logger;
  * @author malang
  */
 public class ArcWriter implements AutoCloseable{
-    
-    public static DateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss", Locale.getDefault());
-    
     
     public final RandomAccessFile bw;
     public String FileName;

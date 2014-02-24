@@ -4,8 +4,8 @@
  */
 package Crawler;
 
+import static ArcFileUtils.ArcRecord.dateFormat;
 import ArcFileUtils.WebArcRecord;
-import ArcFileUtils.WebArcWriter;
 import java.io.*;
 import java.net.*;
 import java.util.Date;
@@ -257,7 +257,7 @@ public class Fetcher {
             /* Write Record Header */
             head = Details.URL + " "
                         + Details.IPAddress + " "
-                        + WebArcWriter.dateFormat.format(new Date()) + " "
+                        + dateFormat.format(new Date()) + " "
                         + Details.ArchiveContentType + " " // DEFAULT "text/html"
                         + Details.ArchiveLength + "\n";
             

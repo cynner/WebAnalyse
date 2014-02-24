@@ -4,7 +4,10 @@
  */
 package ArcFileUtils;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -14,6 +17,7 @@ import java.util.logging.Logger;
  */
 public class ArcRecord implements Cloneable{
     
+    public static DateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss", Locale.getDefault());
     //public String Header;
     
     /* ---------- Record Header ---------- */

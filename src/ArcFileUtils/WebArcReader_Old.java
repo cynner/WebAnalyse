@@ -4,11 +4,10 @@
  */
 package ArcFileUtils;
 
+import static ArcFileUtils.ArcRecord.dateFormat;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.jsoup.Jsoup;
@@ -19,6 +18,7 @@ import org.jsoup.Jsoup;
  */
 public class WebArcReader_Old extends WebArcReader{
 
+    @SuppressWarnings("FieldNameHidesFieldInSuperclass")
     public final WebArcRecord_Old Record;
     public boolean AnalyseCharset ;
     public String FixedCharset = null ;
@@ -70,14 +70,7 @@ public class WebArcReader_Old extends WebArcReader{
                 }
                 Record.IPAddress = Fields[i++];
                 try{
-                    cal.set(
-                        Integer.parseInt(Fields[i].substring(0, 4)),
-                        Integer.parseInt(Fields[i].substring(4, 6)),
-                        Integer.parseInt(Fields[i].substring(6, 8)),
-                        Integer.parseInt(Fields[i].substring(8, 10)),
-                        Integer.parseInt(Fields[i].substring(10, 12)),
-                        Integer.parseInt(Fields[i].substring(12, 14)));
-                    Record.ArchiveDate = cal.getTime();
+                    dateFormat.parse(Fields[i]);
                 }catch(Exception ex){
                     Logger.getLogger(WebArcReader_Old.class.getName()).log(Level.SEVERE, null, ex);
                 }

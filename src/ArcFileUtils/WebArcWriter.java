@@ -4,6 +4,8 @@
  */
 package ArcFileUtils;
 
+import static ArcFileUtils.ArcRecord.dateFormat;
+import static ArcFileUtils.WebArcRecord.webDateFormat;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -39,10 +41,10 @@ public class WebArcWriter extends ArcWriter{
             /* Prepare Content Header */
             String ContentHeader = record.FirstLineContentHeader + "\n"
                 + "Date: " + (record.ServerTime != 0 ? 
-                    WebArcRecord.webDateFormat.format(new Date(record.ServerTime)) : null ) + "\n"
+                    webDateFormat.format(new Date(record.ServerTime)) : null ) + "\n"
                 + "Server: " + record.Server + "\n"
                 + "Content-Type: " + record.WebContentType + (record.LastModified != 0 ?
-                    " Last-Modified: " + WebArcRecord.webDateFormat.format(new Date(record.LastModified)) : "");
+                    " Last-Modified: " + webDateFormat.format(new Date(record.LastModified)) : "");
             ContentHeader += "\n" + "Content-Length: " + record.ContentLength + "\n";
         
             /* Prepare Record Header */
@@ -75,10 +77,10 @@ public class WebArcWriter extends ArcWriter{
             /* Prepare Content Header */
             String ContentHeader = record.FirstLineContentHeader + "\n"
                 + "Date: " + (record.ServerTime != 0 ? 
-                    WebArcRecord.webDateFormat.format(new Date(record.ServerTime)) : null ) + "\n"
+                    webDateFormat.format(new Date(record.ServerTime)) : null ) + "\n"
                 + "Server: " + record.Server + "\n"
                 + "Content-Type: " + record.WebContentType + (record.LastModified != 0 ?
-                    " Last-Modified: " + WebArcRecord.webDateFormat.format(new Date(record.LastModified)) : "");
+                    " Last-Modified: " + webDateFormat.format(new Date(record.LastModified)) : "");
             ContentHeader += "\n" + "Content-Length: " + record.ContentLength + "\n";
         
             /* Prepare Record Header */

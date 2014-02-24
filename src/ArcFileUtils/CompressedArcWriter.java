@@ -6,10 +6,9 @@
 
 package ArcFileUtils;
 
+import static ArcFileUtils.ArcRecord.dateFormat;
 import java.io.File;
 import java.io.IOException;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -20,8 +19,6 @@ import net.sf.samtools.util.BlockCompressedOutputStream;
  * @author malang
  */
 public class CompressedArcWriter implements AutoCloseable{
-    public static DateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
-    public static DateFormat webDateFormat = new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss z");
     
     
     public BlockCompressedOutputStream bw;

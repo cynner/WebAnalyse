@@ -12,6 +12,7 @@ import Crawler.SiteCrawler;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
+import java.util.TimeZone;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -23,6 +24,9 @@ public class FixedBGZ {
     
     
     public static void main(String[] args) {
+        
+        TimeZone.setDefault(TimeZone.getTimeZone("GMT"));
+        
         String InDirname = "data/crawldata2";
         String OutDirname = "data/crawlfixed";
         if(args.length > 1){

@@ -16,8 +16,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.TimeZone;
 import java.util.logging.Level;
@@ -39,8 +37,7 @@ public class SiteCrawler implements Runnable {
 
     public SQLiteQueue dbq;
 
-    public static DateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
-    public static DateFormat webDateFormat = new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss z");
+    public boolean isSetTimeZone = false;
     public static String MyIP = GetMyIP();
     public static String UserAgent = "princeofvamp@gmail.com";
     public int CrawlDelay = 100;
@@ -99,7 +96,11 @@ public class SiteCrawler implements Runnable {
         this.TmpFile = new File(ArcFile.getParent() + "/." + ArcFile.getName() + ".tmp");
         this.ArcGZFile = new File(ArcFile.getPath() + ".gz");
         this.WebDBFile = new File(ArcFile.getParent() + "/db/." + HostName + ".tmpDB");
-        webDateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
+        if(!isSetTimeZone){
+            TimeZone.setDefault(TimeZone.getTimeZone("GMT"));
+            isSetTimeZone = true;
+        }
+        
         if (HostIP != null) {
             this.HostIP = HostIP;
         } else {
