@@ -19,6 +19,7 @@ import java.util.ArrayList;
  *
  * @author malang
  */
+@Deprecated
 public class SCC {
     public static int[][] mat1;
     public static ArrayList<Integer>[] mat2;

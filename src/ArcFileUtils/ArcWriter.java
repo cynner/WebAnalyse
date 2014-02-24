@@ -11,6 +11,7 @@ import java.io.RandomAccessFile;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -20,8 +21,7 @@ import java.util.logging.Logger;
  */
 public class ArcWriter implements AutoCloseable{
     
-    public static DateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
-    public static DateFormat webDateFormat = new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss z");
+    public static DateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss", Locale.getDefault());
     
     
     public final RandomAccessFile bw;
@@ -104,6 +104,5 @@ public class ArcWriter implements AutoCloseable{
     public void close() throws IOException{
         bw.close();
     }
-    
     
 }

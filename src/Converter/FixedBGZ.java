@@ -7,12 +7,16 @@ package Converter;
 
 import ArcFileUtils.ArcReader;
 import ArcFileUtils.CompressedArcWriter;
+import ArcFileUtils.CompressedWebArcWriter;
+import ArcFileUtils.WebArcReader;
+import ArcFileUtils.WebArcReader_Old;
+import Crawler.Fetcher;
+import Crawler.SiteCrawler;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import net.sf.samtools.util.BlockCompressedOutputStream;
 
 /**
  *
@@ -21,8 +25,13 @@ import net.sf.samtools.util.BlockCompressedOutputStream;
 public class FixedBGZ {
 
     public static void main(String[] args) {
-        String InDirname = "data/arc";
-        String OutDirname = "data/arcgz";
+        String InDirname = "data/crawldata2";
+        String OutDirname = "data/crawlfixed";
+        if(args.length > 1){
+            InDirname = args[0];
+        }else if(args.length == 1){
+            OutDirname = args[1];
+        }
 
         File OutDir = new File(OutDirname);
         if (!OutDir.exists()) {
@@ -33,24 +42,35 @@ public class FixedBGZ {
 
             @Override
             public boolean accept(File file, String string) {
-                return string.endsWith(".arc.bgz");
+                return string.endsWith(".arc.gz");
             }
         };
 
         String Filename;
         File OutArc, OutArcBGZF;
-        boolean run = false;
+        Long Diff;
+        //boolean run = false;
+        Fetcher fet = new Fetcher(SiteCrawler.UserAgent);
         for (File f : (new File(InDirname)).listFiles(ff)) {
-            if (run) {
-                BlockCompressedOutputStream BCOS;
-                try (ArcReader war = new ArcReader(f)) {
-                    Filename = war.ArcFile.getName().replaceAll(".bgz", "");
+            
+                try (WebArcReader_Old war = new WebArcReader_Old(f,"utf-8")) {
+                    Filename = war.ArcFile.getName();
                     System.out.println(Filename);
-                    OutArcBGZF = new File(OutDirname + "/" + Filename + ".gz");
-                    try (CompressedArcWriter waw = new CompressedArcWriter(OutArcBGZF)) {
+                    OutArcBGZF = new File(OutDirname + "/" + Filename);
+                    try (CompressedWebArcWriter waw = new CompressedWebArcWriter(OutArcBGZF)) {
                         try {
-                            while (war.Next()) {
-                                waw.WriteRecordFromData(war.Record);
+                            if(war.Next()){
+                                Diff = fet.diffServerDateTime(war.Record.URL);
+                                if(Diff != null){
+                                    war.Record.ServerTime = war.Record.ArchiveDate.getTime() + Diff;
+                                }
+                                waw.WriteRecord(war.Record);
+                                while (war.Next()) {
+                                    if(Diff != null){
+                                        war.Record.ServerTime = war.Record.ArchiveDate.getTime() + Diff;
+                                    }
+                                    waw.WriteRecord(war.Record);
+                                }
                             }
                         } catch (Exception e) {
                             System.err.println("Skip error...");
@@ -61,11 +81,6 @@ public class FixedBGZ {
                 } catch (IOException ex) {
                     Logger.getLogger(FixedBGZ.class.getName()).log(Level.SEVERE, null, ex);
                 }
-            } else {
-                if (f.getName().equalsIgnoreCase("crawl-bb2112.truelife.com.arc.bgz")) {
-                    run = true;
-                }
-            }
         }
     }
 }

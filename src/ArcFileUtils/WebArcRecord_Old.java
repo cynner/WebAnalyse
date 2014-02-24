@@ -16,36 +16,21 @@ import org.jsoup.nodes.Document;
  *
  * @author malang
  */
-public class WebArcRecord extends ArcRecord{
+@Deprecated
+public class WebArcRecord_Old extends WebArcRecord{
     
-    public static DateFormat webDateFormat = new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss z", Locale.getDefault());
+    //public static DateFormat webDateFormat = new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss z", Locale.getDefault());
+    public static DateFormat oldDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
     
-    public static int NewLineLength = "\n".getBytes().length;
-    
-    /* ---------- Content Header ---------- */
-    public String FirstLineContentHeader;
-    //public Date FetchDate;
-    public String Server;
-    public String WebContentType;
-    public long ServerTime;
-    public long LastModified;
-    public long ContentLength;
-    
-    /* ---------- Web Content ---------- */
-    public String WebContent;
-    
-    /* ---------- Content Addition ---------- */
-    public String charset;
-    public Document Doc;
     
     //@Override
     //private String ArchiveContent;
     
-    public WebArcRecord(){
+    public WebArcRecord_Old(){
         
     }
     
-    public WebArcRecord(ArcRecord Orig){
+    public WebArcRecord_Old(ArcRecord Orig){
         //this.ArchiveContent = Orig.ArchiveContent;
         this.ArchiveDate = Orig.ArchiveDate;
         this.ArchiveLength = Orig.ArchiveLength;
@@ -55,6 +40,7 @@ public class WebArcRecord extends ArcRecord{
         this.ParseArchiveHeaderByContent(Orig.ArchiveContent);
     }
     
+    @Override
     public void AnalyseCharset(){
         if(this.WebContentType != null)
             this.charset = WebUtils.CharsetFromWebContentType(this.WebContentType);
@@ -62,6 +48,7 @@ public class WebArcRecord extends ArcRecord{
             this.charset = "utf-8";
     }
     
+    @Override
     public int ParseArchiveHeader(BGZFReader BGZF){
         int beg,end,tmpbeg,tmpend, HeaderLength;
         boolean End = false;
@@ -94,9 +81,9 @@ public class WebArcRecord extends ArcRecord{
                     tmp = Value.trim();
                     if (!tmp.equalsIgnoreCase("null")) {
                         try {
-                            ServerTime = webDateFormat.parse(tmp).getTime();
+                            ServerTime = oldDateFormat.parse(tmp).getTime();
                         } catch (ParseException ex) {
-                            Logger.getLogger(WebArcRecord.class.getName()).log(Level.SEVERE, null, ex);
+                            Logger.getLogger(WebArcRecord_Old.class.getName()).log(Level.SEVERE, null, ex);
                         }
                     }
                 } else if (FieldName.equalsIgnoreCase("Content-Type")) {
@@ -107,9 +94,12 @@ public class WebArcRecord extends ArcRecord{
                             tmp = Value.substring(tmpbeg + 1).trim();
                             if(!tmp.equalsIgnoreCase("null")){
                                 try{
-                                    LastModified = webDateFormat.parse(tmp).getTime();
+                                    LastModified = oldDateFormat.parse(tmp).getTime();
+                                    if(LastModified == 17135452800000L){
+                                        LastModified = 0;
+                                    }
                                 }catch(ParseException ex){
-                                    Logger.getLogger(WebArcRecord.class.getName()).log(Level.SEVERE, null, ex);
+                                    Logger.getLogger(WebArcRecord_Old.class.getName()).log(Level.SEVERE, null, ex);
                                 }
                             }
                         }
@@ -123,12 +113,13 @@ public class WebArcRecord extends ArcRecord{
                 }
             }
         }catch(Exception ex){
-            Logger.getLogger(WebArcRecord.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(WebArcRecord_Old.class.getName()).log(Level.SEVERE, null, ex);
         }
         return HeaderLength;
     }
     
     
+    @Override
     public void ParseArchiveHeaderByContent(String ArchiveContent){
         int beg=0,end,tmpbeg,tmpend;
         boolean End = false;
@@ -160,9 +151,9 @@ public class WebArcRecord extends ArcRecord{
                     tmp = Value.trim();
                     if (!tmp.equalsIgnoreCase("null")) {
                         try {
-                            ServerTime = webDateFormat.parse(tmp).getTime();
-                        } catch (ParseException ex) {
-                            Logger.getLogger(WebArcRecord.class.getName()).log(Level.SEVERE, null, ex);
+                            ServerTime = oldDateFormat.parse(tmp).getTime();
+                        } catch (Exception ex) {
+                            Logger.getLogger(WebArcRecord_Old.class.getName()).log(Level.SEVERE, null, ex);
                         }
                     }
                 } else if (FieldName.equalsIgnoreCase("Content-Type")) {
@@ -173,9 +164,12 @@ public class WebArcRecord extends ArcRecord{
                             tmp = Value.substring(tmpbeg + 1).trim();
                             if(!tmp.equalsIgnoreCase("null")){
                                 try{
-                                    LastModified = webDateFormat.parse(tmp).getTime();
+                                    LastModified = oldDateFormat.parse(tmp).getTime();
+                                    if(LastModified == 17135452800000L){
+                                        LastModified = 0;
+                                    }
                                 }catch(ParseException ex){
-                                    Logger.getLogger(WebArcRecord.class.getName()).log(Level.SEVERE, null, ex);
+                                    Logger.getLogger(WebArcRecord_Old.class.getName()).log(Level.SEVERE, null, ex);
                                 }
                             }
                         }
@@ -192,7 +186,7 @@ public class WebArcRecord extends ArcRecord{
             WebContent = ArchiveContent.substring(beg);
             //return new WebArcRecord(this);
         }catch(Exception ex){
-            Logger.getLogger(WebArcRecord.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(WebArcRecord_Old.class.getName()).log(Level.SEVERE, null, ex);
             WebContent = ArchiveContent;
         }
     }

@@ -60,7 +60,7 @@ public class PageCount {
                         }
                         System.out.println(host);
                         //db.exec("BEGIN;");
-                        db.exec("UPDATE host SET page_count=" + cnt + ", mark=1 WHERE hostname='"+host+"';");
+                        db.exec("UPDATE host SET page_count=" + cnt + " WHERE hostname='"+host+"';");
                     } catch (IOException ex) {
                         Logger.getLogger(PageCount.class.getName()).log(Level.SEVERE, null, ex);
                     }

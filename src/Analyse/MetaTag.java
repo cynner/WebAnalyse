@@ -45,7 +45,7 @@ public class MetaTag {
             System.err.println(Dir.getName() + " is not directory!");
             System.exit(1);
         }
-        HashMap<String,myInt> hm = new HashMap<String,myInt>();
+        HashMap<String,myInt> hm = new HashMap<>();
         int cntdoc=0;
         int cntmeta=0;
         String MetName;

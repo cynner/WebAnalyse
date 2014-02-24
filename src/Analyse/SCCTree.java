@@ -30,7 +30,7 @@ public class SCCTree {
     public static int SCC_SIZE;
     public static String SCC_str;
     
-    public static BufferedWriter[] bwGroup = new BufferedWriter[7];
+    //public static BufferedWriter[] bwGroup = new BufferedWriter[7];
     
     
     
@@ -71,9 +71,6 @@ public class SCCTree {
         String[] strs;
         String Line;
         
-        for(i=0;i<bwGroup.length;i++){
-            bwGroup[i] = new BufferedWriter(new FileWriter(strDirSCC + "/SCCG-TPOW" + (i+1) + ".txt"));
-        }
         try (BufferedReader br = new BufferedReader(new FileReader(fileInputCsv))) {
             mat1 = new int[mat_size][];
             mat2 = new ArrayList[mat_size];
@@ -164,9 +161,6 @@ public class SCCTree {
         }
         
         
-        for(i=0;i<bwGroup.length;i++){
-            bwGroup[i].close();
-        }
         System.out.println("Finished 2nd Trace...");
         gr--;
         System.out.println("Group no: " + gr);

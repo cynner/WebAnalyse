@@ -1,37 +1,52 @@
 /*
- * To change this template, choose Tools | Templates
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
+
 package ArcFileUtils;
 
+import static ArcFileUtils.ArcWriter.dateFormat;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import net.sf.samtools.util.BlockCompressedOutputStream;
 
 /**
  *
  * @author malang
  */
-public class WebArcWriter extends ArcWriter{
+public class CompressedWebArcWriter implements AutoCloseable{
+    public static DateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
+    public static DateFormat webDateFormat = new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss z");
     
-    //public BlockCompressedInputStream bcf;
     
-    public WebArcWriter(File ArchiveFile, long Pos) throws FileNotFoundException, IOException{
-        super(ArchiveFile, Pos);
-    }
+    public BlockCompressedOutputStream bw;
+    public String FileName;
+    public String HostIP="0.0.0.0";
     
-    public WebArcWriter(File ArchiveFile, String FileName, boolean Append, String HostIP) throws FileNotFoundException, IOException{
-        super(ArchiveFile, FileName, Append, HostIP);
-    }
-    
-    public WebArcWriter(File ArchiveFile, boolean Append) throws FileNotFoundException, IOException{
-        super(ArchiveFile, Append);
+    public CompressedWebArcWriter(File ArchiveFile) throws IOException{
+        boolean FileExist = ArchiveFile.exists();
+        FileName = ArchiveFile.getName();
+        bw = new BlockCompressedOutputStream(ArchiveFile);
+        WriteHeaderFile();
     }
 
-    public void WriteRecord(WebArcRecord record){
+    public void WriteHeaderFile() throws IOException {
+            String HeaderFileContent =  "1 0 InternetArchive\n" +
+                    "URL IP-address Archive-date Content-type Archive-length\n";
+            bw.write(("filedesc://" + FileName + " "
+                    + HostIP + " "
+                    + dateFormat.format(new Date()) + " text/plain "
+                    + HeaderFileContent.getBytes("utf-8").length + "\n").getBytes());
+            bw.write(HeaderFileContent.getBytes());
+    }
+    
+     public void WriteRecord(WebArcRecord record){
         try {
             /* Prepare Content */
             record.ContentLength = record.WebContent.getBytes("utf-8").length;
@@ -63,9 +78,13 @@ public class WebArcWriter extends ArcWriter{
             
             
         } catch (IOException ex) {
-            Logger.getLogger(WebArcWriter.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(CompressedWebArcWriter.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
     
+    @Override
+    public void close() throws IOException{
+        bw.close();
+    }
     
 }

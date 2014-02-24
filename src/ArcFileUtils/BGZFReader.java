@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 import net.sf.samtools.util.BlockCompressedFilePointerUtil;
 import net.sf.samtools.util.BlockCompressedInputStream;
+import org.archive.io.GzippedInputStream;
 
 /**
  *
@@ -67,14 +68,13 @@ public class BGZFReader implements AutoCloseable{
     */
     
     private boolean isBGZF(final File arcfile) throws FileNotFoundException, IOException {
+        boolean isValid = false;
         try (BufferedInputStream bufferedInput = new BufferedInputStream(new FileInputStream(arcfile))) {
-            boolean isValid = BlockCompressedInputStream.isValidFile(bufferedInput);
-            bufferedInput.close();
-            return isValid;
+            isValid = GzippedInputStream.isCompressedStream(bufferedInput);
         }catch(RuntimeException re){
             System.out.println("Cannot test non-buffered stream.");
         }
-        return false;
+        return isValid;
     }
 
      @Override
