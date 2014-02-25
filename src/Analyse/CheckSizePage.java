@@ -9,7 +9,6 @@ package Analyse;
 import ArcFileUtils.ArcFilenameFilter;
 import ArcFileUtils.WebArcReader;
 import java.io.File;
-import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;

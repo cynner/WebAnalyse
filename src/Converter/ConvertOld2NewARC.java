@@ -10,13 +10,14 @@ import ArcFileUtils.WebArcReader;
 import ArcFileUtils.WebArcWriter;
 import ArcFileUtils.WebUtils;
 import Crawler.MyURL;
-import Crawler.SiteCrawler;
+import DBDriver.TableConfig;
 import LanguageUtils.LanguageDetector;
 import com.almworks.sqlite4java.SQLiteConnection;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.TimeZone;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -29,12 +30,13 @@ import java.util.logging.Logger;
 public class ConvertOld2NewARC {
 
     public static BufferedWriter bwWeb;
-    public static String WebDBName = "resource/webpage.sqlite3";
-    public static String SiteDBName = "resource/crawler.sqlite3";
+    public static String WebDBName = TableConfig.FileNameWebPageDB;
+    public static String SiteDBName = TableConfig.FileNameWebSiteDB;
     public static WebUtils wu = new WebUtils();
     public static SQLiteConnection dbweb,dbsite;
 
     public static void main(String[] args) throws IOException {
+        TimeZone.setDefault(TimeZone.getTimeZone("GMT"));
         dbweb = new SQLiteConnection(new File(WebDBName));
         dbsite = new SQLiteConnection(new File(SiteDBName));
         String val,lang;
@@ -83,7 +85,7 @@ public class ConvertOld2NewARC {
                         
                         lang = LanguageDetector.Detect(war.Record.Doc.text());
                         val = "\"" + war.Record.URL.replaceAll("\"", "\"\"") + "\"," + (lang == null ? "null" : "\"" + lang + "\"") + "," + wu.FileSize + "," + wu.CommentSize + "," + wu.ScriptSize + "," + wu.StyleSize + "," + wu.ContentSize;
-                        waw.WriteRecord(war.Record);
+                        waw.WriteRecordKeepDate(war.Record);
                         dbweb.exec("INSERT OR IGNORE INTO webpage(url,language,file_size,comment_size,js_size,style_size,content_size) VALUES(" + val + ");");
                         pagecount++;
                     }
