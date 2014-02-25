@@ -2,6 +2,29 @@
 <project-private xmlns="http://www.netbeans.org/ns/project-private/1">
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
-        <group/>
+        <group>
+            <file>file:/C:/Users/Wiwat/Documents/GitHub/WebAnalyse/src/Crawler/MainCrawler.java</file>
+            <file>file:/C:/Users/Wiwat/Documents/GitHub/WebAnalyse/src/ArcFileUtils/WebArcWriter.java</file>
+            <file>file:/C:/Users/Wiwat/Documents/GitHub/WebAnalyse/src/Crawler/SiteCrawler.java</file>
+            <file>file:/C:/Users/Wiwat/Documents/GitHub/WebAnalyse/src/Converter/FixedBGZ.java</file>
+            <file>file:/C:/Users/Wiwat/Documents/GitHub/WebAnalyse/src/ArcFileUtils/CompressedWebArcWriter.java</file>
+            <file>file:/C:/Users/Wiwat/Documents/GitHub/WebAnalyse/src/Converter/ConvertOld2NewARC.java</file>
+            <file>file:/C:/Users/Wiwat/Documents/GitHub/WebAnalyse/src/ArcFileUtils/WebArcReader_Old.java</file>
+            <file>file:/C:/Users/Wiwat/Documents/GitHub/WebAnalyse/src/ArcFileUtils/ArcWriter.java</file>
+            <file>file:/C:/Users/Wiwat/Documents/GitHub/WebAnalyse/src/ArcFileUtils/CompressedArcWriter.java</file>
+            <file>file:/C:/Users/Wiwat/Documents/GitHub/WebAnalyse/src/ArcFileUtils/WebArcReader.java</file>
+            <file>file:/C:/Users/Wiwat/Documents/GitHub/WebAnalyse/src/ArcFileUtils/ArcFilenameFilter.java</file>
+            <file>file:/C:/Users/Wiwat/Documents/GitHub/WebAnalyse/src/ArcFileUtils/GetWebArc.java</file>
+            <file>file:/C:/Users/Wiwat/Documents/GitHub/WebAnalyse/src/Analyse/CheckSizePage.java</file>
+            <file>file:/C:/Users/Wiwat/Documents/GitHub/WebAnalyse/src/ArcFileUtils/WebArcRecord_Old.java</file>
+            <file>file:/C:/Users/Wiwat/Documents/GitHub/WebAnalyse/src/ArcFileUtils/WebArcRecord.java</file>
+            <file>file:/C:/Users/Wiwat/Documents/GitHub/WebAnalyse/src/Converter/GZ2BGZF.java</file>
+            <file>file:/C:/Users/Wiwat/Documents/GitHub/WebAnalyse/src/Converter/ExtrctBGZ.java</file>
+            <file>file:/C:/Users/Wiwat/Documents/GitHub/WebAnalyse/src/ArcFileUtils/BGZFReader.java</file>
+            <file>file:/C:/Users/Wiwat/Documents/GitHub/WebAnalyse/src/ArcFileUtils/ArcFileConverter.java</file>
+            <file>file:/C:/Users/Wiwat/Documents/GitHub/WebAnalyse/src/Crawler/Fetcher.java</file>
+            <file>file:/C:/Users/Wiwat/Documents/GitHub/WebAnalyse/src/ArcFileUtils/ArcReader.java</file>
+            <file>file:/C:/Users/Wiwat/Documents/GitHub/WebAnalyse/src/ArcFileUtils/ArcRecord.java</file>
+        </group>
     </open-files>
 </project-private>

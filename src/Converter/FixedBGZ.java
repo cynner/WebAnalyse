@@ -59,8 +59,7 @@ public class FixedBGZ {
                 System.out.println(Filename);
                 OutArcBGZF = new File(OutDirname + "/" + Filename);
                 if (!OutArcBGZF.exists()) {
-                    try (CompressedWebArcWriter waw = new CompressedWebArcWriter(OutArcBGZF)) {
-                        waw.HostIP = war.FileIP;
+                    try (CompressedWebArcWriter waw = new CompressedWebArcWriter(OutArcBGZF, war.FileIP)) {
                         try {
                             if (war.Next()) {
                                 Diff = fet.diffServerDateTime(war.Record.URL);

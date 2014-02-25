@@ -45,7 +45,7 @@ public class ArcReader implements AutoCloseable{
 
         // Header
         if ((Line = BGZFR.readLine()) != null) {
-            System.out.println(Line);
+            //System.out.println(Line);
             Fields = Line.split(" ");
             FileDesc = Fields[0];
             FileIP = Fields[1];

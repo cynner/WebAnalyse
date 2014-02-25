@@ -26,7 +26,7 @@ public class CheckSizePage {
     public static void main(String[] args){
         
         File wad = new File(WebArcDir);
-        for(File f : wad.listFiles(new ArcFilenameFilter())){
+        for(File f : wad.listFiles(new ArcFilenameFilter(ArcFilenameFilter.AcceptType.All))){
             System.out.println(f.getName());
             try (WebArcReader war = new WebArcReader(f, true)) {
                 while(war.Next()){

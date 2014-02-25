@@ -497,6 +497,13 @@ public class MainCrawler {
             webdbq.execute(new Webjob(FDB));
         }
     }
+    
+    public void dumpWebDB(File dbFile){
+        if(FDB.exists()){
+            webdbq.execute(new Webjob(FDB));
+        }
+    }
+ 
  
     public class Webjob extends SQLiteJob<Object>{
         public File FileName;

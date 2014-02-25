@@ -23,17 +23,25 @@ public class GZ2BGZF {
     public static String dirinname = "data/arc-org/";
     public static String diroutname = "data/arc-org2/";
     public static void main(String[] args){
+        if(args.length >= 1){
+            dirinname = args[0];
+        }
+        if(args.length >= 2){
+            diroutname = args[1];
+        }
+        
         File dirin = new File(dirinname);
         File dirout = new File(diroutname);
+        
         if(!dirout.isDirectory()){
             if(!dirout.exists()){
                 dirout.mkdir();
             }else{
-                System.err.println("Dir out is not Dicrtory");
+                System.err.println("Dir out is not Directory");
                 System.exit(1);
             }
         }
-        for(File f : dirin.listFiles(new ArcFilenameFilter())){
+        for(File f : dirin.listFiles(new ArcFilenameFilter(ArcFilenameFilter.AcceptType.All))){
             File o = new File(diroutname + "/" + f.getName());
             ConvertGZ2BGZ(f, o);
         }

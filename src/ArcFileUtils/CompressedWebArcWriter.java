@@ -27,10 +27,11 @@ public class CompressedWebArcWriter implements AutoCloseable{
     public String FileName;
     public String HostIP="0.0.0.0";
     
-    public CompressedWebArcWriter(File ArchiveFile) throws IOException{
+    public CompressedWebArcWriter(File ArchiveFile,String HostIP) throws IOException{
         boolean FileExist = ArchiveFile.exists();
         FileName = ArchiveFile.getName();
         bw = new BlockCompressedOutputStream(ArchiveFile);
+        this.HostIP = HostIP;
         WriteHeaderFile();
     }
 
