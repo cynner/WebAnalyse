@@ -285,7 +285,7 @@ public class SiteCrawler implements Runnable {
             if (Fetch.getHeader(Url)) {
                 if (isAllowedResponseCode(Fetch.ResponseCode) && isAllowedHeader()) {
                     if (Fetch.getDocument()) {
-                        System.out.println(Fetch.Details.charset);
+                        //System.out.println(Fetch.Details.charset);
                         //System.err.println(new String(Fetch.Details.Data,Charset.forName("tis-620")));
                         Fetch.Details.WebContent = wu.HTMLCompress(Fetch.Details.Doc);
                         waw.WriteRecord(Fetch.Details);
