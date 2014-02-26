@@ -81,7 +81,7 @@ public class WebArcWriter extends ArcWriter{
                 + "Server: " + record.Server + "\n"
                 + "Content-Type: " + record.WebContentType + "\n" + (record.LastModified != 0 ?
                     "Last-Modified: " + webDateFormat.format(new Date(record.LastModified)) + "\n" : "");
-            ContentHeader += "\n" + "Content-Length: " + record.ContentLength + "\n";
+            ContentHeader += "Content-Length: " + record.ContentLength + "\n";
         
             /* Prepare Record Header */
             record.ArchiveLength = ContentHeader.getBytes("utf-8").length + record.ContentLength;
