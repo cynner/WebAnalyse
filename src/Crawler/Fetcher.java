@@ -165,9 +165,9 @@ public class Fetcher {
             }
              * 
              */
-            InputStream is = uc.getInputStream();
-            this.Details.Data = IOUtils.toByteArray(is);
-            is.close();
+            try(InputStream is = uc.getInputStream()){
+                this.Details.Data = IOUtils.toByteArray(is);
+            }
             uc.disconnect();
             return true;
         } catch (SocketTimeoutException ex) {
@@ -281,6 +281,8 @@ public class Fetcher {
     }
     
     public static void main(String[] args){
+        
+        
         Fetcher f = new Fetcher();
         //f.fetch("http://octknight.com/download/DBProposalBalloonie.pdf");
         //f.fetch("http://127.0.0.1/test.html");
@@ -288,7 +290,7 @@ public class Fetcher {
         //f.fetch("http://www.splendith.com/");
         //f.fetch("https://pirun.ku.ac.th/pirun-tools/pirun-chkquota.php");
         //f.fetch("https://pirun.ku.ac.th/pirun-tools/pirun-chkquota.php");
-        String url =  "http://bueds.bu.ac.th/";
+        String url =  "http://www.saraburi.m-society.go.th";
         f.getHeader(url);
         
             for(Entry<String,List<String>> e : f.Headers.entrySet()){

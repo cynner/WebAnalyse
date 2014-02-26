@@ -4,9 +4,9 @@
  */
 package ArcFileUtils;
 
-import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 import java.nio.charset.IllegalCharsetNameException;
+import java.nio.charset.UnsupportedCharsetException;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -55,16 +55,19 @@ public class WebUtils {
     }
 
     public static void AnalyseCharsetFromData(WebArcRecord Record) {
-        String tmpCharSet;
+        String oldCharSet;
         if(Record.charset != null)
-            tmpCharSet = Record.charset;
+            oldCharSet = Record.charset;
         else
-            tmpCharSet = Record.charset = Charset.defaultCharset().name();
+            oldCharSet = Record.charset = Charset.defaultCharset().name();
+        
+        Record.charset = oldCharSet;
+        
         try {
-            
-            Record.WebContent = new String(Record.Data, Record.charset);
-        } catch (UnsupportedEncodingException ex) {
-            Record.charset = Charset.defaultCharset().displayName();
+            Record.WebContent = new String(Record.Data, Charset.forName(oldCharSet));
+        }catch (IllegalCharsetNameException | UnsupportedCharsetException ex) {
+            System.err.println(ex.getMessage());
+            oldCharSet = Record.charset = Charset.defaultCharset().name();
             Record.WebContent = new String(Record.Data, Charset.defaultCharset());
         }
 
@@ -72,20 +75,22 @@ public class WebUtils {
         Elements list = Record.Doc.select("meta");
         for (Element e : list) {
             if ("content-type".equalsIgnoreCase(e.attr("http-equiv")) && !e.attr("content").equals("")) {
-                tmpCharSet = WebUtils.CharsetFromWebContentType(e.attr("content"));
+                Record.charset = WebUtils.CharsetFromWebContentType(e.attr("content"));
                 break;
             } else if (!e.attr("charset").equals("")) {
-                tmpCharSet = e.attr("charset").toLowerCase().trim();
-                tmpCharSet = WebUtils.CharsetPredictor(tmpCharSet);
+                Record.charset = e.attr("charset").toLowerCase().trim();
+                Record.charset = WebUtils.CharsetPredictor(Record.charset);
                 break;
             }
         }
-        if (!tmpCharSet.equalsIgnoreCase(Record.charset)) {
+        if (!oldCharSet.equalsIgnoreCase(Record.charset)) {
             try {
-                Record.WebContent = new String(Record.Data, tmpCharSet);
-                Record.charset = tmpCharSet;
+                String tmp = new String(Record.Data, Charset.forName(Record.charset));
+                Record.WebContent = tmp;
                 Record.Doc = Jsoup.parse(Record.WebContent);
-            } catch (UnsupportedEncodingException ex) {
+            } catch (IllegalCharsetNameException | UnsupportedCharsetException ex) {
+                Record.charset = oldCharSet;
+                System.err.println(ex.getMessage());
             }
         }
 

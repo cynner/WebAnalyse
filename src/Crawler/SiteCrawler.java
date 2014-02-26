@@ -211,8 +211,9 @@ public class SiteCrawler implements Runnable {
             }
         }
 
-        mainCrawl.dumpWebDB(HostName);
-
+        if(mainCrawl != null){
+            mainCrawl.dumpWebDB(HostName);
+        }
         if (arcExists) {
             this.ArcFile.delete();
         }
@@ -284,6 +285,8 @@ public class SiteCrawler implements Runnable {
             if (Fetch.getHeader(Url)) {
                 if (isAllowedResponseCode(Fetch.ResponseCode) && isAllowedHeader()) {
                     if (Fetch.getDocument()) {
+                        System.out.println(Fetch.Details.charset);
+                        //System.err.println(new String(Fetch.Details.Data,Charset.forName("tis-620")));
                         Fetch.Details.WebContent = wu.HTMLCompress(Fetch.Details.Doc);
                         waw.WriteRecord(Fetch.Details);
                         LinkFromRedir(Url, Fetch.Details.Doc);
@@ -481,7 +484,9 @@ public class SiteCrawler implements Runnable {
          Logger.getLogger(Crawler.class.getName()).log(Level.SEVERE, null, ex);
          }*/
         //Crawler c = new Crawler("www.sat.or.th", ".", 200, true);
-        SiteCrawler c = new SiteCrawler("www.dek-d.com", "data/crawldata3/", 11, "/", true);
+        File d = new File("data/db");
+        d.mkdir();
+        SiteCrawler c = new SiteCrawler("createmyownmiracle.diaryclub.com", "data/", 11, "/", true);
         c.run();
         /*
          ArcUtils au = new ArcUtils("crawl-127.0.0.1.arc");

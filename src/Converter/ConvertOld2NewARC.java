@@ -6,12 +6,12 @@
 package Converter;
 
 import ArcFileUtils.ArcFilenameFilter;
-import ArcFileUtils.WebArcReader;
+import ArcFileUtils.WebArcReader_Job;
 import ArcFileUtils.WebArcWriter;
 import ArcFileUtils.WebUtils;
 import Crawler.MyURL;
 import DBDriver.TableConfig;
-import LanguageUtils.LanguageDetector;
+//import LanguageUtils.LanguageDetector;
 import com.almworks.sqlite4java.SQLiteConnection;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -39,8 +39,8 @@ public class ConvertOld2NewARC {
         TimeZone.setDefault(TimeZone.getTimeZone("GMT"));
         dbweb = new SQLiteConnection(new File(WebDBName));
         dbsite = new SQLiteConnection(new File(SiteDBName));
-        String val,lang;
-        int pagecount;
+        //String val,lang;
+        //int pagecount;
         try {
             dbweb.open();
             dbsite.open();
@@ -70,11 +70,11 @@ public class ConvertOld2NewARC {
                 bwWeb = new BufferedWriter(new FileWriter(".webdb." + f.getName()));
                 Filename = f.getName().replaceAll("-2013\\d{10}-00000.arc", ".arc");
                 OutArcBGZF = new File(args[1] + Filename + ".gz");
-
-                try (WebArcReader war = new WebArcReader(f, true);
+                System.out.println(f.getName());
+                try (WebArcReader_Job war = new WebArcReader_Job(f, true);
                         WebArcWriter waw = new WebArcWriter(OutArcBGZF, Filename, false, war.FileIP)) {
-                    dbweb.exec("BEGIN;");
-                    pagecount = 0;
+                    //dbweb.exec("BEGIN;");
+                    //pagecount = 0;
                     while (war.Next()) {
                         war.Record.WebContent = wu.HTMLCompress(war.Record.Doc);
                         try {
@@ -83,13 +83,13 @@ public class ConvertOld2NewARC {
                             Logger.getLogger(ConvertOld2NewARC.class.getName()).log(Level.SEVERE, null, ex);
                         }
                         
-                        lang = LanguageDetector.Detect(war.Record.Doc.text());
-                        val = "\"" + war.Record.URL.replaceAll("\"", "\"\"") + "\"," + (lang == null ? "null" : "\"" + lang + "\"") + "," + wu.FileSize + "," + wu.CommentSize + "," + wu.ScriptSize + "," + wu.StyleSize + "," + wu.ContentSize;
+                        //lang = LanguageDetector.Detect(war.Record.Doc.text());
+                        //val = "\"" + war.Record.URL.replaceAll("\"", "\"\"") + "\"," + (lang == null ? "null" : "\"" + lang + "\"") + "," + wu.FileSize + "," + wu.CommentSize + "," + wu.ScriptSize + "," + wu.StyleSize + "," + wu.ContentSize;
                         waw.WriteRecordKeepDate(war.Record);
-                        dbweb.exec("INSERT OR IGNORE INTO webpage(url,language,file_size,comment_size,js_size,style_size,content_size) VALUES(" + val + ");");
-                        pagecount++;
+                        //dbweb.exec("INSERT OR IGNORE INTO webpage(url,language,file_size,comment_size,js_size,style_size,content_size) VALUES(" + val + ");");
+                        //pagecount++;
                     }
-                    dbweb.exec("COMMIT;");
+                    //dbweb.exec("COMMIT;");
                     //dbsite.exec("UPDATE website SET page_count=" + PageCount + " WHERE hostname='"+HostName+"';");
                 }
                 bwWeb.close();

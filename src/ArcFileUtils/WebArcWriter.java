@@ -43,9 +43,9 @@ public class WebArcWriter extends ArcWriter{
                 + "Date: " + (record.ServerTime != 0 ? 
                     webDateFormat.format(new Date(record.ServerTime)) : null ) + "\n"
                 + "Server: " + record.Server + "\n"
-                + "Content-Type: " + record.WebContentType + (record.LastModified != 0 ?
-                    " Last-Modified: " + webDateFormat.format(new Date(record.LastModified)) : "");
-            ContentHeader += "\n" + "Content-Length: " + record.ContentLength + "\n";
+                + "Content-Type: " + record.WebContentType + "\n" + (record.LastModified != 0 ?
+                    "Last-Modified: " + webDateFormat.format(new Date(record.LastModified)) + "\n" : "");
+            ContentHeader += "Content-Length: " + record.ContentLength + "\n";
         
             /* Prepare Record Header */
             record.ArchiveLength = ContentHeader.getBytes("utf-8").length + record.ContentLength;
@@ -79,8 +79,8 @@ public class WebArcWriter extends ArcWriter{
                 + "Date: " + (record.ServerTime != 0 ? 
                     webDateFormat.format(new Date(record.ServerTime)) : null ) + "\n"
                 + "Server: " + record.Server + "\n"
-                + "Content-Type: " + record.WebContentType + (record.LastModified != 0 ?
-                    " Last-Modified: " + webDateFormat.format(new Date(record.LastModified)) : "");
+                + "Content-Type: " + record.WebContentType + "\n" + (record.LastModified != 0 ?
+                    "Last-Modified: " + webDateFormat.format(new Date(record.LastModified)) + "\n" : "");
             ContentHeader += "\n" + "Content-Length: " + record.ContentLength + "\n";
         
             /* Prepare Record Header */
