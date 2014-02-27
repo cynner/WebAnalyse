@@ -11,11 +11,13 @@ package Analyse;
  * @author pramote
  */
 
+import com.almworks.sqlite4java.SQLiteConnection;
+import com.almworks.sqlite4java.SQLiteException;
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
+//import java.io.BufferedWriter;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
-import java.io.FileWriter;
+//import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -32,6 +34,8 @@ public class PageRank {
 	private HashMap<Integer, HashMap<Integer, Double>> linkedlist;
 	private int maxSize;
 	private HashSet<Integer> zeroOutdegree;
+        private String CSVPath = "data/Graph/PageLink.csv";
+        
 
 	private void getZeroOutdegree() {
 		HashSet<Integer> hasOutlink = new HashSet<>();
@@ -92,7 +96,7 @@ public class PageRank {
 	}
         
         private HashMap<Integer, HashMap<Integer, Double>> importCSVFreq() throws FileNotFoundException{
-            String CSVPath = "data/Graph/PageLink.csv";
+            
             HashMap<Integer, HashMap<Integer, Double>> linkedList = new HashMap<>();
             HashMap<Integer, Double> SubLink;
             BufferedReader br = new BufferedReader(new FileReader(CSVPath));
@@ -141,7 +145,8 @@ public class PageRank {
             PageRank pr = new  PageRank();
             HashMap<Integer, HashMap<Integer, Double>>HM = pr.importCSVFreq();
             System.out.println("ReadCSV Finished" );
-            double[] d = pr.cal(HM,4001000);
+            double[] d = pr.cal(HM,4002746);
+            /*
             try {
                 try (BufferedWriter bw = new BufferedWriter(new FileWriter("data/PR.txt"))) {
                     for(int i=0;i<d.length;i++){
@@ -149,9 +154,31 @@ public class PageRank {
                     }
                 }
             } catch (IOException ex) {
-                
                 Logger.getLogger(PageRank.class.getName()).log(Level.SEVERE, null, ex);
             }
+            */
+            SQLiteConnection db = new SQLiteConnection(DBDriver.TableConfig.FileWebPageDB);
+            try {
+                db.open();
+                db.exec("BEGIN;");
+                int trig = 50000,step = 50000;
+                for(int i=0;i<d.length;i++){
+                    if(i>trig){
+                        System.out.println("id: " + i);
+                        db.exec("COMMIT;");
+                        db.exec("BEGIN;");
+                        trig += step;
+                    }
+                    db.exec("UPDATE webpage SET pagerank="+d[i]+" WHERE id="+i+";");
+                }
+                db.exec("COMMIT;");
+            } catch (SQLiteException ex) {
+                Logger.getLogger(PageRank.class.getName()).log(Level.SEVERE, null, ex);
+            } finally {
+                db.dispose();
+            }
+            
+            
         }
         
 }
