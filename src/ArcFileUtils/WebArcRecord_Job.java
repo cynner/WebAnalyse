@@ -16,6 +16,7 @@ import org.jsoup.nodes.Document;
  *
  * @author malang
  */
+@Deprecated
 public class WebArcRecord_Job extends WebArcRecord{
     
     

@@ -67,7 +67,7 @@ public class ConvertOld2NewARC {
             File OutArcBGZF;
             for (File f : (new File(args[0])).listFiles(new ArcFilenameFilter(ArcFilenameFilter.AcceptType.ArcOnly))) {
 
-                bwWeb = new BufferedWriter(new FileWriter(".webdb." + f.getName()));
+                // bwWeb = new BufferedWriter(new FileWriter("data/newcrawl/.db." + f.getName()));
                 Filename = f.getName().replaceAll("-2013\\d{10}-00000.arc", ".arc");
                 OutArcBGZF = new File(args[1] + Filename + ".gz");
                 System.out.println(f.getName());
@@ -92,7 +92,7 @@ public class ConvertOld2NewARC {
                     //dbweb.exec("COMMIT;");
                     //dbsite.exec("UPDATE website SET page_count=" + PageCount + " WHERE hostname='"+HostName+"';");
                 }
-                bwWeb.close();
+                // bwWeb.close();
 
             }
         } catch (Exception e) {

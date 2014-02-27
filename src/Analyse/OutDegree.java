@@ -28,7 +28,7 @@ public class OutDegree {
     private HashMap<Integer, HashMap<Integer, Double>> importCSVFreq() throws FileNotFoundException{
             String CSVPath = "data/Graph/PageLink.csv";
             HashMap<Integer, HashMap<Integer, Double>> linkedList = new HashMap<>();
-            HashMap<Integer, Double> SubLink = null;
+            HashMap<Integer, Double> SubLink;
             BufferedReader br = new BufferedReader(new FileReader(CSVPath));
             String Line = null;
             String[] strs;
