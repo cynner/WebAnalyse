@@ -25,20 +25,22 @@ public class ArcWriter implements AutoCloseable{
     
     
     public ArcWriter(File ArchiveFile, long pos) throws FileNotFoundException, IOException{
-        boolean FileExist = ArchiveFile.exists();
         FileName = ArchiveFile.getName();
         bw = new RandomAccessFile(ArchiveFile, "rw");
-        bw.seek(pos);
+        if(pos > 0){
+            bw.seek(pos);
+        } else {
+            WriteHeaderFile();
+        }
     }
     
     public ArcWriter(File ArchiveFile, boolean Append) throws FileNotFoundException, IOException{
-        boolean FileExist = ArchiveFile.exists();
         FileName = ArchiveFile.getName();
         bw = new RandomAccessFile(ArchiveFile, "rw");
         if(Append){
             bw.seek(bw.length());
         }
-        if(!Append || !FileExist){
+        if(!Append || !ArchiveFile.exists()){
             WriteHeaderFile();
         }
     }

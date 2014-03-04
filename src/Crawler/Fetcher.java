@@ -137,18 +137,19 @@ public class Fetcher {
             this.Details.AnalyseCharset();
         }catch (SocketTimeoutException ex) {
             // this.ResponseCode = 408;
-            System.err.println(ex.getMessage());
+            
+            System.err.println("Error: Header gathering: " + ex.getMessage());
             return false;
         } catch (ProtocolException ex) {
             // Never happen
-            System.err.println(ex.getMessage());
+            System.err.println("Error: Header gathering: " + ex.getMessage());
             return false;
         } catch (IOException ex) {
             // IO
-            System.err.println(ex.getMessage());
+            System.err.println("Error: Header gathering: " + ex.getMessage());
             return false;
         } catch (Exception e){
-            System.err.println(e.getMessage());
+            System.err.println("Error: Header gathering: " + e.getMessage());
             return false;
         }
         return true;
@@ -171,13 +172,13 @@ public class Fetcher {
             uc.disconnect();
             return true;
         } catch (SocketTimeoutException ex) {
-            //this.ResponseCode = 408;
-            System.err.println(ex.getMessage());
+            System.err.println("Error: Content gathering: " + ex.getMessage());
         } catch (IOException ex) {
-            System.err.println(ex.getMessage());
+            System.err.println("Error: Content gathering: " + ex.getMessage());
         } catch (Exception ex) {
-            System.err.println(ex.getMessage());
+            System.err.println("Error: Content gathering: " + ex.getMessage());
         }
+        uc.disconnect();
         return false;
     }
     
@@ -290,7 +291,7 @@ public class Fetcher {
         //f.fetch("http://www.splendith.com/");
         //f.fetch("https://pirun.ku.ac.th/pirun-tools/pirun-chkquota.php");
         //f.fetch("https://pirun.ku.ac.th/pirun-tools/pirun-chkquota.php");
-        String url =  "http://doggy.igetweb.com/";
+        String url =  "http://doggy.igetweb.com/modules/product/addtocart.php?product_id=1002284&wid=101769";
         f.getHeader(url);
         
             for(Entry<String,List<String>> e : f.Headers.entrySet()){

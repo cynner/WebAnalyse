@@ -16,6 +16,7 @@ import org.jsoup.Jsoup;
  *
  * @author malang
  */
+@Deprecated
 public class WebArcReader_Job extends WebArcReader{
 
     @SuppressWarnings("FieldNameHidesFieldInSuperclass")

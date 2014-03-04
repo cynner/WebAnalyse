@@ -4,18 +4,15 @@
  */
 package ArcFileUtils;
 
-import java.text.DateFormat;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.jsoup.nodes.Document;
 
 /**
  *
  * @author malang
  */
+@Deprecated
 public class WebArcRecord_Job extends WebArcRecord{
     
     

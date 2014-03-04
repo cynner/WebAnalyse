@@ -99,24 +99,17 @@ public class WebArcRecord extends ArcRecord{
                             Logger.getLogger(WebArcRecord.class.getName()).log(Level.SEVERE, null, ex);
                         }
                     }
-                } else if (FieldName.equalsIgnoreCase("Content-Type")) {
-                    tmpbeg = Value.indexOf(':');
-                    if (tmpbeg >= 0) {
-                        tmpend = Value.lastIndexOf(' ', tmpbeg) + 1;
-                        if (Value.substring(tmpend, tmpbeg).equalsIgnoreCase("Last-Modified")) {
-                            tmp = Value.substring(tmpbeg + 1).trim();
-                            if(!tmp.equalsIgnoreCase("null")){
-                                try{
-                                    LastModified = webDateFormat.parse(tmp).getTime();
-                                }catch(ParseException ex){
-                                    Logger.getLogger(WebArcRecord.class.getName()).log(Level.SEVERE, null, ex);
-                                }
-                            }
+                 } else if (FieldName.equalsIgnoreCase("Last-Modified")) {
+                    tmp = Value.trim();
+                    if (!tmp.equalsIgnoreCase("null")) {
+                        try {
+                            LastModified = webDateFormat.parse(tmp).getTime();
+                        } catch (ParseException ex) {
+                            Logger.getLogger(WebArcRecord.class.getName()).log(Level.SEVERE, null, ex);
                         }
-                        WebContentType = Value.substring(0, tmpend).trim();
-                    } else {
-                        WebContentType = Value.trim();
                     }
+                } else if (FieldName.equalsIgnoreCase("Content-Type")) {
+                    WebContentType = Value.trim();
                 } else if (FieldName.equalsIgnoreCase("Content-Length")) {
                     ContentLength = Long.parseLong(Value.trim());
                     End = true;
@@ -165,24 +158,17 @@ public class WebArcRecord extends ArcRecord{
                             Logger.getLogger(WebArcRecord.class.getName()).log(Level.SEVERE, null, ex);
                         }
                     }
-                } else if (FieldName.equalsIgnoreCase("Content-Type")) {
-                    tmpbeg = Value.indexOf(':');
-                    if (tmpbeg >= 0) {
-                        tmpend = Value.lastIndexOf(' ', tmpbeg) + 1;
-                        if (Value.substring(tmpend, tmpbeg).equalsIgnoreCase("Last-Modified")) {
-                            tmp = Value.substring(tmpbeg + 1).trim();
-                            if(!tmp.equalsIgnoreCase("null")){
-                                try{
-                                    LastModified = webDateFormat.parse(tmp).getTime();
-                                }catch(ParseException ex){
-                                    Logger.getLogger(WebArcRecord.class.getName()).log(Level.SEVERE, null, ex);
-                                }
-                            }
+                } else if (FieldName.equalsIgnoreCase("Last-Modified")) {
+                    tmp = Value.trim();
+                    if (!tmp.equalsIgnoreCase("null")) {
+                        try {
+                            LastModified = webDateFormat.parse(tmp).getTime();
+                        } catch (ParseException ex) {
+                            Logger.getLogger(WebArcRecord.class.getName()).log(Level.SEVERE, null, ex);
                         }
-                        WebContentType = Value.substring(0, tmpend).trim();
-                    } else {
-                        WebContentType = Value.trim();
                     }
+                } else if (FieldName.equalsIgnoreCase("Content-Type")) {
+                    WebContentType = Value.trim();
                 } else if (FieldName.equalsIgnoreCase("Content-Length")) {
                     ContentLength = Long.parseLong(Value.trim());
                     End = true;

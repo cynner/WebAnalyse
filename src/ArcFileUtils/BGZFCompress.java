@@ -20,14 +20,25 @@ import net.sf.samtools.util.BlockCompressedOutputStream;
  *
  * @author malang
  */
-public class BGZFWriter {
+public class BGZFCompress {
+    public static void main(String[] args){
+        String FileIn=null, FileOut;
+        if(args.length > 1 ){
+            FileIn = args[0];
+        }else{
+            System.exit(1);
+        }
+        if(args.length == 2){
+            FileOut = args[1];
+        }else{
+            FileOut = args[1] + ".gz";
+        }
+        Compress(new File(FileIn), new File(FileOut));
+    }
+    
     public static void Compress(File Src, File Dst){
-        BlockCompressedOutputStream BCOS = null;
-        
-        DataInputStream br = null;
-        try {
-            br = new DataInputStream(new FileInputStream(Src));
-            BCOS = new BlockCompressedOutputStream(Dst);
+        try (BlockCompressedOutputStream BCOS = new BlockCompressedOutputStream(Dst);
+                DataInputStream br =  new DataInputStream(new FileInputStream(Src))){
             byte[] bytes = new byte[4096];
             int len;
             while( (len = br.read(bytes)) >= 0){
@@ -37,15 +48,6 @@ public class BGZFWriter {
             Logger.getLogger(SiteCrawler.class.getName()).log(Level.SEVERE, null, ex);
         } catch (IOException ex) {
             Logger.getLogger(SiteCrawler.class.getName()).log(Level.SEVERE, null, ex);
-        } finally {
-            try {
-                if (BCOS != null) 
-                    BCOS.close();
-                if (br != null) 
-                    br.close();
-            } catch (IOException ex) {
-                Logger.getLogger(BGZFWriter.class.getName()).log(Level.SEVERE, null, ex);
-            }
         }
     }
     

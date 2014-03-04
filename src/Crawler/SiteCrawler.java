@@ -7,12 +7,10 @@ package Crawler;
 import ArcFileUtils.WebArcReader;
 import ArcFileUtils.WebArcRecord;
 import ArcFileUtils.WebArcWriter;
-import java.io.BufferedWriter;
 import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -28,6 +26,7 @@ import projecttester.ProjectTester;
 import ArcFileUtils.WebUtils;
 import LanguageUtils.LanguageDetector;
 import com.almworks.sqlite4java.SQLiteQueue;
+import java.io.RandomAccessFile;
 
 /**
  *
@@ -59,7 +58,8 @@ public class SiteCrawler implements Runnable {
     public File TmpFile;
     public File WebDBFile;
 
-    public BufferedWriter bwWeb;
+    public RandomAccessFile rafWebDB;
+    public int WebDBColumnWidth = 7;
     public WebArcWriter waw = null;
     public WebArcRecord record;
     public boolean PrintEnqueue = false;
@@ -162,17 +162,17 @@ public class SiteCrawler implements Runnable {
         }
 
         try{
+            rafWebDB = new RandomAccessFile(WebDBFile,"rw");
             if (this.isAppend && tmpExists) {
                 this.waw = new WebArcWriter(this.TmpFile, ReadFile());
             } else {
                 this.waw = new WebArcWriter(this.TmpFile, this.ArcFile.getName(), this.isAppend, this.HostIP);
             }
-            bwWeb = new BufferedWriter(new FileWriter(WebDBFile));
         } catch (IOException ex) {
             Logger.getLogger(SiteCrawler.class.getName()).log(Level.SEVERE, null, ex);
             try{
-                if(bwWeb != null){
-                    bwWeb.close();
+                if(rafWebDB != null){
+                    rafWebDB.close();
                 }
                 if(waw !=null){
                     waw.close();
@@ -191,7 +191,7 @@ public class SiteCrawler implements Runnable {
                 } else {
                     try {
                         this.waw.close();
-                        this.bwWeb.close();
+                        this.rafWebDB.close();
                     } catch (IOException ex) {
                         Logger.getLogger(SiteCrawler.class.getName()).log(Level.SEVERE, null, ex);
                     }
@@ -205,7 +205,7 @@ public class SiteCrawler implements Runnable {
         } finally {
             try {
                 this.waw.close();
-                this.bwWeb.close();
+                this.rafWebDB.close();
             } catch (IOException ex) {
                 Logger.getLogger(SiteCrawler.class.getName()).log(Level.SEVERE, null, ex);
             }
@@ -238,11 +238,11 @@ public class SiteCrawler implements Runnable {
                 if (isAllowedResponseCode(Fetch.ResponseCode) && isAllowedHeader()) {
                     if (Fetch.getDocument()) {
                         Fetch.Details.WebContent = wu.HTMLCompress(Fetch.Details.Doc);
-                        waw.WriteRecord(Fetch.Details);
                         LinkFromRedir(Url, Fetch.Details.Doc);
                         AnalyseLink(Url, Fetch.Details.Doc);
                         URLLoaded.add(URLQueue.remove(0));
                         writeUpdateDB(Url, LanguageDetector.Detect(Fetch.Details.Doc.text()));
+                        waw.WriteRecord(Fetch.Details);
                         try {
                             //Success & delay
                             Thread.sleep(this.CrawlDelay);
@@ -318,8 +318,7 @@ public class SiteCrawler implements Runnable {
     public void writeUpdateDB(String Url, String lang) {
         //"url","language",file_size,comment_size,js_size,style_size,content_size
         try {
-            bwWeb.write("\"" + Url.replaceAll("\"", "\"\"") + "\"," + (lang == null ? "null" : "\"" + lang + "\"") + "," + wu.FileSize + "," + wu.CommentSize + "," + wu.ScriptSize + "," + wu.StyleSize + "," + wu.ContentSize);
-            bwWeb.newLine();
+            rafWebDB.writeUTF("\"" + Url.replaceAll("\"", "\"\"") + "\"," + (lang == null ? "null" : "\"" + lang + "\"") + "," + wu.FileSize + "," + wu.CommentSize + "," + wu.ScriptSize + "," + wu.StyleSize + "," + wu.ContentSize + "\n");
             //System.out.println("\"" + Url.replaceAll("\"", "\"\"") + "\"," + (lang == null ? "null" : "\"" + lang + "\"") + "," + wu.FileSize + "," + wu.CommentSize + "," + wu.ScriptSize + "," + wu.StyleSize + "," + wu.ContentSize);
         } catch (IOException ex) {
             Logger.getLogger(SiteCrawler.class.getName()).log(Level.SEVERE, null, ex);
@@ -328,7 +327,7 @@ public class SiteCrawler implements Runnable {
 
     public void removeUpdateDB() {
         try {
-            bwWeb.close();
+            rafWebDB.close();
         } catch (IOException ex) {
             Logger.getLogger(SiteCrawler.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -376,19 +375,34 @@ public class SiteCrawler implements Runnable {
 
     public long ReadFile() {
         long LastPos = -1;
-        try (WebArcReader war = new WebArcReader(TmpFile, false)) {
-            war.Next();
-
-            while (war.Next()) {
-                try {
-                    LinkFromRedir(war.Record.URL, war.Record.Doc);
-                    AnalyseLink(war.Record.URL, war.Record.Doc);
-                    URLQueue.remove(war.Record.URL);
-                    URLLoaded.add(war.Record.URL);
-                } catch (Exception e) {
+        long dbPos;
+        String Line;
+        try (WebArcReader war = new WebArcReader(TmpFile, "utf-8")) {
+            // Read Update db
+            dbPos = rafWebDB.getFilePointer();
+            Line = rafWebDB.readLine();
+            if (Line == null || Line.split(",").length != WebDBColumnWidth) {
+                rafWebDB.seek(dbPos);
+            } else {
+                while (war.Next()) {
+                    try {
+                        LinkFromRedir(war.Record.URL, war.Record.Doc);
+                        AnalyseLink(war.Record.URL, war.Record.Doc);
+                        URLQueue.remove(war.Record.URL);
+                        URLLoaded.add(war.Record.URL);
+                        // Read Update db
+                        dbPos = rafWebDB.getFilePointer();
+                        Line = rafWebDB.readLine();
+                        if (Line == null || Line.split(",").length != WebDBColumnWidth) {
+                            rafWebDB.seek(dbPos);
+                            break;
+                        }
+                    } catch (Exception e) {
+                    }
                 }
+                LastPos = war.LastPos;
             }
-            LastPos = war.LastPos;
+            
         } catch (IOException ex) {
             Logger.getLogger(SiteCrawler.class.getName()).log(Level.SEVERE, null, ex);
         }
