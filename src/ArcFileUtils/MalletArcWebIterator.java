@@ -49,7 +49,11 @@ public class MalletArcWebIterator implements Iterator<Instance> {
         //System.out.println(AR.Record.URL);
         AR.Next();
         String Title = lex.strSplitContent(AR.Record.Doc.title());
-        return new Instance (Title + Title + lex.strSplitContent(AR.Record.Doc.body().text()), Label, AR.Record.URL, null);
+        String Content = "";
+        if(AR.Record.Doc.body() != null){
+            Content = lex.strSplitContent(AR.Record.Doc.body().text());
+        }
+        return new Instance (Title + Title + Content, Label, AR.Record.URL, null);
     }
 
     @Override
