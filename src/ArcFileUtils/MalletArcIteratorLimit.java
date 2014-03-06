@@ -16,6 +16,7 @@ import java.util.logging.Logger;
  *
  * @author malang
  */
+@Deprecated
 public class MalletArcIteratorLimit implements Iterator<Instance> {
 
     public String Label;

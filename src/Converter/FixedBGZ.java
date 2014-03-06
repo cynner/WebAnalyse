@@ -20,6 +20,7 @@ import java.util.logging.Logger;
  *
  * @author malang
  */
+@Deprecated
 public class FixedBGZ {
     
     

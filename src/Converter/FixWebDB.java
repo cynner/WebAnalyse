@@ -21,6 +21,7 @@ import java.util.logging.Logger;
  *
  * @author wiwat
  */
+@Deprecated
 public class FixWebDB {
     
     public static void main(String[] args) throws InterruptedException{

@@ -18,6 +18,7 @@ import net.sf.samtools.util.BlockCompressedOutputStream;
  *
  * @author malang
  */
+@Deprecated
 public class FixedBGZOneFile {
      public static void main(String[] args){
         String InDirname = "data/arc/crawl-202.142.219.162.arc.bgz";

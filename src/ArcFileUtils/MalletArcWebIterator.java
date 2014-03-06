@@ -4,6 +4,7 @@
  */
 package ArcFileUtils;
 
+import Lexto.LuceneLexicalTH;
 import cc.mallet.types.Instance;
 
 import java.io.File;
@@ -17,17 +18,19 @@ import java.util.logging.Logger;
  * @author malang
  */
 
-public class MalletArcIterator implements Iterator<Instance> {
+public class MalletArcWebIterator implements Iterator<Instance> {
 
     public String Label;
-    ArcReader AR;
+    public WebArcReader AR;
     
-    public MalletArcIterator(File ArcFile, String Label) throws IOException{
-        AR = new ArcReader(ArcFile);
+    private LuceneLexicalTH lex = new LuceneLexicalTH(true);
+    
+    public MalletArcWebIterator(File ArcFile, String Label) throws IOException{
+        AR = new WebArcReader(ArcFile, "utf-8");
         this.Label = Label;
     }
     
-    public MalletArcIterator(File ArcFile) throws IOException{
+    public MalletArcWebIterator(File ArcFile) throws IOException{
         this(ArcFile, "unknown");
     }
     /*
@@ -45,7 +48,8 @@ public class MalletArcIterator implements Iterator<Instance> {
     public Instance next() {
         //System.out.println(AR.Record.URL);
         AR.Next();
-        return new Instance (AR.Record.ArchiveContent.split("\n")[0] + AR.Record.ArchiveContent, Label, AR.Record.URL, null);
+        String Title = lex.strSplitContent(AR.Record.Doc.title());
+        return new Instance (Title + Title + lex.strSplitContent(AR.Record.Doc.body().text()), Label, AR.Record.URL, null);
     }
 
     @Override
@@ -54,7 +58,7 @@ public class MalletArcIterator implements Iterator<Instance> {
             AR.close();
             //throw new UnsupportedOperationException("Not supported yet.");
         } catch (IOException ex) {
-            Logger.getLogger(MalletArcIterator.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(MalletArcWebIterator.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
     
