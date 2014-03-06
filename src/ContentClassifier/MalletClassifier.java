@@ -173,6 +173,7 @@ public final class MalletClassifier {
     
     private void saveSQLFile(File file){
         try {
+            System.out.println(file.getName());
             MalletArcWebIterator reader = new MalletArcWebIterator(file);
             
             Iterator<Instance> instances = classifier.getInstancePipe().newIteratorFrom(reader);
