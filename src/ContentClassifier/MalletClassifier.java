@@ -184,7 +184,7 @@ public final class MalletClassifier {
             while (instances.hasNext()) {
                 ins = instances.next();
                 Labeling labeling = classifier.classify(ins).getLabeling();
-                System.out.println(labeling.getLabelAtRank(0)+" "+ins.getName().toString().replaceAll("\"", "\"\"") );
+                //System.out.println(labeling.getLabelAtRank(0)+" "+ins.getName().toString().replaceAll("\"", "\"\"") );
                 db.exec("UPDATE webpage SET category=\"" + labeling.getLabelAtRank(0) + "\" WHERE url=\"" + ins.getName().toString().replaceAll("\"", "\"\"") + "\";");
                 
             }
@@ -260,8 +260,8 @@ public final class MalletClassifier {
             
             MC.loadClassifier(new File(StrFileClassifier));
             
-            MC.printBest(new File(StrFileIn));
-            //MC.saveSQL(new File(StrFileIn));
+            //MC.printBest(new File(StrFileIn));
+            MC.saveSQL(new File(StrFileIn));
             
         } catch ( IOException | ClassNotFoundException ex) {
             Logger.getLogger(MalletClassifier.class.getName()).log(Level.SEVERE, null, ex);
