@@ -161,51 +161,87 @@ public class BGZFReader implements AutoCloseable{
 
     public long lastPos;
     public String readLine() throws IOException {
-        if(isASCII){
-            if(txt != null)
-                return txt.readLine();
-        } else if(bgzf != null) {
-            String ans = "";
-            int i;
-            int v;
-            lastPos = bgzf.getFilePointer();
-            byte[] b = new byte[8192];
-                while((v = bgzf.read()) != -1){
-                    if(v >= 0){
-                        if(v != '\n'){
-                            ans += (char)v;
-                        }else{
-                                //System.out.println(ans);
-                            return ans;
-                        }
-                    }else{
-                        i=0;
-                        b[i++] = (byte)v;
-                        //System.err.println("+"+v+"+");
-                        while((v = bgzf.read()) < -1){
-                            
-                            //System.err.println("++"+v+"+");
-                            b[i++] = (byte)v;
-                        }
-                        ans += new String(b, 0, i, "utf-8");
-                        if(v != -1){
-                            if(v != '\n')
-                                ans += (char)v;
-                            else{
-                                
-                                //System.out.println(ans);
-                                return ans;
+        String ans = "";
+        int i = 0;
+        byte v;
+        int bs = 8192;
+        int bs_max = 8186;
+        byte[] b = new byte[bs];
+        if (isASCII) {
+            if (txt != null) {
+                if ((v = (byte) txt.read()) != -1) {
+                    do {
+                        if (i < bs_max) {
+                            if (v >= 0) {
+                                if (v == '\n') {
+                                    return ans + new String(b, 0, i, "utf-8");
+                                }
+                                b[i++] = v;
+                            } else {
+                                b[i++] = v;
+                                if (v >= -4) {
+                                    txt.read(b, i, 5);
+                                    i += 5;
+                                } else if (v >= -8) {
+                                    txt.read(b, i, 4);
+                                    i += 4;
+                                } else if (v >= -16) {
+                                    txt.read(b, i, 3);
+                                    i += 3;
+                                } else if (v >= -32) {
+                                    txt.read(b, i, 2);
+                                    i += 2;
+                                } else {
+                                    txt.read(b, i, 1);
+                                    i += 1;
+                                }
                             }
-                        }else{
-                            break;
+                        } else {
+                            ans += new String(b, 0, i, "utf-8");
+                            i = 0;
                         }
-                    }
+                    } while ((v = (byte) txt.read()) != -1);
+                    return ans + new String(b, 0, i, "utf-8");
                 }
-                //lastTT = v;
-                //System.err.println(ans);
+            }
+        } else if (bgzf != null) {
+            lastPos = bgzf.getFilePointer();
+            if ((v = (byte) bgzf.read()) != -1) {
+                do {
+                    if (i < bs_max) {
+                        if (v >= 0) {
+                            if (v == '\n') {
+                                return ans + new String(b, 0, i, "utf-8");
+                            }
+                            b[i++] = v;
+                        } else {
+                            b[i++] = v;
+                            if (v >= -4) {
+                                bgzf.read(b, i, 5);
+                                i += 5;
+                            } else if (v >= -8) {
+                                bgzf.read(b, i, 4);
+                                i += 4;
+                            } else if (v >= -16) {
+                                bgzf.read(b, i, 3);
+                                i += 3;
+                            } else if (v >= -32) {
+                                bgzf.read(b, i, 2);
+                                i += 2;
+                            } else {
+                                bgzf.read(b, i, 1);
+                                i += 1;
+                            }
+                        }
+                    } else {
+                        ans += new String(b, 0, i, "utf-8");
+                        i = 0;
+                    }
+                } while ((v = (byte) bgzf.read()) != -1);
+                return ans + new String(b, 0, i, "utf-8");
+            }
         }
-        
-                    //System.err.println("|"+lastTT+"|");
+
         return null;
     }
 
