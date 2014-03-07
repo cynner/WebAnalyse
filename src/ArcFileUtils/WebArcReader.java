@@ -129,4 +129,36 @@ public class WebArcReader extends ArcReader{
         }
         return true;
     }
+    
+    public static void main(String[] args){
+        String FileName = args.length > 0 ? args[0] : "crawl-100kg.diaryclub.com.arc";
+        File f = new File(FileName);
+        try(WebArcReader war = new WebArcReader(f,"utf-8")){
+            System.out.println("-------------------- HEADER --------------------");
+            System.out.println("Content type: " + war.FileContentType);
+            System.out.println("Date: " + war.FileDate);
+            System.out.println("Desc: " + war.FileDesc);
+            System.out.println("IP: " + war.FileIP);
+            System.out.println("Origin: " + war.FileOrigin);
+            System.out.println("Version: " + war.FileVersion);
+            System.out.println("------------------------------------------------");
+            System.out.println();
+            
+            while(war.Next()){
+                System.out.println("URL: " + war.Record.URL);
+                System.out.println("DATE: " + war.Record.ArchiveDate);
+                System.out.println("ARC LENGTH: " + war.Record.ArchiveLength);
+                System.out.println("WEB LENGTH: " + war.Record.ContentLength);
+                System.out.println("CHARSET: " + war.Record.charset);
+                System.out.println("SERVER: " + war.Record.Server);
+                //System.out.println("JSOUP --------------------------------------");
+                //System.out.println("TITLE: " + war.Record.Doc.title());
+                //System.out.println("BODY: " + war.Record.Doc.body().text());
+                System.out.println("--------------------------------------------");
+            }
+        } catch (IOException ex) {
+            Logger.getLogger(WebArcReader.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
+    }
 }

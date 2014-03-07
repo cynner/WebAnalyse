@@ -114,8 +114,8 @@ public final class MalletClassifier {
     
     public void printBestFile(File file) throws IOException {
         int [] sum = new int[classifier.getLabelAlphabet().toArray().length];
-                                                   
-        MalletArcIterator reader = new MalletArcIterator(file);
+
+        MalletArcWebIterator reader = new MalletArcWebIterator(file);
                                                      
         Iterator<Instance> instances = classifier.getInstancePipe().newIteratorFrom(reader);
         Instance ins;                                                 
@@ -126,7 +126,8 @@ public final class MalletClassifier {
             // print the labels with their weights in descending order (ie best first)
             sum[labeling.getBestIndex()]++;
             //System.out.println(labeling.getBestLabel()+" "+ins.getName());
-            System.out.println(labeling.getLabelAtRank(0)+" "+ins.getName());
+            System.out.println(labeling.getLabelAtRank(0)+" "+ins.getName().toString().replaceAll("\"", "\"\"") );
+            //System.out.println(labeling.getLabelAtRank(0)+" "+reader.AR.Record.URL.replaceAll("\"", "\"\"") );
 
         }
         reader.remove();
@@ -183,9 +184,8 @@ public final class MalletClassifier {
             while (instances.hasNext()) {
                 ins = instances.next();
                 Labeling labeling = classifier.classify(ins).getLabeling();
-                
+                System.out.println(labeling.getLabelAtRank(0)+" "+ins.getName().toString().replaceAll("\"", "\"\"") );
                 db.exec("UPDATE webpage SET category=\"" + labeling.getLabelAtRank(0) + "\" WHERE url=\"" + ins.getName().toString().replaceAll("\"", "\"\"") + "\";");
-                
                 
             }
             db.exec("COMMIT;");
@@ -252,15 +252,16 @@ public final class MalletClassifier {
         StrFileSummary = Args.get("s");
         StrFileClassifier = Args.get("c");
         */ 
-        StrFileIn = args.length > 0 ? args[0] : "data/crawldata";
+        //StrFileIn = args.length > 0 ? args[0] : "data/crawldata";
+        StrFileIn = args.length > 0 ? args[0] : "crawl-100kg.diaryclub.com.arc";
         try {        
             MC = new MalletClassifier(new File(StrFileOut), new File(StrFileSummary), new File(StrFileClassifier));
             
             
             MC.loadClassifier(new File(StrFileClassifier));
             
-            //MC.printLabelings(new File(StrFileIn));
-            MC.saveSQL(new File(StrFileIn));
+            MC.printBest(new File(StrFileIn));
+            //MC.saveSQL(new File(StrFileIn));
             
         } catch ( IOException | ClassNotFoundException ex) {
             Logger.getLogger(MalletClassifier.class.getName()).log(Level.SEVERE, null, ex);
