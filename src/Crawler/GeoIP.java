@@ -32,7 +32,16 @@ public class GeoIP {
     public static void main(String[] args) throws IOException{
         //ConvertCSV2Bin("/home/malang/Desktop/GeoIPCountryWhois.csv", 82078);
         LoadToMem();
-        System.out.println(IP2ISOCountry("128.0.0.1"));
+        //203.158.177.12
+        String HostName = "denis.darzacq.revue.com";
+        //System.out.println(IP2ISOCountry("128.0.0.1"));
+        try{
+            InetAddress address = InetAddress.getByName(HostName);
+            System.out.println(address.getHostAddress());
+        }catch(UnknownHostException ex){
+            System.err.println(ex.getMessage());
+        }
+        
     }
     
     public static void ConvertCSV2Bin(String CSVPath, int N) throws FileNotFoundException, IOException {
@@ -186,6 +195,7 @@ public class GeoIP {
     }
     
     public static void LoadToMem() {
+        System.setProperty("java.net.preferIPv4Stack" , "true");
         if (!isLoadToMem) {
             File BinFile = new File(BinPath);
             Mem = new GeoIPNode[(int) (BinFile.length() / RecordSize)];
