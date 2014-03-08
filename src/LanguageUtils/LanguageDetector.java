@@ -37,7 +37,7 @@ public class LanguageDetector {
         init();
         String lang = null;
         try {
-            if(Content != null && !Content.equals("")){
+            if(Content != null && Content.length() >= 3){
                 Detector detector = DetectorFactory.create();
 
                 detector.append(Content);

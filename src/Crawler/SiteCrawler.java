@@ -4,6 +4,7 @@
  */
 package Crawler;
 
+import ArcFileUtils.MyRandomAccessFile;
 import ArcFileUtils.WebArcReader;
 import ArcFileUtils.WebArcRecord;
 import ArcFileUtils.WebArcWriter;
@@ -58,7 +59,7 @@ public class SiteCrawler implements Runnable {
     public File TmpFile;
     public File WebDBFile;
 
-    public RandomAccessFile rafWebDB;
+    public MyRandomAccessFile rafWebDB;
     public int WebDBColumnWidth = 7;
     public WebArcWriter waw = null;
     public WebArcRecord record;
@@ -162,7 +163,7 @@ public class SiteCrawler implements Runnable {
         }
 
         try{
-            rafWebDB = new RandomAccessFile(WebDBFile,"rw");
+            rafWebDB = new MyRandomAccessFile(WebDBFile,"rw");
             if (this.isAppend && tmpExists) {
                 this.waw = new WebArcWriter(this.TmpFile, ReadFile());
             } else {
@@ -292,7 +293,7 @@ public class SiteCrawler implements Runnable {
                         LinkFromRedir(Url, Fetch.Details.Doc);
                         AnalyseLink(Url, Fetch.Details.Doc);
                         URLLoaded.add(URLQueue.remove(0));
-                        writeUpdateDB(Url, LanguageDetector.Detect(Fetch.Details.Doc.text()));
+                        writeUpdateDB(Url, LanguageDetector.Detect(Fetch.Details.Doc.text().trim()));
                         try {
                             //Success & delay
                             Thread.sleep(this.CrawlDelay);
