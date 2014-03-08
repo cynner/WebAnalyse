@@ -137,7 +137,6 @@ public class Fetcher {
             this.Details.AnalyseCharset();
         }catch (SocketTimeoutException ex) {
             // this.ResponseCode = 408;
-            
             System.err.println("Error: Header gathering: " + ex.getMessage());
             return false;
         } catch (ProtocolException ex) {
@@ -232,8 +231,8 @@ public class Fetcher {
 
     public void fetch() {
         this.isSuccess = false;
-        getHeader();
-        getDocument();
+        if(getHeader())
+            getDocument();
     }
     
    

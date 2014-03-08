@@ -122,4 +122,18 @@ public class CompressedWebArcWriter implements AutoCloseable{
         bw.close();
     }
     
+    public static void main(String[] args){
+        String FileIn = args.length > 0 ? args[0] : "crawl-100kg.diaryclub.com.arc";
+        String FileOut = args.length >= 2 ? args[1] : FileIn + ".gz";
+        try(WebArcReader war = new WebArcReader(new File(FileIn), "utf-8")){
+            try(CompressedWebArcWriter caw = new CompressedWebArcWriter(new File(FileOut),war.FileIP)){
+                while(war.Next()){
+                    caw.WriteRecordKeepDate(war.Record);
+                }
+            }
+        } catch (IOException ex) {
+            Logger.getLogger(CompressedWebArcWriter.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+    
 }

@@ -54,7 +54,7 @@ public class MainCrawler {
     public int Threads = 10;
     public int log_id = 3;
     public String Dirname;
-    public String Selcond = "(log_id is NULL OR location='TH')";// "log_id is NULL";
+    public String Selcond = "(hostname like '%.th')";//"(log_id is NULL OR location='TH')";// "log_id is NULL";
     public String Fixedcond = "status > 0";
     SQLiteQueue dbq;
     SQLiteQueue webdbq;

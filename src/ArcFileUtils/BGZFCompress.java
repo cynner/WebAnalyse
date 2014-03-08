@@ -22,17 +22,9 @@ import net.sf.samtools.util.BlockCompressedOutputStream;
  */
 public class BGZFCompress {
     public static void main(String[] args){
-        String FileIn=null, FileOut;
-        if(args.length > 1 ){
-            FileIn = args[0];
-        }else{
-            System.exit(1);
-        }
-        if(args.length == 2){
-            FileOut = args[1];
-        }else{
-            FileOut = args[1] + ".gz";
-        }
+        String FileIn, FileOut;
+        FileIn = args.length > 0 ? args[0] : "crawl-100kg.diaryclub.com.arc";
+        FileOut = args.length >=2 ? args[1] : FileIn + ".gz";
         Compress(new File(FileIn), new File(FileOut));
     }
     
