@@ -318,7 +318,7 @@ public class SiteCrawler implements Runnable {
     public void writeUpdateDB(String Url, String lang) {
         //"url","language",file_size,comment_size,js_size,style_size,content_size
         try {
-            rafWebDB.writeChars("\"" + Url.replaceAll("\"", "\"\"") + "\"," + (lang == null ? "null" : "\"" + lang + "\"") + "," + wu.FileSize + "," + wu.CommentSize + "," + wu.ScriptSize + "," + wu.StyleSize + "," + wu.ContentSize + "\n");
+            rafWebDB.writeBytes("\"" + Url.replaceAll("\"", "\"\"") + "\"," + (lang == null ? "null" : "\"" + lang + "\"") + "," + wu.FileSize + "," + wu.CommentSize + "," + wu.ScriptSize + "," + wu.StyleSize + "," + wu.ContentSize + "\n");
             //System.out.println("\"" + Url.replaceAll("\"", "\"\"") + "\"," + (lang == null ? "null" : "\"" + lang + "\"") + "," + wu.FileSize + "," + wu.CommentSize + "," + wu.ScriptSize + "," + wu.StyleSize + "," + wu.ContentSize);
         } catch (IOException ex) {
             Logger.getLogger(SiteCrawler.class.getName()).log(Level.SEVERE, null, ex);
