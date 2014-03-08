@@ -96,10 +96,14 @@ public class GeoIP {
         try{
             InetAddress address = InetAddress.getByName(HostName);
             String [] addrs = address.getHostAddress().split("\\.");
-            return Integer.parseInt(addrs[0]) * 16777216L + 
-                Integer.parseInt(addrs[1]) * 65536L + 
-                Integer.parseInt(addrs[2]) * 256L +
-                Integer.parseInt(addrs[3]);
+            if(addrs.length == 4){
+                return Integer.parseInt(addrs[0]) * 16777216L + 
+                    Integer.parseInt(addrs[1]) * 65536L + 
+                    Integer.parseInt(addrs[2]) * 256L +
+                    Integer.parseInt(addrs[3]);
+            }else{
+                return -1;
+            }
         }catch(UnknownHostException ex){
             System.err.println("Unknown host name : " + HostName);
             Logger.getLogger(GeoIP.class.getName()).log(Level.SEVERE, null, ex);
@@ -111,12 +115,16 @@ public class GeoIP {
         return Num2ISOCountry(IP2Num(IP));
     }
     
-    public static long IP2Num(String IP){
-        String [] addrs = IP.split("\\.");
-        return Integer.parseInt(addrs[0]) * 16777216L + 
-            Integer.parseInt(addrs[1]) * 65536L + 
-            Integer.parseInt(addrs[2]) * 256L +
-            Integer.parseInt(addrs[3]);
+    public static long IP2Num(String IP) {
+        String[] addrs = IP.split("\\.");
+        if (addrs.length == 4) {
+            return Integer.parseInt(addrs[0]) * 16777216L
+                    + Integer.parseInt(addrs[1]) * 65536L
+                    + Integer.parseInt(addrs[2]) * 256L
+                    + Integer.parseInt(addrs[3]);
+        } else {
+            return -1;
+        }
     }
     
     public static String Domain2IP(String HostName){
