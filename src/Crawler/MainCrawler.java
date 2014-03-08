@@ -167,6 +167,8 @@ public class MainCrawler {
                     
                 }
             
+                worker = new SiteCrawler(HostName, HostIP, Dirname, MaxPagePerSite, "/",true,this, SiteCrawler.Mode.Crawl);
+                /*
                 if(Location.equals("TH")){
                     worker = new SiteCrawler(HostName, HostIP, Dirname, MaxPagePerSite, "/",true,this, SiteCrawler.Mode.Crawl);
                 }else{
@@ -175,9 +177,9 @@ public class MainCrawler {
                     worker = new SiteCrawler(HostName, HostIP, Dirname, MaxPagePerSite, 
                        "/",true,this, 
                        ((stat == Status.Crawling) ? SiteCrawler.Mode.Crawl :  SiteCrawler.Mode.preCrawl));
-                    */
-                
+                    // * /
                 }
+                */
                 
                 executor.execute(worker);
             }
