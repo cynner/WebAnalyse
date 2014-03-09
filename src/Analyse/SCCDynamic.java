@@ -158,8 +158,8 @@ public class SCCDynamic {
     
     
     public static void main(String[] args){
-        String FileInName = args.length > 0 ? args[0] : "";
-        String FileOutName = args.length > 1 ? args[1] : "";
+        String FileInName = args.length > 0 ? args[0] : "data/graph.result.webpage";
+        String FileOutName = args.length > 1 ? args[1] : "data/scc.result.webpage";
         SCCDynamic scc = new SCCDynamic();
         scc.ImportCSV(FileInName, ";");
         scc.Compute();
