@@ -223,7 +223,7 @@ public class ExtractLink {
         String FNDirIn = args.length > 0 ? args[0] : "data/testarc";
         String FNOut = args.length > 1 ? args[1] : "data/graph.result";
         
-        ExtractLink el = new ExtractLink(new File(FNOut + ".webpage"),new File(FNOut + ".host"));
+        ExtractLink el = new ExtractLink(new File(FNOut + ".host"),new File(FNOut + ".webpage"));
         try {
             el.runExtractLinkDir(new File(FNDirIn));
         } catch (IOException ex) {
