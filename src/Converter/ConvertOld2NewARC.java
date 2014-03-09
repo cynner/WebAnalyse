@@ -44,15 +44,9 @@ public class ConvertOld2NewARC {
         try {
             dbweb.open();
             dbsite.open();
-            if (args.length == 0) {
-                args = new String[]{"data/oldcrawl/", "data/newcrawl/"};
-            } else if (args.length == 1){
-                System.err.println("No Output dir!");
-                System.exit(1);
-            }
 
-            File InDir = new File(args[0]);
-            File OutDir = new File(args[1]);
+            File InDir = args.length > 0 ? new File(args[0]) : new File("data/arc/");
+            File OutDir = args.length > 1 ? new File(args[1]) : new File("data/converted/");
 
             if (!InDir.exists()) {
                 System.err.println("No such directory -> " + args[0]);
@@ -71,6 +65,7 @@ public class ConvertOld2NewARC {
                 Filename = f.getName().replaceAll("-2013\\d{10}-00000.arc", ".arc");
                 OutArcBGZF = new File(args[1] + Filename + ".gz");
                 System.out.println(f.getName());
+                if(!OutArcBGZF.exists()){
                 try (WebArcReader_Job war = new WebArcReader_Job(f, true);
                         WebArcWriter waw = new WebArcWriter(OutArcBGZF, Filename, false, war.FileIP)) {
                     //dbweb.exec("BEGIN;");
@@ -91,6 +86,7 @@ public class ConvertOld2NewARC {
                     }
                     //dbweb.exec("COMMIT;");
                     //dbsite.exec("UPDATE website SET page_count=" + PageCount + " WHERE hostname='"+HostName+"';");
+                }
                 }
                 // bwWeb.close();
 
