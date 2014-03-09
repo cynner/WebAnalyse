@@ -6,10 +6,8 @@
 package Converter;
 
 import ArcFileUtils.ArcFilenameFilter;
-import ArcFileUtils.CompressedArcWriter;
 import ArcFileUtils.CompressedWebArcWriter;
 import ArcFileUtils.WebArcReader_Job;
-import ArcFileUtils.WebArcWriter;
 import ArcFileUtils.WebUtils;
 import Crawler.MyURL;
 import DBDriver.TableConfig;
@@ -17,7 +15,6 @@ import DBDriver.TableConfig;
 import com.almworks.sqlite4java.SQLiteConnection;
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.util.TimeZone;
 import java.util.logging.Level;
@@ -39,13 +36,13 @@ public class ConvertOld2NewARC {
 
     public static void main(String[] args) throws IOException {
         TimeZone.setDefault(TimeZone.getTimeZone("GMT"));
-        dbweb = new SQLiteConnection(new File(WebDBName));
-        dbsite = new SQLiteConnection(new File(SiteDBName));
+        //dbweb = new SQLiteConnection(new File(WebDBName));
+        //dbsite = new SQLiteConnection(new File(SiteDBName));
         //String val,lang;
         //int pagecount;
         try {
-            dbweb.open();
-            dbsite.open();
+            //dbweb.open();
+            //dbsite.open();
 
             String StrIn = args.length > 0 ? args[0] : "data/arc/";
             String StrOut = args.length > 1 ? args[1] : "data/converted/";
@@ -97,11 +94,11 @@ public class ConvertOld2NewARC {
                 // bwWeb.close();
 
             }
-        } catch (Exception e) {
-
+        } catch (IOException ex) {
+            Logger.getLogger(ConvertOld2NewARC.class.getName()).log(Level.SEVERE, null, ex);
         } finally {
-            dbweb.dispose();
-            dbsite.dispose();
+            //dbweb.dispose();
+            //dbsite.dispose();
         }
         
     }

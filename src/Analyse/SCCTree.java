@@ -33,6 +33,14 @@ public class SCCTree {
     
     //public static BufferedWriter[] bwGroup = new BufferedWriter[7];
     
+    public static void ImportHavalivalaCSV(String FileName){
+    }
+    
+    public static void ImportNESD(String FileName){
+        
+    }
+    
+    
     
     /*
     public static void dfs1(int id){
