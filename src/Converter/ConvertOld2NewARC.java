@@ -6,6 +6,8 @@
 package Converter;
 
 import ArcFileUtils.ArcFilenameFilter;
+import ArcFileUtils.CompressedArcWriter;
+import ArcFileUtils.CompressedWebArcWriter;
 import ArcFileUtils.WebArcReader_Job;
 import ArcFileUtils.WebArcWriter;
 import ArcFileUtils.WebUtils;
@@ -45,11 +47,15 @@ public class ConvertOld2NewARC {
             dbweb.open();
             dbsite.open();
 
-            File InDir = args.length > 0 ? new File(args[0]) : new File("data/arc/");
-            File OutDir = args.length > 1 ? new File(args[1]) : new File("data/converted/");
+            String StrIn = args.length > 0 ? args[0] : "data/arc/";
+            String StrOut = args.length > 1 ? args[1] : "data/converted/";
+            File InDir = new File(StrIn);
+            File OutDir = new File(StrOut);
+            StrIn += StrIn.endsWith("/") ? "" : "/" ;
+            StrOut += StrOut.endsWith("/") ? "" : "/" ;
 
             if (!InDir.exists()) {
-                System.err.println("No such directory -> " + args[0]);
+                System.err.println("No such directory -> " + StrIn);
                 System.exit(1);
             }
 
@@ -59,15 +65,15 @@ public class ConvertOld2NewARC {
 
             String Filename;
             File OutArcBGZF;
-            for (File f : (new File(args[0])).listFiles(new ArcFilenameFilter(ArcFilenameFilter.AcceptType.ArcOnly))) {
+            for (File f : InDir.listFiles(new ArcFilenameFilter(ArcFilenameFilter.AcceptType.ArcOnly))) {
 
                 // bwWeb = new BufferedWriter(new FileWriter("data/newcrawl/.db." + f.getName()));
                 Filename = f.getName().replaceAll("-2013\\d{10}-00000.arc", ".arc");
-                OutArcBGZF = new File(args[1] + Filename + ".gz");
+                OutArcBGZF = new File(StrOut + Filename + ".gz");
                 System.out.println(f.getName());
                 if(!OutArcBGZF.exists()){
                 try (WebArcReader_Job war = new WebArcReader_Job(f, true);
-                        WebArcWriter waw = new WebArcWriter(OutArcBGZF, Filename, false, war.FileIP)) {
+                    CompressedWebArcWriter waw = new CompressedWebArcWriter(OutArcBGZF, args[1] + Filename, war.FileIP)) {
                     //dbweb.exec("BEGIN;");
                     //pagecount = 0;
                     while (war.Next()) {

@@ -27,9 +27,8 @@ public class CompressedWebArcWriter implements AutoCloseable{
     public String FileName;
     public String HostIP="0.0.0.0";
     
-    public CompressedWebArcWriter(File ArchiveFile,String HostIP) throws IOException{
-        boolean FileExist = ArchiveFile.exists();
-        FileName = ArchiveFile.getName();
+    public CompressedWebArcWriter(File ArchiveFile,String FileName,String HostIP) throws IOException{
+        this.FileName = FileName;
         bw = new BlockCompressedOutputStream(ArchiveFile);
         this.HostIP = HostIP;
         WriteHeaderFile();
@@ -126,7 +125,7 @@ public class CompressedWebArcWriter implements AutoCloseable{
         String FileIn = args.length > 0 ? args[0] : "crawl-100kg.diaryclub.com.arc";
         String FileOut = args.length >= 2 ? args[1] : FileIn + ".gz";
         try(WebArcReader war = new WebArcReader(new File(FileIn), "utf-8")){
-            try(CompressedWebArcWriter caw = new CompressedWebArcWriter(new File(FileOut),war.FileIP)){
+            try(CompressedWebArcWriter caw = new CompressedWebArcWriter(new File(FileOut),FileOut.substring(0, FileOut.length() - 3),war.FileIP)){
                 while(war.Next()){
                     caw.WriteRecordKeepDate(war.Record);
                 }
