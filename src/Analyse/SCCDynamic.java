@@ -26,7 +26,7 @@ public class SCCDynamic {
     
     public static class Node{
         int visited;
-        ArrayList<Node> Link;;
+        ArrayList<Node> Link;
         ArrayList<Node> LinkReverse;
         
         public Node(){
@@ -148,7 +148,7 @@ public class SCCDynamic {
             Node n;
             for(int i=0;i<Graph.size();i++){
                 n = Graph.get(i);
-                bw.write(n + ":" + n.visited + "\n");
+                bw.write(i + ":" + n.visited + "\n");
             }
         } catch (IOException ex) {
             Logger.getLogger(SCCDynamic.class.getName()).log(Level.SEVERE, null, ex);
@@ -156,13 +156,40 @@ public class SCCDynamic {
     }
     
     
+    /**
+     * Write scc info
+     * @param FileName Output Path
+     */
+    public void WriteInfo(String FileName){
+        WriteMap(new File(FileName));
+    }
+    
+    
+    /**
+     * Write scc info
+     * @param file Output File
+     */
+    public void WriteInfo(File file){
+        try(BufferedWriter bw = new BufferedWriter(new FileWriter(file))){
+            bw.write("Component:" + this.GroupNo);
+            int n;
+            for(int i=0;i<GroupSize.size();i++){
+                bw.write((i+1) + ":" + GroupSize.get(i) + "\n");
+            }
+        } catch (IOException ex) {
+            Logger.getLogger(SCCDynamic.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+    
     
     public static void main(String[] args){
         String FileInName = args.length > 0 ? args[0] : "data/graph.result.webpage";
         String FileOutName = args.length > 1 ? args[1] : "data/scc.result.webpage";
+        String FileInfo = FileOutName + ".info";
         SCCDynamic scc = new SCCDynamic();
         scc.ImportCSV(FileInName, ";");
         scc.Compute();
         scc.WriteMap(FileOutName);
+        scc.WriteInfo(FileInfo);
     }
 }
