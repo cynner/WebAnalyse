@@ -73,7 +73,7 @@ public class ConvertOld2NewARC {
                 System.out.println(f.getName());
                 if(!OutArcBGZF.exists()){
                 try (WebArcReader_Job war = new WebArcReader_Job(f, true);
-                    CompressedWebArcWriter waw = new CompressedWebArcWriter(OutArcBGZF, args[1] + Filename, war.FileIP)) {
+                    CompressedWebArcWriter waw = new CompressedWebArcWriter(OutArcBGZF, Filename, war.FileIP)) {
                     //dbweb.exec("BEGIN;");
                     //pagecount = 0;
                     while (war.Next()) {
