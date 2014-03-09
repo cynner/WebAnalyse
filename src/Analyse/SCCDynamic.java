@@ -161,7 +161,7 @@ public class SCCDynamic {
      * @param FileName Output Path
      */
     public void WriteInfo(String FileName){
-        WriteMap(new File(FileName));
+        WriteInfo(new File(FileName));
     }
     
     
