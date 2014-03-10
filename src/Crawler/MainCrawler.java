@@ -6,7 +6,6 @@
 
 package Crawler;
 
-import ArcFileUtils.WebArcRecord;
 import LanguageUtils.LanguageDetector;
 import com.almworks.sqlite4java.SQLiteConnection;
 import com.almworks.sqlite4java.SQLiteException;
@@ -28,19 +27,7 @@ import java.util.logging.Logger;
  *
  * @author malang
  */
-public class MainCrawler {
-    
-    public static enum Status {
-        Finished(0), Crawling(1), NotBegin(9), NotInScope(-1), NoHostIP(-2), NoHostLocation(-3), Failed(-9) ;
-        public final int value;
-        private Status(int value){this.value = value;}
-        public static Status GetKey(int val){
-            for (Status d : Status.values())
-                if(d.value == val)
-                    return d;
-            return null;
-        }
-    };
+public class MainCrawler extends CrawlerConfig{
     
     public String DBName = "resource/crawler.sqlite3";
     public String WebDBName = "resource/webpage.sqlite3";
@@ -48,16 +35,13 @@ public class MainCrawler {
     
     
     //public int LimitCrawlSite = 10000;
-    public int MaxPreCrawl = 3;
     public int MaxPagePerSite = 1000;
     public int CacheSize = 1000;
     public int Threads = 10;
-    public int log_id = 3;
     public String Dirname;
     public String Selcond = "(hostname like '%.th')";//"(log_id is NULL OR location='TH')";// "log_id is NULL";
     public String Fixedcond = "status > 0";
-    SQLiteQueue dbq;
-    SQLiteQueue webdbq;
+    
     SQLiteConnection dbc;
     
     public ArrayList<String> HostNameQueue = new ArrayList<>();
@@ -67,14 +51,13 @@ public class MainCrawler {
     
 
     public MainCrawler(String DirName, int MaxPreCrawl, int MaxPagePerSite){
+        super(MaxPreCrawl);
         this.Dirname = DirName;
         this.MaxPagePerSite = MaxPagePerSite;
-        this.MaxPreCrawl = MaxPreCrawl;
     }
     
     public static void main(String[] args) throws IOException{
         String Dir = args.length > 0 ? args[0] : DefaultSitePath;
-        String DBDir = Dir + "/db";
         LanguageDetector.init();
         GeoIP.LoadToMem();
         
@@ -86,7 +69,6 @@ public class MainCrawler {
         //mc.RunExampleSelect();
         
         File dir = new File(Dir);
-        File DBDirf = new File(DBDir);
         
         if(!dir.isDirectory()){
             if(dir.exists()){
@@ -98,9 +80,6 @@ public class MainCrawler {
             }
         }
         
-        if(!DBDirf.exists()){
-            DBDirf.mkdir();
-        }
         mc.run();
     }
     
@@ -127,10 +106,6 @@ public class MainCrawler {
             Logger.getLogger(MainCrawler.class.getName()).log(Level.SEVERE, null, ex);
         }*/
         
-        dbq = new SQLiteQueue(new File(DBName));
-        dbq.start();
-        webdbq = new SQLiteQueue(new File(WebDBName));
-        webdbq.start();
             
         while(NextCache()){
             
@@ -197,116 +172,14 @@ public class MainCrawler {
             } catch (InterruptedException ex) {
                 Logger.getLogger(MainCrawler.class.getName()).log(Level.SEVERE, null, ex);
             }
-            dbq = new SQLiteQueue(new File(DBName));
+            dbq = new SQLiteQueue(DBDriver.TableConfig.FileWebSiteDB);
             dbq.start();
-            webdbq = new SQLiteQueue(new File(WebDBName));
+            webdbq = new SQLiteQueue(DBDriver.TableConfig.FileWebPageDB);
             webdbq.start();
         }
-        try {
-            dbq.stop(true).join();
-            webdbq.stop(true).join();
-        } catch (InterruptedException ex) {
-            Logger.getLogger(MainCrawler.class.getName()).log(Level.SEVERE, null, ex);
-        }
     }
     
     
-    // Can't remove
-    public boolean isAccept(WebArcRecord f){
-        return "th".equals(LanguageDetector.Detect(f.Doc.text()));
-        //return true;
-    }
-    
-    public class Qjob extends SQLiteJob<Object>{
-        public String Command;
-        
-        public Qjob(String Command){
-            this.Command = Command;
-            
-        } 
-        
-        @Override
-        protected Object job(SQLiteConnection connection) throws Throwable {
-            connection.exec(Command);
-            return null;
-        }
-        
-    }
-    
-    public void UpdateStatus(String HostName, Status stat){
-        /*
-        SQLiteConnection db = new SQLiteConnection(new File(DBName));
-        try {
-            db.open(false);
-            db.exec("UPDATE website SET lastupdate=datetime('now','localtime'), status=" + stat.value + " WHERE hostname='"+HostName+"';");
-        } catch (SQLiteException ex) {
-            Logger.getLogger(MainCrawler.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        db.dispose();
-        */
-        dbq.execute(new Qjob("UPDATE website SET log_id=" + log_id + ", lastupdate=datetime('now','localtime'), status=" + stat.value + " WHERE hostname='"+HostName+"';"));
-    }
-    
-    
-    
-    
-    public void UpdatePageCount(String HostName, int PageCount, Status stat){
-        /*
-        SQLiteConnection db = new SQLiteConnection(new File(DBName));
-        try {
-            db.open(false);
-            db.exec("UPDATE website SET lastupdate=datetime('now','localtime'), page_count=" + PageCount + ", status=" + stat.value + " WHERE hostname='"+HostName+"';");
-        } catch (SQLiteException ex) {
-            Logger.getLogger(MainCrawler.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        db.dispose();
-        */
-        dbq.execute(new Qjob("UPDATE website SET log_id=" + log_id + ",  lastupdate=datetime('now','localtime'), page_count=" + PageCount + ", status=" + stat.value + " WHERE hostname='"+HostName+"';"));
-    
-    }
-    
-    public void UpdateIP(String HostName, String IP){
-        /*
-        SQLiteConnection db = new SQLiteConnection(new File(DBName));
-        try {
-            db.open(false);
-            db.exec("UPDATE website SET lastupdate=datetime('now','localtime'), ip='" + IP + "' WHERE hostname='"+HostName+"';");
-        } catch (SQLiteException ex) {
-            Logger.getLogger(MainCrawler.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        db.dispose();
-        */
-        dbq.execute(new Qjob("UPDATE website SET log_id=" + log_id + ", lastupdate=datetime('now','localtime'), ip='" + IP + "' WHERE hostname='"+HostName+"';"));
-    
-    }
-    
-    public void UpdateIP(String HostName, String IP, Status stat){
-        /*
-        SQLiteConnection db = new SQLiteConnection(new File(DBName));
-        try {
-            db.open(false);
-            db.exec("UPDATE website SET lastupdate=datetime('now','localtime'), ip='" + IP + "', status=" + stat.value + " WHERE hostname='"+HostName+"';");
-        } catch (SQLiteException ex) {
-            Logger.getLogger(MainCrawler.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        db.dispose();
-        */
-        dbq.execute(new Qjob("UPDATE website SET log_id=" + log_id + ", lastupdate=datetime('now','localtime'), ip='" + IP + "', status=" + stat.value + " WHERE hostname='"+HostName+"';"));
-    }
-    
-    public void UpdateLocation(String HostName, String Location){
-        /*
-        SQLiteConnection db = new SQLiteConnection(new File(DBName));
-        try {
-            db.open(false);
-            db.exec("UPDATE website SET lastupdate=datetime('now','localtime'), location='" + Location + "' WHERE hostname='"+HostName+"';");
-        } catch (SQLiteException ex) {
-            Logger.getLogger(MainCrawler.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        db.dispose();
-        */
-        dbq.execute(new Qjob("UPDATE website SET log_id=" + log_id + ", lastupdate=datetime('now','localtime'), location='" + Location + "' WHERE hostname='"+HostName+"';"));
-    }
     
     
     public void ImportSeedSite(File Seed) throws FileNotFoundException, IOException{
@@ -490,57 +363,6 @@ public class MainCrawler {
     }
     
     
-    public File FDB;
-    public void dumpWebDB(String HostName){
-        FDB = new File(Dirname + "/db/." + HostName + ".tmpDB");
-        
-        
-        if(FDB.exists()){
-            webdbq.execute(new Webjob(FDB));
-        }
-    }
-    
-    public void dumpWebDB(File dbFile){
-        if(FDB.exists()){
-            webdbq.execute(new Webjob(FDB));
-        }
-    }
- 
- 
-    public class Webjob extends SQLiteJob<Object>{
-        public File FileName;
-        
-        public Webjob(File FileName){
-            this.FileName = FileName;
-            
-        } 
-        
-        @Override
-        protected Object job(SQLiteConnection connection) throws Throwable {
-            
-                    String line;
-                    connection.exec("BEGIN;");
-                    try (BufferedReader br = new BufferedReader(new FileReader(FileName))){
-                        //"url","language",file_size,comment_size,js_size,style_size,content_size
-                        while ((line = br.readLine()) != null) {
-                            if(!line.isEmpty()){
-                                connection.exec("INSERT OR IGNORE INTO webpage(url,language,file_size,comment_size,js_size,style_size,content_size) VALUES(" + line + ");");
-                            }
-                        }
-                        
-                    } catch (FileNotFoundException ex) {
-                        Logger.getLogger(MainCrawler.class.getName()).log(Level.SEVERE, null, ex);
-                    } catch (IOException ex) {
-                        Logger.getLogger(MainCrawler.class.getName()).log(Level.SEVERE, null, ex);
-                    }
-                    connection.exec("COMMIT;");
-                    
-                    FDB.delete();
-                    return null;
-                    
-        }
-        
-    }
 }
 
 

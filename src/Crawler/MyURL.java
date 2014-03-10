@@ -221,6 +221,7 @@ public class MyURL {
                 case ' ':
                     sb.append("%20");
                     i++;
+                    needToChange = true;
                     break;
                 case '%':
                     /*
