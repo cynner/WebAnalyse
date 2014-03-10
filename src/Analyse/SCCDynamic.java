@@ -57,7 +57,6 @@ public class SCCDynamic {
         if(N.visited == -1){
             N.visited = GroupNo;
             GroupCnt++;
-            System.out.println(N.LinkReverse.size());
             for(Node n : N.LinkReverse){
                 TraverseGraphReverse(n);
             }
@@ -191,6 +190,10 @@ public class SCCDynamic {
         SCCDynamic scc = new SCCDynamic();
         System.out.println("Importing...");
         scc.ImportCSV(FileInName, ";");
+        int i =1;
+        for(Node n : scc.Graph){
+            System.err.println(i++ + ":" + n.Link.size() + ":" + n.LinkReverse.size());
+        }
         System.out.println("Computing...");
         scc.Compute();
         System.out.println("Writting...");
