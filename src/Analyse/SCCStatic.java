@@ -38,7 +38,7 @@ public class SCCStatic {
     public int NodeSize = 0;
     public int GroupNo = 1;
     public int GroupCnt;
-    public ArrayList<Node> Graph = new ArrayList<>();
+    public Node[] Graph;
     public ArrayList<Integer> GroupSize = new ArrayList<>();
     public Stack<Node> LastAccess = new Stack<>();
     
@@ -87,15 +87,16 @@ public class SCCStatic {
             int src,dst,i;
             Node NSrc,NDst;
             NodeSize = Integer.parseInt(br.readLine());
+            Graph = new Node[NodeSize];
             br.readLine(); // Skip edge
             for(i=0;i<NodeSize;i++)
-                Graph.add(new Node());
+                Graph[i] = new Node();
             while((Line = br.readLine()) != null){
-                strs = Line.split(" ");
+                strs = Line.split(sep);
                 src = Integer.parseInt(strs[0]);
                 dst = Integer.parseInt(strs[1]);
-                NSrc = Graph.get(src);
-                NDst = Graph.get(dst);
+                NSrc = Graph[src];
+                NDst = Graph[dst];
                 NSrc.Link.add(NDst);
                 NDst.LinkReverse.add(NSrc);
             }
@@ -140,8 +141,8 @@ public class SCCStatic {
     public void WriteMap(File file){
         try(BufferedWriter bw = new BufferedWriter(new FileWriter(file))){
             Node n;
-            for(int i=0;i<Graph.size();i++){
-                n = Graph.get(i);
+            for(int i=0;i<Graph.length;i++){
+                n = Graph[i];
                 bw.write(i + ":" + n.visited + "\n");
             }
         } catch (IOException ex) {
@@ -177,21 +178,12 @@ public class SCCStatic {
     
     
     public static void main(String[] args){
-        String FileInName = args.length > 0 ? args[0] : "data/graph.result.webpage";
+        String FileInName = args.length > 0 ? args[0] : "/home/wiwat/gr.txt";
         String FileOutName = args.length > 1 ? args[1] : "data/sccstatic.result.webpage";
         String FileInfo = FileOutName + ".info";
         SCCStatic scc = new SCCStatic();
         System.out.println("Importing...");
         scc.ImportNED(FileInName, "\t");
-        int i =1;
-        int inl=0,outl=0;
-        
-        for(Node n : scc.Graph){
-            inl += n.LinkReverse.size();
-            outl += n.Link.size();
-            //System.err.println(i++ + ":" + n.Link.size() + ":" + n.LinkReverse.size());
-        }
-        System.out.println("In: " + inl + ", Out: " + outl);
         System.out.println("Computing...");
         scc.Compute();
         System.out.println("Writting...");

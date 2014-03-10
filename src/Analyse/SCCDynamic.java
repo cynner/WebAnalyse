@@ -64,8 +64,9 @@ public class SCCDynamic {
     }
     
     /**
-     * Import CSV File
-     * in format: <b>SRCn&lt;sep&gt;DSTn1&lt;sep&gt;DSTn2...</b> 
+     * Import CSV File<br/>
+     * in format: <br/>
+     * <b>SRCn&lt;sep&gt;DSTn1&lt;sep&gt;DSTn2...</b> 
      *  
      * @param FileName CSV File Path
      * @param sep Separated string
@@ -75,8 +76,9 @@ public class SCCDynamic {
     }
     
     /**
-     * Import CSV File
-     * in format: <b>SRCn&lt;sep&gt;DSTn1&lt;sep&gt;DSTn2...</b> 
+     * Import CSV File<br />
+     * in format: <br />
+     * <b>SRCn&lt;sep&gt;DSTn1&lt;sep&gt;DSTn2...</b> 
      *  
      * @param file CSV File
      * @param sep Separated string
@@ -88,7 +90,7 @@ public class SCCDynamic {
             int src,dst,i;
             Node NSrc,NDst;
             while((Line = br.readLine()) != null){
-                strs = Line.split(";");
+                strs = Line.split(sep);
                 src = Integer.parseInt(strs[0]);
                 while(NodeSize <= src){
                     Graph.add(new Node());
@@ -105,6 +107,61 @@ public class SCCDynamic {
                     NSrc.Link.add(NDst);
                     NDst.LinkReverse.add(NSrc);
                 }
+            }
+        } catch (FileNotFoundException ex) {
+            Logger.getLogger(SCCDynamic.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IOException ex) {
+            Logger.getLogger(SCCDynamic.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+    
+    
+    /**
+     * Import Src Dst File<br/>
+     * in format: <b><br/>
+     * SRC1&lt;sep&gt;DST1<br/>
+     * SRC2&lt;sep&gt;DST2<br/>
+     * ...</b> 
+     *  
+     * @param FileName SD File Path
+     * @param sep Separated string
+     */
+    public void ImportSD(String FileName, String sep){
+        ImportSD(new File(FileName),sep);
+    }
+    
+     /**
+     * Import Src Dst File<br/>
+     * in format: <b><br/>
+     * SRC1&lt;sep&gt;DST1<br/>
+     * SRC2&lt;sep&gt;DST2<br/>
+     * ...</b> 
+     *  
+     * @param file SD File
+     * @param sep Separated string
+     */
+    public void ImportSD(File file,String sep){
+        try(BufferedReader br = new BufferedReader(new FileReader(file))){
+            String Line;
+            String[] strs;
+            int src,dst,i;
+            Node NSrc,NDst;
+            while((Line = br.readLine()) != null) {
+                strs = Line.split(sep);
+                src = Integer.parseInt(strs[0]);
+                while (NodeSize <= src) {
+                    Graph.add(new Node());
+                    NodeSize++;
+                }
+                NSrc = Graph.get(src);
+                dst = Integer.parseInt(strs[1]);
+                while (NodeSize <= dst) {
+                    Graph.add(new Node());
+                    NodeSize++;
+                }
+                NDst = Graph.get(dst);
+                NSrc.Link.add(NDst);
+                NDst.LinkReverse.add(NSrc);
             }
         } catch (FileNotFoundException ex) {
             Logger.getLogger(SCCDynamic.class.getName()).log(Level.SEVERE, null, ex);
@@ -184,21 +241,12 @@ public class SCCDynamic {
     
     
     public static void main(String[] args){
-        String FileInName = args.length > 0 ? args[0] : "data/graph.result.webpage";
-        String FileOutName = args.length > 1 ? args[1] : "data/scc.result.webpage";
+        String FileInName = args.length > 0 ? args[0] : "data/graph.result";
+        String FileOutName = args.length > 1 ? args[1] : "data/testscc.result";
         String FileInfo = FileOutName + ".info";
         SCCDynamic scc = new SCCDynamic();
         System.out.println("Importing...");
         scc.ImportCSV(FileInName, ";");
-        int i =1;
-        int inl=0,outl=0;
-        
-        for(Node n : scc.Graph){
-            inl += n.LinkReverse.size();
-            outl += n.Link.size();
-            //System.err.println(i++ + ":" + n.Link.size() + ":" + n.LinkReverse.size());
-        }
-        System.out.println("In: " + inl + ", Out: " + outl);
         System.out.println("Computing...");
         scc.Compute();
         System.out.println("Writting...");
