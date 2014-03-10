@@ -191,9 +191,14 @@ public class SCCDynamic {
         System.out.println("Importing...");
         scc.ImportCSV(FileInName, ";");
         int i =1;
+        int inl=0,outl=0;
+        
         for(Node n : scc.Graph){
+            inl += n.LinkReverse.size();
+            outl += n.Link.size();
             System.err.println(i++ + ":" + n.Link.size() + ":" + n.LinkReverse.size());
         }
+        System.out.println("In: " + inl + ", Out: " + outl);
         System.out.println("Computing...");
         scc.Compute();
         System.out.println("Writting...");
