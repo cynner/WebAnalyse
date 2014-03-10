@@ -229,7 +229,7 @@ public class SCCDynamic {
      */
     public void WriteInfo(File file){
         try(BufferedWriter bw = new BufferedWriter(new FileWriter(file))){
-            bw.write("Component:" + this.GroupNo);
+            bw.write("Component:" + (this.GroupNo-1)) ;
             int n;
             for(int i=0;i<GroupSize.size();i++){
                 bw.write((i+1) + ":" + GroupSize.get(i) + "\n");

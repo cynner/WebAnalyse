@@ -61,6 +61,7 @@ public class ExtractLink {
             dbHost.openReadonly();
 
             for (File f : Dir.listFiles(new ArcFilenameFilter(ArcFilenameFilter.AcceptType.ArcOnly))) {
+                System.out.println(f.getName());
                 try (WebArcReader war = new WebArcReader(f, "utf-8")) {
                     srcDomain = "";
                     while (war.Next()) {
