@@ -22,8 +22,7 @@ import java.util.logging.Logger;
  *
  * @author wiwat
  */
-public class SCCDynamic {
-    
+public class SCCStatic {
     public static class Node{
         int visited;
         ArrayList<Node> Link;
@@ -64,47 +63,41 @@ public class SCCDynamic {
     }
     
     /**
-     * Import CSV File
-     * in format: <b>SRCn&lt;sep&gt;DSTn1&lt;sep&gt;DSTn2...</b> 
-     *  
-     * @param FileName CSV File Path
+     * Import Node Edge Data File
+     * in format: <b>Node\nEdge\nSRC1&lt;sep&gt;DST1\nSRC2&lt;sep&gt;DST2\n...</b> 
+     * 
+     * @param FileName NED File Path
      * @param sep Separated string
      */
-    public void ImportCSV(String FileName, String sep){
-        ImportCSV(new File(FileName),sep);
+    public void ImportNED(String FileName, String sep){
+        ImportNED(new File(FileName),sep);
     }
     
     /**
-     * Import CSV File
-     * in format: <b>SRCn&lt;sep&gt;DSTn1&lt;sep&gt;DSTn2...</b> 
+     * Import Node Edge Data File
+     * in format: <b>Node\nEdge\nSRC1&lt;sep&gt;DST1\nSRC2&lt;sep&gt;DST2\n...</b> 
      *  
-     * @param file CSV File
+     * @param file NED File
      * @param sep Separated string
      */
-    public void ImportCSV(File file,String sep){
+    public void ImportNED(File file,String sep){
         try(BufferedReader br = new BufferedReader(new FileReader(file))){
             String Line;
             String[] strs;
             int src,dst,i;
             Node NSrc,NDst;
+            NodeSize = Integer.parseInt(br.readLine());
+            br.readLine(); // Skip edge
+            for(i=0;i<NodeSize;i++)
+                Graph.add(new Node());
             while((Line = br.readLine()) != null){
-                strs = Line.split(";");
+                strs = Line.split(" ");
                 src = Integer.parseInt(strs[0]);
-                while(NodeSize <= src){
-                    Graph.add(new Node());
-                    NodeSize++;
-                }
+                dst = Integer.parseInt(strs[1]);
                 NSrc = Graph.get(src);
-                for (i = 1; i < strs.length; i++) {
-                    dst = Integer.parseInt(strs[i]);
-                    while(NodeSize <= dst){
-                        Graph.add(new Node());
-                        NodeSize++;
-                    }
-                    NDst = Graph.get(dst);
-                    NSrc.Link.add(NDst);
-                    NDst.LinkReverse.add(NSrc);
-                }
+                NDst = Graph.get(dst);
+                NSrc.Link.add(NDst);
+                NDst.LinkReverse.add(NSrc);
             }
         } catch (FileNotFoundException ex) {
             Logger.getLogger(SCCDynamic.class.getName()).log(Level.SEVERE, null, ex);
@@ -185,11 +178,11 @@ public class SCCDynamic {
     
     public static void main(String[] args){
         String FileInName = args.length > 0 ? args[0] : "data/graph.result.webpage";
-        String FileOutName = args.length > 1 ? args[1] : "data/scc.result.webpage";
+        String FileOutName = args.length > 1 ? args[1] : "data/sccstatic.result.webpage";
         String FileInfo = FileOutName + ".info";
-        SCCDynamic scc = new SCCDynamic();
+        SCCStatic scc = new SCCStatic();
         System.out.println("Importing...");
-        scc.ImportCSV(FileInName, ";");
+        scc.ImportNED(FileInName, "\t");
         int i =1;
         int inl=0,outl=0;
         
