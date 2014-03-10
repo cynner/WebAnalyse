@@ -44,20 +44,21 @@ public class SCCDynamic {
     public Stack<Node> LastAccess = new Stack<>();
     
     public void TraverseGraph(Node N){
-        N.visited = -1;
-        for(Node n : N.Link){
-            if(n.visited == 0){
+        if(N.visited == 0){
+            N.visited = -1;
+            for(Node n : N.Link){
                 TraverseGraph(n);
             }
+            LastAccess.push(N);
         }
-        LastAccess.push(N);
     }
     
     public void TraverseGraphReverse(Node N){
-        N.visited = GroupNo;
-        GroupCnt++;
-        for(Node n : N.LinkReverse){
-            if(n.visited == -1){
+        if(N.visited == -1){
+            N.visited = GroupNo;
+            GroupCnt++;
+            System.out.println(N.LinkReverse.size());
+            for(Node n : N.LinkReverse){
                 TraverseGraphReverse(n);
             }
         }
@@ -116,10 +117,11 @@ public class SCCDynamic {
     
     public void Compute(){
         for(Node n : Graph){
-            if(n.visited == 0)
-                TraverseGraph(n);
+            TraverseGraph(n);
         }
         Node n;
+        
+        System.out.println("Reverse Traverse...");
         while(!LastAccess.empty()){
             n = LastAccess.pop();
             if(n.visited == -1){
@@ -187,8 +189,11 @@ public class SCCDynamic {
         String FileOutName = args.length > 1 ? args[1] : "data/scc.result.webpage";
         String FileInfo = FileOutName + ".info";
         SCCDynamic scc = new SCCDynamic();
+        System.out.println("Importing...");
         scc.ImportCSV(FileInName, ";");
+        System.out.println("Computing...");
         scc.Compute();
+        System.out.println("Writting...");
         scc.WriteMap(FileOutName);
         scc.WriteInfo(FileInfo);
     }
