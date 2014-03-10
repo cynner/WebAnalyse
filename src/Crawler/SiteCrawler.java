@@ -508,9 +508,12 @@ public class SiteCrawler implements Runnable {
         String StorePath = args.length > 1 ? args[1] : "data/crawldata";
         int limit = args.length > 2 ? Integer.parseInt(args[2]) : 1000;
         String SubHostPath = args.length > 3 ? args[3] : "/";
-        CrawlerConfig cfg = new CrawlerConfig(3);
-        SiteCrawler c = new SiteCrawler(HostName, StorePath, limit, SubHostPath, false, cfg);
-        c.run();
+        try(CrawlerConfig cfg = new CrawlerConfig(3)){
+            SiteCrawler c = new SiteCrawler(HostName, StorePath, limit, SubHostPath, false, cfg);
+            c.run();
+        } catch(Exception ex){
+            Logger.getLogger(SiteCrawler.class.getName()).log(Level.SEVERE, null, ex);
+        }
         /*
          ArcUtils au = new ArcUtils("crawl-127.0.0.1.arc");
          while(au.Next()){
