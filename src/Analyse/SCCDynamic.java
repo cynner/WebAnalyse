@@ -241,12 +241,26 @@ public class SCCDynamic {
     
     
     public static void main(String[] args){
-        String FileInName = args.length > 0 ? args[0] : "data/graph.result";
-        String FileOutName = args.length > 1 ? args[1] : "data/testscc.result";
+        //Mode has sd or csv mode
+        String Mode = args.length > 0 ? args[0] : "csv";
+        String FileInName = args.length > 1 ? args[1] : "data/graph.result";
+        String FileOutName = args.length > 2 ? args[2] : "data/testscc.result";
         String FileInfo = FileOutName + ".info";
         SCCDynamic scc = new SCCDynamic();
+        
         System.out.println("Importing...");
-        scc.ImportCSV(FileInName, ";");
+        switch(Mode.toLowerCase()){
+            case "csv":
+                scc.ImportCSV(FileInName, ";");
+                break;
+            case "sd":
+                scc.ImportSD(FileInName, ";");
+                break;
+            default:
+                System.err.println("ERROR: No Input Type '" + Mode + "' in {csv,sd}." );
+                System.exit(1);
+                break;
+        }
         System.out.println("Computing...");
         scc.Compute();
         System.out.println("Writting...");
