@@ -3,7 +3,6 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-
 package ArcFileUtils;
 
 import java.io.DataInput;
@@ -20,32 +19,33 @@ import java.io.RandomAccessFile;
 public class MyRandomAccessFile implements DataOutput, DataInput, AutoCloseable {
 
     public RandomAccessFile raf;
+
     public MyRandomAccessFile(String name, String mode) throws FileNotFoundException {
         raf = new RandomAccessFile(name, mode);
     }
-    
+
     public MyRandomAccessFile(File name, String mode) throws FileNotFoundException {
         raf = new RandomAccessFile(name, mode);
     }
-    
-    public final void seek(long pos) throws IOException{
+
+    public final void seek(long pos) throws IOException {
         raf.seek(pos);
     }
-    
-    public void setLength(long newLength) throws IOException{
+
+    public void setLength(long newLength) throws IOException {
         raf.setLength(newLength);
     }
-    
-    public long length() throws IOException{
+
+    public long length() throws IOException {
         return raf.length();
     }
-    
-    public long getFilePointer() throws IOException{
+
+    public long getFilePointer() throws IOException {
         return raf.getFilePointer();
     }
-    
+
     @Override
-    public String readLine() throws IOException{
+    public String readLine() throws IOException {
         String ans = "";
         int i = 0;
         byte v;
@@ -54,32 +54,31 @@ public class MyRandomAccessFile implements DataOutput, DataInput, AutoCloseable 
         byte[] b = new byte[bs];
         if ((v = (byte) raf.read()) != -1) {
             do {
-                if (i < bs_max) {
-                    if (v >= 0) {
-                        if (v == '\n') {
-                            return ans + new String(b, 0, i, "utf-8");
-                        }
-                        b[i++] = v;
-                    } else {
-                        b[i++] = v;
-                        if (v >= -4) {
-                            raf.read(b, i, 5);
-                            i += 5;
-                        } else if (v >= -8) {
-                            raf.read(b, i, 4);
-                            i += 4;
-                        } else if (v >= -16) {
-                            raf.read(b, i, 3);
-                            i += 3;
-                        } else if (v >= -32) {
-                            raf.read(b, i, 2);
-                            i += 2;
-                        } else {
-                            raf.read(b, i, 1);
-                            i += 1;
-                        }
+                if (v >= 0) {
+                    if (v == '\n') {
+                        return ans + new String(b, 0, i, "utf-8");
                     }
+                    b[i++] = v;
                 } else {
+                    b[i++] = v;
+                    if (v >= -4) {
+                        raf.read(b, i, 5);
+                        i += 5;
+                    } else if (v >= -8) {
+                        raf.read(b, i, 4);
+                        i += 4;
+                    } else if (v >= -16) {
+                        raf.read(b, i, 3);
+                        i += 3;
+                    } else if (v >= -32) {
+                        raf.read(b, i, 2);
+                        i += 2;
+                    } else {
+                        raf.read(b, i, 1);
+                        i += 1;
+                    }
+                }
+                if (i >= bs_max) {
                     ans += new String(b, 0, i, "utf-8");
                     i = 0;
                 }
@@ -88,14 +87,14 @@ public class MyRandomAccessFile implements DataOutput, DataInput, AutoCloseable 
         }
         return "";
     }
-    
+
     @Override
-    public int skipBytes(int n) throws IOException{
+    public int skipBytes(int n) throws IOException {
         return raf.skipBytes(n);
     }
-    
+
     @Override
-    public void close() throws IOException{
+    public void close() throws IOException {
         raf.close();
     }
 

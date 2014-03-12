@@ -18,14 +18,15 @@ import java.util.logging.Logger;
 public class ReadArcFile {
     
     public static void main(String[] args){
-        try (WebArcReader aar = new WebArcReader(new File("consump.arc"),false)) {
+        try (WebArcReader aar = new WebArcReader(new File("data/crawl-cokezafamily.diaryclub.com.arc"),false)) {
             int i = 0;
             while(aar.Next()){
                 WebArcRecord w = aar.Record;
                 System.out.println(w.ArchiveLength);
                 System.out.println(w.charset);
                 System.out.println("---------------------------");
-                System.out.println(w.WebContent);
+                System.out.println(w.URL);
+                ////System.out.println(w.WebContent);
                 System.out.println("---------------------------");
                 i++;
             }
