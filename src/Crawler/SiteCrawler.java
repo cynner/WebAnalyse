@@ -25,6 +25,7 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import projecttester.ProjectTester;
 import ArcFileUtils.WebUtils;
+import Crawler.CrawlerConfig.Status;
 import LanguageUtils.LanguageDetector;
 import com.almworks.sqlite4java.SQLiteQueue;
 
@@ -41,10 +42,6 @@ public class SiteCrawler implements Runnable {
     public static String UserAgent = "princeofvamp@gmail.com";
     public int CrawlDelay = 100;
     public String HostName;
-    public String HostIP;
-    public String AcceptOnlyPrefixPath = "/";
-    public int MarginPage;
-    public int MaxPage;
     public ArrayList<String> URLQueue = new ArrayList<>();
     public ArrayList<String> URLCrash = new ArrayList<>();
     public ArrayList<String> URLLoaded = new ArrayList<>();
@@ -53,10 +50,9 @@ public class SiteCrawler implements Runnable {
     //private BufferedWriter bw;
     private boolean isAppend = true;
     //private boolean isOpenFile = false;
-    public File ArcGZFile;
     public File ArcFile;
-    public File TmpFile;
     public File WebDBFile;
+    public String HostIP;
 
     public MyRandomAccessFile rafWebDB;
     public int WebDBColumnWidth = 7;
@@ -65,12 +61,9 @@ public class SiteCrawler implements Runnable {
     public boolean PrintEnqueue = false;
 
     public CrawlerConfig crawlConf = null;
+    public CrawlerConfig.Status status;
 
-    public static enum Mode {
-
-        preCrawl, Crawl
-    };
-    public Mode mode = Mode.Crawl;
+    
 
     private final WebUtils wu = new WebUtils();
 
@@ -83,19 +76,14 @@ public class SiteCrawler implements Runnable {
         }
         return s;
     }
-
-    public SiteCrawler(String HostName, String HostIP, File ArcFile, int MaxPage, String AcceptOnlyPrefixPath, boolean isAppend, CrawlerConfig crawlConf, Mode mode) {
+    
+    public SiteCrawler(String HostName, String HostIP, File ArcFile, File InfoFile, CrawlerConfig crawlConf, boolean isAppend) {
         this.HostName = HostName;
-        this.MaxPage = MaxPage;
-        this.MarginPage = (int) (this.MaxPage * 3);
+        this.HostIP = HostIP;
         this.isAppend = isAppend;
         this.crawlConf = crawlConf;
-        this.mode = mode;
-        this.AcceptOnlyPrefixPath = AcceptOnlyPrefixPath;
         this.ArcFile = ArcFile;
-        this.TmpFile = new File(ArcFile.getParent() + "/." + ArcFile.getName() + ".tmp");
-        this.ArcGZFile = new File(ArcFile.getPath() + ".gz");
-        this.WebDBFile = new File(TmpFile.getPath() + "DB");
+        this.WebDBFile = InfoFile;
         if(!isSetTimeZone){
             TimeZone.setDefault(TimeZone.getTimeZone("GMT"));
             isSetTimeZone = true;
@@ -107,15 +95,13 @@ public class SiteCrawler implements Runnable {
             try {
                 InetAddress address = InetAddress.getByName(HostName);
                 this.HostIP = address.getHostAddress();
-                if (crawlConf != null) {
-                    crawlConf.UpdateIP(this.HostName, this.HostIP);
-                }
             } catch (UnknownHostException ex) {
                 this.HostIP = null;
             }
         }
     }
 
+    /*
     public SiteCrawler(String HostName, String DirName, int MaxPage, String AcceptOnlyPrefixPath, boolean isAppend) {
         this(HostName, null, new File(DirName + "/crawl-" + HostName + ".arc"), MaxPage, AcceptOnlyPrefixPath, isAppend, null, Mode.Crawl);
     }
@@ -131,6 +117,7 @@ public class SiteCrawler implements Runnable {
     public SiteCrawler(String HostName, String HostIP, String DirName, int MaxPage, String AcceptOnlyPrefixPath, boolean isAppend, CrawlerConfig mc, Mode mode) {
         this(HostName, HostIP, new File(DirName + "/crawl-" + HostName + ".arc"), MaxPage, AcceptOnlyPrefixPath, isAppend, mc, mode);
     }
+    */
     
     
 
@@ -138,19 +125,18 @@ public class SiteCrawler implements Runnable {
     public void run() {
         System.out.println(Thread.currentThread().getName() + " " + HostName + " Start.");
         if (this.HostIP != null) {
-
             processCommand();
-        } else if (crawlConf != null) {
-            crawlConf.UpdateStatus(HostName, CrawlerConfig.Status.NoHostIP);
+        } else {
+            status = Status.NoHostIP; 
         }
         System.out.println(Thread.currentThread().getName() + " " + HostName + " End.");
     }
 
     private void processCommand() {
+        
+        status = Status.Crawling;
         this.Fetch = new Fetcher(UserAgent);
         this.robots = new Robotstxt(HostName, UserAgent);
-        boolean tmpExists = TmpFile.exists(), arcExists = ArcFile.exists();
-
         // 1. Load Robots.txt
         Fetch.fetch("http://" + HostName + "/robots.txt");
         if (Fetch.Details.WebContent != null) {
@@ -158,22 +144,18 @@ public class SiteCrawler implements Runnable {
         }
 
         if (URLQueue.isEmpty()) {
-            URLQueue.add("http://" + HostName + AcceptOnlyPrefixPath);
-        }
-
-        if (!tmpExists && arcExists) {
-            this.ArcFile.renameTo(TmpFile);
-            tmpExists = true;
-            arcExists = false;
+            URLQueue.add("http://" + HostName + crawlConf.AcceptOnlyPrefixPath);
         }
 
         try{
             rafWebDB = new MyRandomAccessFile(WebDBFile,"rw");
-            if (this.isAppend && tmpExists) {
-                this.waw = new WebArcWriter(this.TmpFile, ReadFile());
+            if (this.isAppend && this.ArcFile.exists()) {
+                this.waw = new WebArcWriter(this.ArcFile, ReadFile());
             } else {
-                this.waw = new WebArcWriter(this.TmpFile, this.ArcFile.getName(), this.isAppend, this.HostIP);
+                this.waw = new WebArcWriter(this.ArcFile, this.ArcFile.getName(), this.isAppend, this.HostIP);
             }
+            Crawl();
+            
         } catch (IOException ex) {
             Logger.getLogger(SiteCrawler.class.getName()).log(Level.SEVERE, null, ex);
             try{
@@ -189,47 +171,8 @@ public class SiteCrawler implements Runnable {
             return;
         }
         
-        try {
-            if (crawlConf != null && mode == Mode.preCrawl) {
-
-                if (preCrawl()) {
-                    crawlConf.UpdateStatus(HostName, CrawlerConfig.Status.Crawling);
-                } else {
-                    try {
-                        this.waw.close();
-                        this.rafWebDB.close();
-                    } catch (IOException ex) {
-                        Logger.getLogger(SiteCrawler.class.getName()).log(Level.SEVERE, null, ex);
-                    }
-                    this.TmpFile.delete();
-                    crawlConf.UpdateStatus(HostName, CrawlerConfig.Status.NotInScope);
-                    removeUpdateDB();
-                    return;
-                }
-            }
-            Crawl();
-        } finally {
-            try {
-                this.waw.close();
-                this.rafWebDB.close();
-            } catch (IOException ex) {
-                Logger.getLogger(SiteCrawler.class.getName()).log(Level.SEVERE, null, ex);
-            }
-        }
-
-        if(crawlConf != null){
-            crawlConf.dumpWebDB(WebDBFile);
-        }
-        if (arcExists) {
-            this.ArcFile.delete();
-        }
-        this.TmpFile.renameTo(ArcFile);
-        Compress(ArcFile, ArcGZFile);
-        this.ArcFile.delete();
-
-        if (crawlConf != null) {
-            crawlConf.UpdatePageCount(HostName, URLLoaded.size(), CrawlerConfig.Status.Finished);
-        }
+        status = Status.Finished;
+        crawlConf.Finishing(this);
 
     }
 
@@ -283,7 +226,7 @@ public class SiteCrawler implements Runnable {
 
     public void Crawl() {
         String Url;
-        while (!URLQueue.isEmpty() && URLLoaded.size() < MaxPage) {
+        while (!URLQueue.isEmpty() && URLLoaded.size() < crawlConf.MaxPage) {
             // 2.1 Fetch
             Url = URLQueue.get(0);
             System.out.println("Fetch: " + Url);
@@ -324,7 +267,7 @@ public class SiteCrawler implements Runnable {
     public void writeUpdateDB(String Url, String lang) {
         //"url","language",file_size,comment_size,js_size,style_size,content_size
         try {
-            rafWebDB.write(("\"" + Url.replaceAll("\"", "\"\"") + "\"," + (lang == null ? "null" : "\"" + lang + "\"") + "," + wu.FileSize + "," + wu.CommentSize + "," + wu.ScriptSize + "," + wu.StyleSize + "," + wu.ContentSize + "\n").getBytes());
+            rafWebDB.write(("\"" + Url.replaceAll("\"", "\"\"") + "\"," + (lang == null ? "null" : "\"" + lang + "\"") + "," + wu.FileSize + "," + wu.CommentSize + "," + wu.ScriptSize + "," + wu.StyleSize + "," + wu.ContentSize + "\n").getBytes("utf-8"));
             //System.out.println("\"" + Url.replaceAll("\"", "\"\"") + "\"," + (lang == null ? "null" : "\"" + lang + "\"") + "," + wu.FileSize + "," + wu.CommentSize + "," + wu.ScriptSize + "," + wu.StyleSize + "," + wu.ContentSize);
         } catch (IOException ex) {
             Logger.getLogger(SiteCrawler.class.getName()).log(Level.SEVERE, null, ex);
@@ -376,14 +319,14 @@ public class SiteCrawler implements Runnable {
     }
 
     public boolean isAllowedPreFixPath(String Path) {
-        return Path.startsWith(AcceptOnlyPrefixPath);
+        return Path.startsWith(crawlConf.AcceptOnlyPrefixPath);
     }
 
     public long ReadFile() {
         long LastPos = -1;
         long dbPos;
         String Line;
-        try (WebArcReader war = new WebArcReader(TmpFile, "utf-8")) {
+        try (WebArcReader war = new WebArcReader(ArcFile, "utf-8")) {
             // Read Update db
             dbPos = rafWebDB.getFilePointer();
             Line = rafWebDB.readLine();
@@ -440,7 +383,7 @@ public class SiteCrawler implements Runnable {
             Elements links = doc.select("meta");
             for (Element e : links) {
                 try {
-                    if (URLQueue.size() < MarginPage) {
+                    if (URLQueue.size() < crawlConf.MarginPage) {
                         if ("refresh".equalsIgnoreCase(e.attr("http-equiv"))) {
                             String[] tmp = e.attr("content").split(";");
                             tmp = tmp[tmp.length - 1].split("=");
@@ -458,13 +401,13 @@ public class SiteCrawler implements Runnable {
     }
 
     public void AnalyseLink(String url, Document doc) {
-        if (URLQueue.size() < MarginPage) {
+        if (URLQueue.size() < crawlConf.MarginPage) {
             try {
                 MyURL src = new MyURL(url);
                 Elements links = doc.select("a");
                 for (Element e : links) {
                     try {
-                        if (URLQueue.size() < MarginPage) {
+                        if (URLQueue.size() < crawlConf.MarginPage) {
                             AddURL(src.resolve(e.attr("href")));
                             //System.out.println(src.resolve(e.attr("href")).UniqURL);
                         } else {
@@ -478,7 +421,7 @@ public class SiteCrawler implements Runnable {
                 links = doc.select("frame,iframe");
                 for (Element e : links) {
                     try {
-                        if (URLQueue.size() < MarginPage) {
+                        if (URLQueue.size() < crawlConf.MarginPage) {
                             AddURL(src.resolve(e.attr("src")));
                             //System.out.println(src.resolve(e.attr("href")).UniqURL);
                         } else {
@@ -504,14 +447,25 @@ public class SiteCrawler implements Runnable {
          Logger.getLogger(Crawler.class.getName()).log(Level.SEVERE, null, ex);
          }*/
         //Crawler c = new Crawler("www.sat.or.th", ".", 200, true);
-        String HostName = args.length > 0 ? args[0] : "chaosuan.me.engr.tu.ac.th";
-        String StorePath = args.length > 1 ? args[1] : "data/crawldata";
+        String HostName = args.length > 0 ? args[0] : "gamecenter.kapook.com";
+        String StoreDir = args.length > 1 ? args[1] : "data/crawldata/";
         int limit = args.length > 2 ? Integer.parseInt(args[2]) : 1000;
         String SubHostPath = args.length > 3 ? args[3] : "/";
-        try(CrawlerConfig cfg = new CrawlerConfig(3)){
-            SiteCrawler c = new SiteCrawler(HostName, StorePath, limit, SubHostPath, false, cfg);
+        
+        
+        try {
+            CrawlerConfigList cfg = new CrawlerConfigList("GG",StoreDir);
+            
+            cfg.AcceptOnlyPrefixPath = SubHostPath;
+            cfg.MaxPage = limit;
+            cfg.log_id = 9;
+            cfg.MaxPage = 30;
+            cfg.MarginPage = cfg.MaxPage * 3;
+            cfg.MaxPreCrawl = 3;
+            
+            SiteCrawler c = new SiteCrawler(HostName,null, new File(StoreDir + "/" + HostName + ".arc"),new File(StoreDir + "/" + HostName + ".info"), cfg, false);
             c.run();
-        } catch(Exception ex){
+        } catch (IOException ex) {
             Logger.getLogger(SiteCrawler.class.getName()).log(Level.SEVERE, null, ex);
         }
         /*

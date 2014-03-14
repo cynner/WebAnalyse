@@ -88,12 +88,10 @@ public class ExtractLinkFromDMOZ {
                                 
                                 Link = URL.getHost();
                                 System.out.println(Dir + " " + cnt + " " + Link);
-                                /*
-                                crwl = new Crawler(Link, Dir, MaxPage, "/", true);
-                                crwl.run();
-                                */
-                                Runnable worker = new SiteCrawler(Link, Dir, MaxPage, "/", true);
-                                executor.execute(worker);
+
+                                
+                                //Runnable worker = new SiteCrawler(Link, Dir, MaxPage, "/", true);
+                                //executor.execute(worker);
                                 
                             } catch (Exception ex) {
                                 Logger.getLogger(ExtractLinkFromDMOZ.class.getName()).log(Level.SEVERE, null, ex);
@@ -103,10 +101,6 @@ public class ExtractLinkFromDMOZ {
                 } catch (UnsupportedEncodingException ex) {
                     Logger.getLogger(ExtractLinkFromDMOZ.class.getName()).log(Level.SEVERE, null, ex);
                 }
-                /*}else{
-                cnt++;
-                System.out.println("skip: " + cnt + ar.Record.URL );
-                }*/
             }
         } catch (IOException ex) {
             Logger.getLogger(ExtractLinkFromDMOZ.class.getName()).log(Level.SEVERE, null, ex);
@@ -124,8 +118,8 @@ public class ExtractLinkFromDMOZ {
                 else{
                     Link = f.getName();
                     Link = Link.substring(6,Link.length() - 4);
-                    Runnable worker = new SiteCrawler(Link,null, f, MaxPage, "/", false, null, SiteCrawler.Mode.Crawl);
-                    executor.execute(worker);
+                    //Runnable worker = new SiteCrawler(Link,null, f, MaxPage, "/", false, null, SiteCrawler.Mode.Crawl);
+                    //executor.execute(worker);
                 }
             }
         }

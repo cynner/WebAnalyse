@@ -155,6 +155,7 @@ public class ThreadPool{
         System.out.println("Finished all threads");
     }
     
+    /*
     public static void RunCrawler(int MaxPage){
         String Host;
         ProjectTester.WorkBufferSize = ProjectTester.ThreadNo * 10;
@@ -169,6 +170,8 @@ public class ThreadPool{
                 //File f = dir.listFiles((FileFilter)(new WildcardFileFilter( "*" + Host + "*.arc")))[0];
                 //System.out.println(OutDir);
                 Runnable worker = new SiteCrawler(Host, ProjectTester.outputDir, MaxPage, "/", true);
+                
+                
                 executor.execute(worker);
             }
         }
@@ -180,7 +183,7 @@ public class ThreadPool{
             System.out.println("End by sigterm..");
         System.out.println("Finished all threads");
     }
-    
+    */
     public static void RunExampleThread(int CntThread, int Work)  {
         
         ExecutorService executor = Executors.newFixedThreadPool(CntThread);

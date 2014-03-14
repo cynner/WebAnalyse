@@ -47,7 +47,7 @@ public class MyURL {
         if (URL.contains("\n")) {
             throw new MalformedURLException("Newline char could not be contain in url.");
         }
-        URL = URL.replaceAll("\r", "");
+        URL = URL.replaceAll("\\r", "");
         if (URL.equals("")) {
             return this;
         } else if (isDirectURL(URL)) {
@@ -77,7 +77,10 @@ public class MyURL {
         if (a < 0) {
             throw new Exception("Empty protocol.");
         }
-        this.Protocol = URL.substring(0, a);
+        this.Protocol = URL.substring(0, a).toLowerCase();
+        if(Protocol.contains(":") || Protocol.contains("/")){
+            throw new Exception("Wrong scheme : " + Protocol);
+        }
         a += 3;
         if (URL.length() <= a || URL.charAt(a) == '/' || URL.charAt(a) == ':') {
             throw new Exception("Empty host name.");
@@ -199,8 +202,11 @@ public class MyURL {
     }
 
     public static void main(String[] args) throws Exception {
-        MyURL A = new MyURL("http://www.tplnews.com/toyota-cup-2013-%e0%b9%80%e0%b8%81%e0%b8%a9%e0%b8%95%e0%b8%a3%e0%b8%a8%e0%b8%b2%e0%b8%aa%e0%b8%95%e0%b8%a3%e0%b9%8c-%e0%b9%80%e0%b8%ad%e0%b8%9f%e0%b8%8b%e0%b8%b5-0-6-%e0%b8%ad%e0%b8%b4%e0%b8%99/");
+        String URLLL= "/search-tag-id-%E0%B9%80%E0%B8%81%E0%B8%A1%E0%B8%AA%E0%B9%8C%E0%B8%9D%E0%B8%B6%E0%B8%81%E0%B8%97%E0%B8%B3%E0%B8%AD%E0%B8%B2%E0%B8%AB%E0%B8%B2%E0%B8%A3http://gamecenter.kapook.com/search-tag-id-เกมส์ฝึกทำอาหาร";
+        MyURL A = new MyURL(URLLL);
         System.out.println(A.UniqURL);
+        
+        
     }
 
     /**
@@ -208,20 +214,21 @@ public class MyURL {
      */
     public void NormPath() {
         
-        boolean needToChange = false;
         int numChars = Path.length();
         StringBuilder sb = new StringBuilder(numChars > 500 ? numChars / 2 : numChars);
         int i = 0;
 
         char c,t;
-        byte[] bytes = null;
+        int v;
+        int maxblen=2042,blen=2048,pos=0;
+        byte[] bytes = new byte[blen];
+        
         while (i < numChars) {
             c = Path.charAt(i);
             switch (c) {
                 case ' ':
                     sb.append("%20");
                     i++;
-                    needToChange = true;
                     break;
                 case '%':
                     /*
@@ -232,53 +239,56 @@ public class MyURL {
                      * character(s) they represent in the provided
                      * encoding.
                      */
-                    
-                    if(Path.charAt(i+1) == '2'){
-                        t = Path.charAt(i+2);
-                        if(t == '0' || t == '5'  ){
-                            i+=3;
-                            sb.append("%2");
-                            sb.append(t);
-                            break;
-                        }
-                    }
-
                     try {
-
-                    // (numChars-i)/3 is an upper bound for the number
-                        // of remaining bytes
-                        if (bytes == null) {
-                            bytes = new byte[(numChars - i) / 3];
-                        }
-                        int pos = 0;
-
                         while (((i + 2) < numChars)
                                 && (c == '%')) {
-                            int v = Integer.parseInt(Path.substring(i + 1, i + 3), 16);
-                            if (v < 0) {
-                                throw new IllegalArgumentException("URLDecoder: Illegal hex characters in escape (%) pattern - negative value");
+                            v = Integer.parseInt(Path.substring(i + 1, i + 3), 16);
+                            
+                            switch(v){
+                                case 0x0A:
+                                    bytes[pos++] = '%';
+                                    bytes[pos++] = 0x30; // 0x30 = '0' //
+                                    bytes[pos++] = 0x41; // 0x41 = 'A' //
+                                    break;
+                                case 0x0D:
+                                    bytes[pos++] = '%';
+                                    bytes[pos++] = 0x30; // 0x30 = '0' //
+                                    bytes[pos++] = 0x44; // 0x44 = 'D' //
+                                    break;
+                                case 0x20: 
+                                    bytes[pos++] = '%';
+                                    bytes[pos++] = 0x32; // 0x32 = '2' //
+                                    bytes[pos++] = 0x30; // 0x30 = '0' //
+                                    break;
+                                case 0x25: 
+                                    bytes[pos++] = '%';
+                                    bytes[pos++] = 0x32; // 0x32 = '2' //
+                                    bytes[pos++] = 0x35; // 0x30 = '5' //
+                                    break;
+                                default:
+                                    bytes[pos++] = (byte)v;
+                                    break;
                             }
-                            bytes[pos++] = (byte) v;
                             i += 3;
                             if (i < numChars) {
                                 c = Path.charAt(i);
                             }
+                            
+                            if(pos >= maxblen){
+                                sb.append(new String(bytes, 0, pos));
+                                pos = 0;
+                            }
+                            
                         }
-
-                    // A trailing, incomplete byte encoding such as
-                        // "%x" will cause an exception to be thrown
-                        if ((i < numChars) && (c == '%')) {
-                            throw new IllegalArgumentException(
-                                    "URLDecoder: Incomplete trailing escape (%) pattern");
+                        if(pos > 0){
+                            sb.append(new String(bytes, 0, pos));
+                            pos = 0;
                         }
-
-                        sb.append(new String(bytes, 0, pos));
                     } catch (NumberFormatException e) {
                         throw new IllegalArgumentException(
                                 "URLDecoder: Illegal hex characters in escape (%) pattern - "
                                 + e.getMessage());
                     }
-                    needToChange = true;
                     break;
                 default:
                     sb.append(c);
@@ -286,8 +296,8 @@ public class MyURL {
                     break;
             }
         }
-        if(needToChange)
-            Path = sb.toString();
+        //if(needToChange)
+        Path = sb.toString();
     }
     
     public static String NormQuery(String query){

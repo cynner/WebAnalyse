@@ -118,7 +118,7 @@ public class Fetcher {
             uc.setReadTimeout(ReadTimeout);
             uc.setRequestMethod("GET");
 
-
+            
             this.ResponseCode = uc.getResponseCode();
             this.ContentTypeOrg = uc.getContentType();
             this.ContentEncoding = uc.getContentEncoding();

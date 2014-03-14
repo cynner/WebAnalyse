@@ -28,20 +28,25 @@ import java.util.logging.Logger;
  *
  * @author malang
  */
-public class MainCrawler{
+public class MainCrawlerList{
+    public static final String DefaultWorkingDirectory = "data/crawler";
     
-    public String DBName = "resource/crawler.sqlite3";
-    public String WebDBName = "resource/webpage.sqlite3";
-    public static String DefaultSitePath = "data/crawldata2";
+    // Config for CrawlerConfigList
+    public static final String subDirArc = "crawl";
+    public static final String SuffixArc = ".arc";
+    public static final String strSeed = "seed.txt";
+    public final String strWorkingDirectory;
+    public final String TaskName;
+    public final File fileSeed;
+    
+    public CrawlerConfig.Mode mode = CrawlerConfig.Mode.Crawl;
+    public String AcceptOnlyPrefixPath = "/";
+    public int MaxPreCrawl = 3;
+    public int log_id = 9;
     
     
     //public int LimitCrawlSite = 10000;
-    public int MaxPagePerSite = 1000;
-    public int CacheSize = 1000;
     public int Threads = 10;
-    public String Dirname;
-    public String Selcond = "(hostname like '%.th')";//"(log_id is NULL OR location='TH')";// "log_id is NULL";
-    public String Fixedcond = "status > 0";
     
     SQLiteConnection dbc;
     
@@ -53,19 +58,27 @@ public class MainCrawler{
     public CrawlerConfigMain cfg;
     
 
-    public MainCrawler(String DirName, int MaxPreCrawl, int MaxPagePerSite){
+    public MainCrawlerList(String TaskName, String strWorkingDirectory, int MaxPagePerSite){
         //super(MaxPreCrawl);
-        this.Dirname = DirName;
-        this.MaxPagePerSite = MaxPagePerSite;
+        
+        this.TaskName = TaskName;
+        this.strWorkingDirectory = strWorkingDirectory;
         cfg = new CrawlerConfigMain();
+        cfg.AcceptOnlyPrefixPath = this.AcceptOnlyPrefixPath;
+        cfg.MaxPreCrawl = this.MaxPreCrawl;
+        cfg.AcceptOnlyPrefixPath = this.AcceptOnlyPrefixPath;
+        cfg.MaxPage = MaxPagePerSite;
+        cfg.MarginPage = MaxPagePerSite * 3;
+        cfg.log_id = this.log_id;
+        this.fileSeed = new File(strWorkingDirectory + "/" + TaskName + "/" + strSeed);
     }
     
     public static void main(String[] args) throws IOException{
-        String Dir = args.length > 0 ? args[0] : DefaultSitePath;
+        String Dir = args.length > 0 ? args[0] : DefaultWorkingDirectory;
         LanguageDetector.init();
         GeoIP.LoadToMem();
         
-        MainCrawler mc = new MainCrawler(Dir,3,1000);
+        MainCrawlerList mc = new MainCrawlerList("task-0001",Dir,1000);
         
         //mc.ImportSeedSite(new File("Hop2.pure"));
         //mc.RunExampleStatement();
@@ -99,21 +112,11 @@ public class MainCrawler{
     public void run(){
         String Location,HostName,HostIP;
         Status stat;
-        int cycle=1;
-        
+        String Line;
         ExecutorService executor;
         
-        /*db = new SQLiteConnection(new File(DBName));
-        try {
-            db.open(false);
-        } catch (SQLiteException ex) {
-            Logger.getLogger(MainCrawler.class.getName()).log(Level.SEVERE, null, ex);
-        }*/
-        
-            
-        while(NextCache()){
-            
-            System.out.println("====== newFixedThreadPool cycle #" + cycle +" ======");
+        try(BufferedReader br = new BufferedReader (new FileReader(fileSeed))){
+            System.out.println("====== newFixedThreadPool ======");
             
             executor = Executors.newFixedThreadPool(this.Threads);
             //System.out.println("gg");
@@ -165,8 +168,7 @@ public class MainCrawler{
             
             executor.shutdown();
             
-            System.out.println("====== shutdown cycle #" + cycle +" ======");
-            cycle++;
+            System.out.println("====== shutdown ======");
             while (!executor.isTerminated()) {
             }
             
@@ -174,12 +176,16 @@ public class MainCrawler{
                 cfg.dbq.stop(true).join();
                 cfg.webdbq.stop(true).join();
             } catch (InterruptedException ex) {
-                Logger.getLogger(MainCrawler.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(MainCrawlerList.class.getName()).log(Level.SEVERE, null, ex);
             }
             cfg.dbq = new SQLiteQueue(DBDriver.TableConfig.FileWebSiteDB);
             cfg.dbq.start();
             cfg.webdbq = new SQLiteQueue(DBDriver.TableConfig.FileWebPageDB);
             cfg.webdbq.start();
+        } catch (FileNotFoundException ex) {
+            Logger.getLogger(MainCrawlerList.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IOException ex) {
+            Logger.getLogger(MainCrawlerList.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
     
@@ -216,7 +222,7 @@ public class MainCrawler{
                 System.out.println("Finished. ");
             
             } catch ( SQLiteException | IOException ex) {
-                Logger.getLogger(MainCrawler.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(MainCrawlerList.class.getName()).log(Level.SEVERE, null, ex);
             } finally{
                 db.dispose();
             }
@@ -256,12 +262,12 @@ public class MainCrawler{
                 System.out.println("Finished. ");
             
             } catch ( SQLiteException | IOException ex) {
-                Logger.getLogger(MainCrawler.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(MainCrawlerList.class.getName()).log(Level.SEVERE, null, ex);
             } finally{
                 db.dispose();
             }
         } catch (FileNotFoundException ex) {
-            Logger.getLogger(MainCrawler.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(MainCrawlerList.class.getName()).log(Level.SEVERE, null, ex);
         }
         
     }
@@ -278,7 +284,7 @@ public class MainCrawler{
             //db.exec("UPDATE website SET lastupdate=datetime('now','localtime'), status=-2 WHERE status=9 AND hostname LIKE '%.myfri3nd.com';");
             
         } catch (SQLiteException ex) {
-            Logger.getLogger(MainCrawler.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(MainCrawlerList.class.getName()).log(Level.SEVERE, null, ex);
         } finally {
             db.dispose();
         }
@@ -321,7 +327,7 @@ public class MainCrawler{
                 st.dispose();
             }
         } catch (SQLiteException ex) {
-            Logger.getLogger(MainCrawler.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(MainCrawlerList.class.getName()).log(Level.SEVERE, null, ex);
         } finally {
             db.dispose();
         }
@@ -351,7 +357,7 @@ public class MainCrawler{
                             st.dispose();
                         }
                     } catch (SQLiteException ex) {
-                        Logger.getLogger(MainCrawler.class.getName()).log(Level.SEVERE, null, ex);
+                        Logger.getLogger(MainCrawlerList.class.getName()).log(Level.SEVERE, null, ex);
                     } finally {
                         //connection.dispose();
                     }
