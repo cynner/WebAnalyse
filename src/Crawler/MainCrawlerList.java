@@ -6,6 +6,7 @@
 
 package Crawler;
 
+import ArcFileUtils.MyRandomAccessFile;
 import Crawler.CrawlerConfig.Status;
 import LanguageUtils.LanguageDetector;
 import com.almworks.sqlite4java.SQLiteConnection;
@@ -15,10 +16,14 @@ import com.almworks.sqlite4java.SQLiteQueue;
 import com.almworks.sqlite4java.SQLiteStatement;
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.logging.Level;
@@ -32,15 +37,19 @@ public class MainCrawlerList{
     public static final String DefaultWorkingDirectory = "data/crawler";
     
     // Config for CrawlerConfigList
-    public static final String subDirArc = "crawl";
+    public static final String subDirTmp = "tmp";
+    public static final String PrefixArc = "crawl-";
     public static final String SuffixArc = ".arc";
+    public static final String PrefixInfo = "web-";
+    public static final String SuffixInfo = ".info";
     public static final String strSeed = "seed.txt";
     public final String strWorkingDirectory;
     public final String TaskName;
     public final File fileSeed;
+    public final String strDirTmp;
     
     public CrawlerConfig.Mode mode = CrawlerConfig.Mode.Crawl;
-    public String AcceptOnlyPrefixPath = "/";
+    public String AcceptOnlyPrefixPath;
     public int MaxPreCrawl = 3;
     public int log_id = 9;
     
@@ -50,52 +59,61 @@ public class MainCrawlerList{
     
     SQLiteConnection dbc;
     
-    public ArrayList<String> HostNameQueue = new ArrayList<>();
-    public ArrayList<String> HostIPQueue = new ArrayList<>();
-    public ArrayList<String> LocationQueue = new ArrayList<>();
-    public ArrayList<Status> StatusQueue = new ArrayList<>();
+    public CrawlerConfigList cfg;
     
-    public CrawlerConfigMain cfg;
-    
+    public static String getSeedPath(String strWorkingDirectory, String TaskName){
+        return strWorkingDirectory + "/" + TaskName + "/" + strSeed;
+    }
 
-    public MainCrawlerList(String TaskName, String strWorkingDirectory, int MaxPagePerSite){
+    public MainCrawlerList(String TaskName, String strWorkingDirectory, int MaxPagePerSite, String AcceptOnlyPrefixPath) throws IOException{
         //super(MaxPreCrawl);
-        
         this.TaskName = TaskName;
         this.strWorkingDirectory = strWorkingDirectory;
-        cfg = new CrawlerConfigMain();
+        this.strDirTmp = strWorkingDirectory + "/" + subDirTmp ;
+        this.AcceptOnlyPrefixPath = AcceptOnlyPrefixPath;
+        
+        cfg = new CrawlerConfigList(TaskName, strWorkingDirectory);
         cfg.AcceptOnlyPrefixPath = this.AcceptOnlyPrefixPath;
         cfg.MaxPreCrawl = this.MaxPreCrawl;
         cfg.AcceptOnlyPrefixPath = this.AcceptOnlyPrefixPath;
         cfg.MaxPage = MaxPagePerSite;
         cfg.MarginPage = MaxPagePerSite * 3;
         cfg.log_id = this.log_id;
-        this.fileSeed = new File(strWorkingDirectory + "/" + TaskName + "/" + strSeed);
+        this.fileSeed = new File(getSeedPath(strWorkingDirectory, TaskName));
+    }
+    
+    public static void Import(String TaskName, String strWorkingDirectory, File fileOrgSeed) throws IOException {
+        File fileSeed = new File(getSeedPath(strWorkingDirectory, TaskName));
+        if(fileSeed.exists())
+            throw new IOException("Seed File Exists.");
+        File fileDir = fileSeed.getParentFile();
+        if(!fileDir.isDirectory()){
+            if(fileDir.exists()){
+                throw new IOException("Can't create directory " + fileDir.getCanonicalPath());
+            }else{
+                fileDir.mkdirs();
+            }
+        }
+        Files.copy(fileOrgSeed.toPath(), new FileOutputStream(fileSeed));
     }
     
     public static void main(String[] args) throws IOException{
         String Dir = args.length > 0 ? args[0] : DefaultWorkingDirectory;
+        String TaskName = args.length > 1 ? args[1] : "task-0001";
+        String strFileSeed = args.length > 2 ? args[2] : (args.length > 0 ? null : "testlist.txt");
         LanguageDetector.init();
         GeoIP.LoadToMem();
-        
-        MainCrawlerList mc = new MainCrawlerList("task-0001",Dir,1000);
+        if(strFileSeed != null){
+            if(!(new File(getSeedPath(DefaultWorkingDirectory, TaskName))).exists())
+                MainCrawlerList.Import(TaskName, Dir, new File(strFileSeed));
+        }
+        MainCrawlerList mc = new MainCrawlerList(TaskName,Dir,1000,"/");
         
         //mc.ImportSeedSite(new File("Hop2.pure"));
         //mc.RunExampleStatement();
         //mc.MyImportSeedSite(new File("sumout.txt"));
         //mc.RunExampleSelect();
         
-        File dir = new File(Dir);
-        
-        if(!dir.isDirectory()){
-            if(dir.exists()){
-                System.err.println(Dir + " is not a directory");
-                System.exit(1);
-            }else{
-                System.out.println("Crawl data will stored in " + Dir);
-                dir.mkdir();
-            }
-        }
         
         mc.run();
     }
@@ -109,79 +127,56 @@ public class MainCrawlerList{
     //    2.3 Fetching() - Change status to crawling(1) Crawl 2.1
     //    2.4 Finishing() - if finished change status to finished(2)
     
-    public void run(){
-        String Location,HostName,HostIP;
-        Status stat;
-        String Line;
+    public void run() throws IOException{
+        String HostName;
         ExecutorService executor;
+        File fArc,fInfo;
+        
+        File fileDirTmp = new File(strDirTmp);
+        if(!fileDirTmp.isDirectory()){
+            if(!fileDirTmp.exists()){
+                fileDirTmp.mkdirs();
+            }else{
+                throw new IOException("Can't create directory " + strDirTmp + ".");
+            }
+        }
+        
+        HashSet<String> hs = new HashSet<>();
+        if(cfg.fileHostCrawled.exists()){
+            long len;
+            try(MyRandomAccessFile raf = new MyRandomAccessFile(cfg.fileHostCrawled, "r")){
+                // just skip
+                len = raf.readLong();
+                while(raf.getFilePointer() < len){
+                    hs.add(raf.readLine());
+                }
+            }
+        }
         
         try(BufferedReader br = new BufferedReader (new FileReader(fileSeed))){
-            System.out.println("====== newFixedThreadPool ======");
+            System.out.println("====== Starting ======");
             
             executor = Executors.newFixedThreadPool(this.Threads);
             //System.out.println("gg");
                 
-            while(Next()){
-                Runnable worker; 
-                HostIP = HostIPQueue.remove(0);
-                HostName = HostNameQueue.remove(0);
-                Location = LocationQueue.remove(0);
-                stat = StatusQueue.remove(0);
-                System.out.println(HostName);
-                if(HostIP == null){
-                    HostIP = GeoIP.Domain2IP(HostName);
-                    if(HostIP != null){
-                        cfg.UpdateIP(HostName, HostIP);
-                    }else{
-                        cfg.UpdateStatus(HostName, Status.NoHostIP);
-                        continue;
-                    }
-                }
-                if(Location == null){
-                    Location = GeoIP.IP2ISOCountry(HostIP);
-                
-                    if(Location != null){
-                        cfg.UpdateLocation(HostName, Location);
-                    }else{
-                        cfg.UpdateStatus(HostName, Status.NoHostLocation);
-                        continue;
-                    }
-                    
-                }
             
-                worker = new SiteCrawler(HostName, HostIP, new File(Dirname + "/" + HostName + ".arc"),new File(Dirname + "/" + HostName + ".info"), cfg, true);
-                /*
-                if(Location.equals("TH")){
-                    worker = new SiteCrawler(HostName, HostIP, Dirname, MaxPagePerSite, "/",true,this, SiteCrawler.Mode.Crawl);
-                }else{
-                    continue;
-                    /*
-                    worker = new SiteCrawler(HostName, HostIP, Dirname, MaxPagePerSite, 
-                       "/",true,this, 
-                       ((stat == Status.Crawling) ? SiteCrawler.Mode.Crawl :  SiteCrawler.Mode.preCrawl));
-                    // * /
+            
+            while((HostName = br.readLine()) != null){
+
+                if(!hs.contains(HostName)){
+                    fArc = new File(strDirTmp + "/" + PrefixArc + HostName + SuffixArc);
+                    fInfo = new File(strDirTmp + "/" + PrefixInfo + HostName + SuffixInfo);
+                    Runnable worker = new SiteCrawler(HostName, null, fArc,fInfo, cfg, true);
+                    executor.execute(worker);
                 }
-                */
-                
-                executor.execute(worker);
             }
             
             executor.shutdown();
             
-            System.out.println("====== shutdown ======");
             while (!executor.isTerminated()) {
             }
             
-            try {
-                cfg.dbq.stop(true).join();
-                cfg.webdbq.stop(true).join();
-            } catch (InterruptedException ex) {
-                Logger.getLogger(MainCrawlerList.class.getName()).log(Level.SEVERE, null, ex);
-            }
-            cfg.dbq = new SQLiteQueue(DBDriver.TableConfig.FileWebSiteDB);
-            cfg.dbq.start();
-            cfg.webdbq = new SQLiteQueue(DBDriver.TableConfig.FileWebPageDB);
-            cfg.webdbq.start();
+            System.out.println("====== Success ======");
         } catch (FileNotFoundException ex) {
             Logger.getLogger(MainCrawlerList.class.getName()).log(Level.SEVERE, null, ex);
         } catch (IOException ex) {
@@ -189,188 +184,6 @@ public class MainCrawlerList{
         }
     }
     
-    
-    
-    
-    public void ImportSeedSite(File Seed) throws FileNotFoundException, IOException{
-        
-        SQLiteConnection db = new SQLiteConnection(new File(DBName));
-        //BufferedReader br;
-        try (BufferedReader br = new BufferedReader(new FileReader(Seed))){
-            try{
-                db.open(true);
-                String Line;
-                String [] x;
-            
-                // Status 0 For not begin, 1 for crawling, 2 for finished, -1 for can't download.
-                //db.exec("DROP TABLE host;");
-                db.exec("BEGIN;");
-           
-                db.exec("CREATE TABLE IF NOT EXISTS website(id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, hostname VARCHAR(255) UNIQUE NOT NULL, ip VARCHAR(40), location VARCHAR(2), page_count INTEGER, status TINYINT, lastupdate DATETIME);");
-                //Line = br.readLine();
-                //x = Line.split(":");
-                
-                //String query = "INSERT INTO website(hostname,ip,location) VALUES('"+x[2]+"','"+x[1] + (x[0].equals("null") ? "',null," : "'," + x[0] + "')");
-                while( (Line = br.readLine()) != null){
-                    System.out.println(Line);
-                    db.exec("INSERT OR IGNORE INTO website(hostname,status) VALUES('" 
-                            + Line + "',0);");
-                }
-                System.out.println("Exec. ");
-            
-                db.exec("COMMIT;");
-                System.out.println("Finished. ");
-            
-            } catch ( SQLiteException | IOException ex) {
-                Logger.getLogger(MainCrawlerList.class.getName()).log(Level.SEVERE, null, ex);
-            } finally{
-                db.dispose();
-            }
-        }
-    }
-    
-    public void MyImportSeedSite(File Seed) throws IOException{
-        
-        SQLiteConnection db = new SQLiteConnection(new File(DBName));
-        
-        try (BufferedReader br = new BufferedReader(new FileReader(Seed))){
-            try{
-                db.open(true);
-                String Line;
-                String [] x;
-            
-                // Status 0 For not begin, 1 for crawling, 2 for finished, -1 for can't download.
-                //db.exec("DROP TABLE host;");
-                db.exec("BEGIN;");
-           
-                db.exec("CREATE TABLE IF NOT EXISTS website(id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, hostname VARCHAR(255) UNIQUE NOT NULL, ip VARCHAR(40), location VARCHAR(2), page_count INTEGER, status TINYINT);");
-                //Line = br.readLine();
-                //x = Line.split(":");
-                
-                //String query = "INSERT INTO website(hostname,ip,location) VALUES('"+x[2]+"','"+x[1] + (x[0].equals("null") ? "',null," : "'," + x[0] + "')");
-                while( (Line = br.readLine()) != null){
-                    x = Line.split(":");
-                    System.out.println(Line);
-                    db.exec("INSERT INTO website(hostname,ip,location) VALUES('" 
-                            + x[2] 
-                            + (x[1].equals("null") ? "',null" : "','" + x[1] + "'") 
-                            + (x[0].equals("null") ? ",null);" : ",'" + x[0] + "');"));
-                }
-                System.out.println("Exec. ");
-            
-                db.exec("COMMIT;");
-                System.out.println("Finished. ");
-            
-            } catch ( SQLiteException | IOException ex) {
-                Logger.getLogger(MainCrawlerList.class.getName()).log(Level.SEVERE, null, ex);
-            } finally{
-                db.dispose();
-            }
-        } catch (FileNotFoundException ex) {
-            Logger.getLogger(MainCrawlerList.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        
-    }
-    
-    public void RunExampleStatement(){
-        
-        SQLiteConnection db = new SQLiteConnection(new File(DBName));
-        try {
-            db.open(false);
-            //db.exec("UPDATE website SET status=2 WHERE 1;");
-            //db.exec("ALTER TABLE website ADD COLUMN lastupdate DATETIME;");
-            //db.exec("UPDATE website SET lastupdate=datetime('now','localtime') WHERE status=2;");
-            db.exec("UPDATE website SET status=9 WHERE lastupdate > '2013-12-06 20:58:00';");
-            //db.exec("UPDATE website SET lastupdate=datetime('now','localtime'), status=-2 WHERE status=9 AND hostname LIKE '%.myfri3nd.com';");
-            
-        } catch (SQLiteException ex) {
-            Logger.getLogger(MainCrawlerList.class.getName()).log(Level.SEVERE, null, ex);
-        } finally {
-            db.dispose();
-        }
-    }
-    
-    public void RunExampleSelect(){
-        
-        SQLiteConnection db = new SQLiteConnection(new File(DBName));
-        try {
-            db.open(true);
-            //SQLiteStatement st = db.prepare("SELECT id,hostname FROM website WHERE ip is null;");
-            //SQLiteStatement st = db.prepare("SELECT * FROM website WHERE status=-1 LIMIT 100;");
-            //SQLiteStatement st = db.prepare("SELECT * FROM website WHERE lastupdate > '2013-12-06 17:07:00' LIMIT 100;");
-            
-            SQLiteStatement st = db.prepare("SELECT * FROM website WHERE lastupdate > '2013-12-06 19:07:00' LIMIT 100;");
-            //SQLiteStatement st = db.prepare("SELECT * FROM website WHERE lastupdate not null LIMIT 5;");
-            try {
-                int cols = st.columnCount();
-                for(int i=0;i<cols;i++){
-                    System.out.print(st.getColumnName(i) + "|");
-                }
-                System.out.println();
-                while (st.step()) {
-                    for(int i=0;i<cols;i++){
-                        System.out.print(st.columnValue(i) + "|");
-                    }
-                    System.out.println();
-                    /*
-                    String ISO,IP;
-                    IP = GeoIP.Domain2IP(st.columnString(1));
-                    if(IP != null){
-                        if((ISO = GeoIP.IP2ISOCountry(IP)) != null){
-                            System.out.println("UPDATE!!");
-                            db.exec("UPDATE website SET location = '" + ISO + "', ip = '" + IP + "' WHERE id = " + st.columnValue(0) );
-                        }
-                    }
-                    */
-                }
-            } finally {
-                st.dispose();
-            }
-        } catch (SQLiteException ex) {
-            Logger.getLogger(MainCrawlerList.class.getName()).log(Level.SEVERE, null, ex);
-        } finally {
-            db.dispose();
-        }
-    }
-    
-    
-    
-    public boolean NextCache() {
-        cfg.dbq.execute(new SQLiteJob<Object>() {
-            @Override
-            protected Object job(SQLiteConnection connection) throws SQLiteException {
-                if (HostNameQueue.isEmpty()) {
-                    //SQLiteConnection db = new SQLiteConnection(new File(DBName));
-                    try {
-                //connection.open(false);
-                        //SQLiteStatement st = db.prepare("SELECT id,hostname FROM website WHERE ip is null;");
-                        String cond = Fixedcond + ((Selcond != null && !Selcond.isEmpty()) ? " AND " + Selcond : "");
-                        SQLiteStatement st = connection.prepare("SELECT hostname,ip,location,status FROM website WHERE " + cond + " LIMIT " + CacheSize + ";");
-                        try {
-                            while (st.step()) {
-                                HostNameQueue.add(st.columnString(0));
-                                HostIPQueue.add(st.columnString(1));
-                                LocationQueue.add(st.columnString(2));
-                                StatusQueue.add(Status.GetKey(st.columnInt(3)));
-                            }
-                        } finally {
-                            st.dispose();
-                        }
-                    } catch (SQLiteException ex) {
-                        Logger.getLogger(MainCrawlerList.class.getName()).log(Level.SEVERE, null, ex);
-                    } finally {
-                        //connection.dispose();
-                    }
-                }
-                return null;
-            }
-        }).complete();
-        return !HostNameQueue.isEmpty();
-    }
-    
-    public boolean Next(){
-        return !HostNameQueue.isEmpty();
-    }
     
     
 }
