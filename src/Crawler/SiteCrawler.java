@@ -129,7 +129,6 @@ public class SiteCrawler implements Runnable {
         } else {
             status = Status.NoHostIP; 
         }
-        crawlConf.Finishing(this);
         System.out.println(Thread.currentThread().getName() + " " + HostName + " End.");
     }
 
@@ -173,6 +172,7 @@ public class SiteCrawler implements Runnable {
         }
         
         status = Status.Finished;
+        crawlConf.Finishing(this);
 
     }
 

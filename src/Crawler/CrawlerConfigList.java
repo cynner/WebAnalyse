@@ -36,11 +36,9 @@ public class CrawlerConfigList extends CrawlerConfig {
     public static final String SuffixGZ = ".gz";
     public static final String strMergeWebInfo = "webpageinfo.txt";
     public static final String strHostInfo = "websiteinfo.txt";
-    public static final String strHostCrawled = "websitecrawled.txt";
     public final String TaskName;
     public final File fileMergeWebInfo;
     public final File fileHostInfo;
-    public final File fileHostCrawled;
     public final String strWorkingDirectory;
     public final String strDirArcGZ;
 
@@ -50,7 +48,6 @@ public class CrawlerConfigList extends CrawlerConfig {
         this.strDirArcGZ = strWorkingDirectory + "/" + subDirArcGZ + "/" + TaskName;
         this.fileMergeWebInfo = new File(strWorkingDirectory + "/" + TaskName + "/" + strMergeWebInfo);
         this.fileHostInfo = new File(strWorkingDirectory + "/" + TaskName + "/" + strHostInfo);
-        this.fileHostCrawled = new File(strWorkingDirectory + "/" + TaskName + "/" + strHostCrawled);
         File[] D = new File[3];
         D[0] = new File(this.strWorkingDirectory);
         D[1] = new File(this.strDirArcGZ);
@@ -96,58 +93,19 @@ public class CrawlerConfigList extends CrawlerConfig {
         }
     }
     
-    public void addCrawledList(String HostName) {
-        Long pos;
-        synchronized (fileHostCrawled) {
-            boolean fileExists = fileHostCrawled.exists();
-            try (MyRandomAccessFile raf = new MyRandomAccessFile(fileHostCrawled, "rw")) {
-
-                if (fileExists) {
-                    pos = raf.readLong();
-                    raf.seek(pos);
-                } else {
-                    pos = (long) (Long.SIZE / 8);
-                    raf.writeLong(pos);
-                }
-                raf.write((HostName + "\n").getBytes("utf-8"));
-                pos = raf.getFilePointer();
-                raf.seek(0);
-                raf.writeLong(pos);
-            } catch (FileNotFoundException ex) {
-                Logger.getLogger(CrawlerConfigList.class.getName()).log(Level.SEVERE, null, ex);
-            } catch (IOException ex) {
-                Logger.getLogger(CrawlerConfigList.class.getName()).log(Level.SEVERE, null, ex);
-            }
-        }
-    }
-    
     @Override
     public void Finishing(SiteCrawler s){
-        if(s.URLLoaded.size() > 0){
-            addWebInfo(s.WebDBFile);
-            BGZFCompress.Compress(s.ArcFile, new File(this.strDirArcGZ + "/" + s.ArcFile.getName() + SuffixGZ));
-        }
-        String Location = null;
-        if(s.HostIP != null)
-            Location = GeoIP.IP2ISOCountry(s.HostIP);
-        if(Location != null)
-            s.status = Status.Finished;
-        UpdateHostInfo(s.HostName, s.HostIP, Location, s.status, s.URLLoaded.size());
-        addCrawledList(s.HostName);
+        addWebInfo(s.WebDBFile);
         s.WebDBFile.delete();
+        BGZFCompress.Compress(s.ArcFile, new File(this.strDirArcGZ + "/" + s.ArcFile.getName() + ".gz"));
         s.ArcFile.delete();
-        
+        UpdateHostInfo(s.HostName, s.HostIP, GeoIP.IP2ISOCountry(s.HostIP), s.status, s.URLLoaded.size());
     }
 
     @Override
     public boolean isAccept(WebArcRecord f) {
         return true;
         //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-    
-    public boolean isCrawled(File ArcFile){
-        File chk = new File(this.strDirArcGZ + "/" + ArcFile.getName() + SuffixGZ);
-        return chk.exists();
     }
     
     public void UpdateHostInfo(String HostName, String IP, String Location, Status stat, int page_count){
