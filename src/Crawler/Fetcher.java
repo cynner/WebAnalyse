@@ -22,7 +22,8 @@ import org.apache.commons.io.IOUtils;
  */
 public class Fetcher {
     
-
+    private final int size_buff = 2048; 
+    private byte[] buff = new byte[size_buff];
     public boolean isSuccess;
     public Map<String , List<String>> Headers;
     public HttpURLConnection uc;
@@ -117,7 +118,6 @@ public class Fetcher {
             uc.setConnectTimeout(Timeout);
             uc.setReadTimeout(ReadTimeout);
             uc.setRequestMethod("GET");
-
             
             this.ResponseCode = uc.getResponseCode();
             this.ContentTypeOrg = uc.getContentType();
@@ -156,6 +156,8 @@ public class Fetcher {
     
     public boolean getData(){
         this.Details.Data = null;
+        int len;
+        long tmpsize = 0;
         try{
         
             uc.connect();
@@ -165,8 +167,19 @@ public class Fetcher {
             }
              * 
              */
-            try(InputStream is = uc.getInputStream()){
-                this.Details.Data = IOUtils.toByteArray(is);
+            try(InputStream is = uc.getInputStream();
+                    ByteArrayOutputStream baos = new ByteArrayOutputStream()){
+                while(tmpsize <= MaxContentLength && (len = is.read(buff, 0, size_buff)) >= 0){
+                    baos.write(buff, 0, len);
+                    tmpsize += len;
+                }
+                if(tmpsize <= MaxContentLength)
+                    this.Details.Data = baos.toByteArray();
+                else{
+                    System.err.println("Error: Fetcher: Maximum limit file exceeded.");
+                    uc.disconnect();
+                    return false;
+                }
             }
             uc.disconnect();
             return true;
@@ -290,7 +303,8 @@ public class Fetcher {
         //f.fetch("http://www.splendith.com/");
         //f.fetch("https://pirun.ku.ac.th/pirun-tools/pirun-chkquota.php");
         //f.fetch("https://pirun.ku.ac.th/pirun-tools/pirun-chkquota.php");
-        String url =  "http://doggy.igetweb.com/modules/product/addtocart.php?product_id=1002284&wid=101769";
+        //String url =  "http://nia.or.th/index.php?page=main";
+        String url =  "http://www.splendith.com/";
         f.getHeader(url);
         
             for(Entry<String,List<String>> e : f.Headers.entrySet()){
@@ -312,6 +326,7 @@ public class Fetcher {
         System.out.println("==================== BEG ARC HEADER ====================");
         System.out.println(f.GetPrintHeadArc());
         System.out.println("==================== END ARC HEADER ====================");
+        System.out.println(f.Details.WebContent);
         
         //System.out.print(f.Details.WebContent);
     }
