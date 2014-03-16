@@ -240,6 +240,7 @@ public class SiteCrawler implements Runnable {
             if (Fetch.getHeader(Url)) {
                 if (isAllowedResponseCode(Fetch.ResponseCode) && isAllowedHeader()) {
                     if (Fetch.getDocument()) {
+                        
                         //System.out.println(Fetch.Details.charset);
                         //System.err.println(new String(Fetch.Details.Data,Charset.forName("tis-620")));
                         Fetch.Details.WebContent = wu.HTMLCompress(Fetch.Details.Doc);
@@ -248,6 +249,7 @@ public class SiteCrawler implements Runnable {
                         AnalyseLink(Url, Fetch.Details.Doc);
                         URLLoaded.add(URLQueue.remove(0));
                         writeUpdateDB(Url, LanguageDetector.Detect(Fetch.Details.Doc.text().trim()));
+                        
                         try {
                             //Success & delay
                             Thread.sleep(this.CrawlDelay);
@@ -265,8 +267,10 @@ public class SiteCrawler implements Runnable {
                 }
             } else {
                 // Unknown and add to crash
+                
                 URLCrash.add(URLQueue.remove(0));
             }
+            
         }
     }
 
@@ -420,6 +424,7 @@ public class SiteCrawler implements Runnable {
                             break;
                         }
                     } catch (Exception ex) {
+                        Logger.getLogger(SiteCrawler.class.getName()).log(Level.SEVERE, null, ex);
                     }
                 }
 

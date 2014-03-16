@@ -13,6 +13,8 @@ import java.nio.charset.IllegalCharsetNameException;
 import java.nio.charset.UnsupportedCharsetException;
 import java.util.Arrays;
 import java.util.BitSet;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -202,7 +204,7 @@ public class MyURL {
     }
 
     public static void main(String[] args) throws Exception {
-        String URLLL= "/search-tag-id-%E0%B9%80%E0%B8%81%E0%B8%A1%E0%B8%AA%E0%B9%8C%E0%B8%9D%E0%B8%B6%E0%B8%81%E0%B8%97%E0%B8%B3%E0%B8%AD%E0%B8%B2%E0%B8%AB%E0%B8%B2%E0%B8%A3http://gamecenter.kapook.com/search-tag-id-เกมส์ฝึกทำอาหาร";
+        String URLLL= "http://campus.sanook.com/951989/%E0%B9%80%E0%B8%94%E0%B8%B4%E0%B8%99%E0%B9%80%E0%B8%97%E0%B9%89%E0%B8%B2%E0%B9%80%E0%B8%9B%E0%B8%A5%E0%B9%88%E0%B8%B2%";
         MyURL A = new MyURL(URLLL);
         System.out.println(A.UniqURL);
         
@@ -212,7 +214,7 @@ public class MyURL {
     /**
      * Decode URL Except Space & Percent sign or %25 that will be Encode
      */
-    public void NormPath() {
+    public void NormPath() throws MalformedURLException {
         
         int numChars = Path.length();
         StringBuilder sb = new StringBuilder(numChars > 500 ? numChars / 2 : numChars);
@@ -240,10 +242,12 @@ public class MyURL {
                      * encoding.
                      */
                     try {
+                        if((i + 2) >= numChars)
+                            throw new MalformedURLException ("Wrong % position in URL");
+                            
                         while (((i + 2) < numChars)
                                 && (c == '%')) {
                             v = Integer.parseInt(Path.substring(i + 1, i + 3), 16);
-                            
                             switch(v){
                                 case 0x0A:
                                     bytes[pos++] = '%';
@@ -285,9 +289,15 @@ public class MyURL {
                             pos = 0;
                         }
                     } catch (NumberFormatException e) {
-                        throw new IllegalArgumentException(
+                        throw new IllegalArgumentException (
                                 "URLDecoder: Illegal hex characters in escape (%) pattern - "
                                 + e.getMessage());
+                    } catch (IndexOutOfBoundsException ex) {
+                        try {
+                            throw new Exception("Index out of bond.");
+                        } catch (Exception ex1) {
+                            Logger.getLogger(MyURL.class.getName()).log(Level.SEVERE, null, ex1);
+                        }
                     }
                     break;
                 default:

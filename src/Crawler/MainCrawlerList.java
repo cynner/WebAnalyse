@@ -89,8 +89,8 @@ public class MainCrawlerList{
     
     public static void main(String[] args) throws IOException{
         String Dir = args.length > 0 ? args[0] : DefaultWorkingDirectory;
-        String TaskName = args.length > 1 ? args[1] : "task-0002";
-        String strFileSeed = args.length > 2 ? args[2] : (args.length > 0 ? null : "seed0001.txt");
+        String TaskName = args.length > 1 ? args[1] : "test-0001";
+        String strFileSeed = args.length > 2 ? args[2] : (args.length > 0 ? null : "test0001.txt");
         LanguageDetector.init();
         GeoIP.LoadToMem();
         if(strFileSeed != null){
@@ -140,6 +140,8 @@ public class MainCrawlerList{
                 while(raf.getFilePointer() < len){
                     hs.add(raf.readLine());
                 }
+            } catch (IOException ex){
+                 Logger.getLogger(MainCrawlerList.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
         
@@ -147,7 +149,6 @@ public class MainCrawlerList{
             System.out.println("====== Starting ======");
             
             executor = Executors.newFixedThreadPool(this.Threads);
-            //System.out.println("gg");
                 
             
             
@@ -162,7 +163,6 @@ public class MainCrawlerList{
             }
             
             executor.shutdown();
-            
             while (!executor.isTerminated()) {
             }
             
