@@ -7,22 +7,14 @@
 package Crawler;
 
 import ArcFileUtils.MyRandomAccessFile;
-import Crawler.CrawlerConfig.Status;
 import LanguageUtils.LanguageDetector;
-import com.almworks.sqlite4java.SQLiteConnection;
-import com.almworks.sqlite4java.SQLiteException;
-import com.almworks.sqlite4java.SQLiteJob;
-import com.almworks.sqlite4java.SQLiteQueue;
-import com.almworks.sqlite4java.SQLiteStatement;
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -56,8 +48,6 @@ public class MainCrawlerList{
     
     //public int LimitCrawlSite = 10000;
     public int Threads = 10;
-    
-    SQLiteConnection dbc;
     
     public CrawlerConfigList cfg;
     
@@ -99,8 +89,8 @@ public class MainCrawlerList{
     
     public static void main(String[] args) throws IOException{
         String Dir = args.length > 0 ? args[0] : DefaultWorkingDirectory;
-        String TaskName = args.length > 1 ? args[1] : "task-0001";
-        String strFileSeed = args.length > 2 ? args[2] : (args.length > 0 ? null : "testlist.txt");
+        String TaskName = args.length > 1 ? args[1] : "task-0002";
+        String strFileSeed = args.length > 2 ? args[2] : (args.length > 0 ? null : "seed0001.txt");
         LanguageDetector.init();
         GeoIP.LoadToMem();
         if(strFileSeed != null){
