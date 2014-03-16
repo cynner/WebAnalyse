@@ -156,7 +156,13 @@ public class SiteCrawler implements Runnable {
                 this.waw = new WebArcWriter(this.ArcFile, this.ArcFile.getName(), this.isAppend, this.HostIP);
             }
             Crawl();
-            
+
+            if (rafWebDB != null) {
+                rafWebDB.close();
+            }
+            if (waw != null) {
+                waw.close();
+            }
         } catch (IOException ex) {
             Logger.getLogger(SiteCrawler.class.getName()).log(Level.SEVERE, null, ex);
             try{
@@ -170,7 +176,7 @@ public class SiteCrawler implements Runnable {
                 Logger.getLogger(SiteCrawler.class.getName()).log(Level.SEVERE, null, ex1);
             }
             return;
-        }
+        } 
         
         status = Status.Finished;
 
