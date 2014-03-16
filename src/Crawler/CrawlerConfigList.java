@@ -133,8 +133,10 @@ public class CrawlerConfigList extends CrawlerConfig {
             s.status = Status.Finished;
         UpdateHostInfo(s.HostName, s.HostIP, Location, s.status, s.URLLoaded.size());
         addCrawledList(s.HostName);
-        s.WebDBFile.delete();
-        s.ArcFile.delete();
+        if(s.WebDBFile.exists())
+            s.WebDBFile.delete();
+        if(s.ArcFile.exists())
+            s.ArcFile.delete();
         
     }
 

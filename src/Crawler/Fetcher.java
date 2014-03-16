@@ -169,7 +169,7 @@ public class Fetcher {
              */
             try(InputStream is = uc.getInputStream();
                     ByteArrayOutputStream baos = new ByteArrayOutputStream()){
-                while(tmpsize <= MaxContentLength && (len = is.read(buff, 0, size_buff)) >= 0){
+                while(tmpsize <= MaxContentLength && (len = is.read(buff, 0, size_buff)) > 0){
                     baos.write(buff, 0, len);
                     tmpsize += len;
                 }
