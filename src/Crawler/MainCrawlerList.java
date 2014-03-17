@@ -89,7 +89,7 @@ public class MainCrawlerList{
     
     public static void main(String[] args) throws IOException{
         String Dir = args.length > 0 ? args[0] : DefaultWorkingDirectory;
-        String TaskName = args.length > 1 ? args[1] : "test-0001";
+        String TaskName = args.length > 1 ? args[1] : "task-0002";
         String strFileSeed = args.length > 2 ? args[2] : (args.length > 0 ? null : "test0001.txt");
         LanguageDetector.init();
         GeoIP.LoadToMem();

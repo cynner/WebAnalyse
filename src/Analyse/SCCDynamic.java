@@ -26,13 +26,17 @@ public class SCCDynamic {
     
     public static class Node{
         int visited;
+        int curNodeNo;
         ArrayList<Node> Link;
         ArrayList<Node> LinkReverse;
+        Node Back;
         
         public Node(){
             Link = new ArrayList<>();
             LinkReverse = new ArrayList<>();
             visited = 0;
+            curNodeNo = 0;
+            Back = null;
         }
     }
     
@@ -42,8 +46,10 @@ public class SCCDynamic {
     public ArrayList<Node> Graph = new ArrayList<>();
     public ArrayList<Integer> GroupSize = new ArrayList<>();
     public Stack<Node> LastAccess = new Stack<>();
+    public Stack<Node> StackList = new Stack<>();
     
     public void TraverseGraph(Node N){
+        /*
         if(N.visited == 0){
             N.visited = -1;
             for(Node n : N.Link){
@@ -51,9 +57,34 @@ public class SCCDynamic {
             }
             LastAccess.push(N);
         }
+        */
+        Node n;
+        if(N.visited == 0) {
+            N.visited = -1;
+            while (true) {
+                if (N.curNodeNo < N.Link.size()) {
+                    n = N.Link.get(N.curNodeNo);
+                    N.curNodeNo++;
+                    if(n.visited != 0)
+                        continue;
+                    else 
+                        n.visited = -1;
+                    n.Back = N;
+                    N = n;
+                } else {
+                    LastAccess.push(N);
+                    N.curNodeNo = 0;
+                    if(N.Back == null)
+                        break;
+                    else
+                        N = N.Back;
+                }
+            }
+        }
     }
     
     public void TraverseGraphReverse(Node N){
+        /*
         if(N.visited == -1){
             N.visited = GroupNo;
             GroupCnt++;
@@ -61,6 +92,32 @@ public class SCCDynamic {
                 TraverseGraphReverse(n);
             }
         }
+        */
+        Node n;
+        if(N.visited == -1) {
+            N.visited = GroupNo;
+            GroupCnt = 1;
+            while (true) {
+                if (N.curNodeNo < N.LinkReverse.size()) {
+                    n = N.LinkReverse.get(N.curNodeNo);
+                    N.curNodeNo++;
+                    if(n.visited != -1)
+                        continue;
+                    else {
+                        n.visited = GroupNo;
+                        GroupCnt++;
+                    }
+                    n.Back = N;
+                    N = n;
+                } else {
+                    if(N.Back == null)
+                        break;
+                    else
+                        N = N.Back;
+                }
+            }
+        }
+        
     }
     
     /**
@@ -229,7 +286,7 @@ public class SCCDynamic {
      */
     public void WriteInfo(File file){
         try(BufferedWriter bw = new BufferedWriter(new FileWriter(file))){
-            bw.write("Component:" + (this.GroupNo-1)) ;
+            bw.write("Component:" + (this.GroupNo-1) + "\n") ;
             int n;
             for(int i=0;i<GroupSize.size();i++){
                 bw.write((i+1) + ":" + GroupSize.get(i) + "\n");
@@ -242,8 +299,8 @@ public class SCCDynamic {
     
     public static void main(String[] args){
         //Mode has sd or csv mode
-        String Mode = args.length > 0 ? args[0] : "csv";
-        String FileInName = args.length > 1 ? args[1] : "data/graph.result";
+        String Mode = args.length > 0 ? args[0] : "sd";
+        String FileInName = args.length > 1 ? args[1] : "web-Stanford.txt";
         String FileOutName = args.length > 2 ? args[2] : "data/testscc.result";
         String FileInfo = FileOutName + ".info";
         SCCDynamic scc = new SCCDynamic();
@@ -254,7 +311,7 @@ public class SCCDynamic {
                 scc.ImportCSV(FileInName, ";");
                 break;
             case "sd":
-                scc.ImportSD(FileInName, ";");
+                scc.ImportSD(FileInName, "\t");
                 break;
             default:
                 System.err.println("ERROR: No Input Type '" + Mode + "' in {csv,sd}." );
