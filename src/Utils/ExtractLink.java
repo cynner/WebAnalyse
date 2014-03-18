@@ -12,6 +12,7 @@ import Crawler.MyURL;
 import com.almworks.sqlite4java.SQLiteConnection;
 import com.almworks.sqlite4java.SQLiteException;
 import com.almworks.sqlite4java.SQLiteStatement;
+import com.sun.org.apache.xalan.internal.xsltc.runtime.BasisLibrary;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
@@ -53,7 +54,7 @@ public class ExtractLink {
         HashMap <String,MutableInt> HOSTs = new HashMap<>();
         HashSet <String> URLs;
         MyURL src;
-        String srcDomain;
+        String srcDomain,srcURL = "";
         bwWebLink = new BufferedWriter(new FileWriter(OutWebLink));
         bwHostLink = new BufferedWriter(new FileWriter(OutHostLink));
         try {
@@ -66,7 +67,8 @@ public class ExtractLink {
                     srcDomain = "";
                     while (war.Next()) {
                         try {
-                            src = new MyURL(war.Record.URL);
+                            srcURL = war.Record.URL;
+                            src = new MyURL(srcURL);
                             if (srcDomain.isEmpty()) {
                                 srcDomain = src.getHost();
                             }
@@ -78,6 +80,7 @@ public class ExtractLink {
                     }
                     WriteHostLink(srcDomain, HOSTs);
                 } catch (IOException ex) {
+                    System.err.println("Error At : " + srcURL);
                     Logger.getLogger(ExtractLink.class.getName()).log(Level.SEVERE, null, ex);
                 }
                 HOSTs.clear();
