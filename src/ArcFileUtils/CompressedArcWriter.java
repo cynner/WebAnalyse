@@ -8,7 +8,9 @@ package ArcFileUtils;
 
 import static ArcFileUtils.ArcRecord.dateFormat;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.RandomAccessFile;
 import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -26,11 +28,18 @@ public class CompressedArcWriter implements AutoCloseable{
     public String HostIP="0.0.0.0";
     
     public CompressedArcWriter(File ArchiveFile) throws IOException{
-        boolean FileExist = ArchiveFile.exists();
         FileName = ArchiveFile.getName();
         bw = new BlockCompressedOutputStream(ArchiveFile);
         WriteHeaderFile();
     }
+    
+    public CompressedArcWriter(File ArchiveFile, String FileName, String HostIP) throws FileNotFoundException, IOException{
+        this.FileName = FileName;
+        this.HostIP = HostIP;
+        bw = new BlockCompressedOutputStream(ArchiveFile);
+        WriteHeaderFile();    
+    }
+    
 
     public void WriteHeaderFile() throws IOException {
             String HeaderFileContent =  "1 0 InternetArchive\n" +
