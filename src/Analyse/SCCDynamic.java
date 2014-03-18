@@ -311,7 +311,7 @@ public class SCCDynamic {
                 scc.ImportCSV(FileInName, ";");
                 break;
             case "sd":
-                scc.ImportSD(FileInName, "\t");
+                scc.ImportSD(FileInName, ";");
                 break;
             default:
                 System.err.println("ERROR: No Input Type '" + Mode + "' in {csv,sd}." );

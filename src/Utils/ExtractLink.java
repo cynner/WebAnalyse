@@ -96,7 +96,7 @@ public class ExtractLink {
         String srcID, dstID;
         SQLiteStatement st;
         try {
-            st = dbWeb.prepare("SELECT id FROM webpage WHERE url='" + src.UniqURL + "';");
+            st = dbWeb.prepare("SELECT id FROM webpage WHERE url='" + src.UniqURL.replaceAll("'", "''") + "';");
             if (st.step()) {
                 srcID = st.columnString(0);
                 st.dispose();
@@ -104,7 +104,7 @@ public class ExtractLink {
 
                 for (String url : URLs) {
                     try {
-                        st = dbWeb.prepare("SELECT id FROM webpage WHERE url='" + url + "';");
+                        st = dbWeb.prepare("SELECT id FROM webpage WHERE url='" + url.replaceAll("'", "''") + "';");
                         if (st.step()) {
                             dstID = st.columnString(0);
                             bwWebLink.write(";" + dstID);
@@ -127,13 +127,13 @@ public class ExtractLink {
         String srcID, dstID;
         SQLiteStatement st;
         try {
-            st = dbHost.prepare("SELECT id FROM website WHERE hostname = '" + srcDomain + "';");
+            st = dbHost.prepare("SELECT id FROM website WHERE hostname = '" + srcDomain.replaceAll("'", "''") + "';");
             if (st.step()) {
                 srcID = st.columnString(0);
                 st.dispose();
                 for (Map.Entry<String, MutableInt> host : HOSTs.entrySet()) {
                     try {
-                        st = dbHost.prepare("SELECT id FROM website WHERE hostname = '" + host.getKey() + "';");
+                        st = dbHost.prepare("SELECT id FROM website WHERE hostname = '" + host.getKey().replaceAll("'", "''") + "';");
                         if (st.step()) {
                             dstID = st.columnString(0);
                             bwHostLink.write(srcID + ";" + dstID + ";" + host.getValue().value + "\n");
