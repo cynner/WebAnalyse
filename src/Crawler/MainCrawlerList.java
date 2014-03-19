@@ -7,6 +7,7 @@
 package Crawler;
 
 import ArcFileUtils.MyRandomAccessFile;
+import static Crawler.GeoIP.Domain2IP;
 import LanguageUtils.LanguageDetector;
 import java.io.BufferedReader;
 import java.io.File;
@@ -89,8 +90,8 @@ public class MainCrawlerList{
     
     public static void main(String[] args) throws IOException{
         String Dir = args.length > 0 ? args[0] : DefaultWorkingDirectory;
-        String TaskName = args.length > 1 ? args[1] : "task-0002";
-        String strFileSeed = args.length > 2 ? args[2] : (args.length > 0 ? null : "test0001.txt");
+        String TaskName = args.length > 1 ? args[1] : "task-0003";
+        String strFileSeed = args.length > 2 ? args[2] : (args.length > 0 ? null : "seed0001.txt");
         LanguageDetector.init();
         GeoIP.LoadToMem();
         if(strFileSeed != null){
@@ -155,10 +156,30 @@ public class MainCrawlerList{
             while((HostName = br.readLine()) != null){
 
                 if(!hs.contains(HostName)){
-                    fArc = new File(strDirTmp + "/" + PrefixArc + HostName + SuffixArc);
-                    fInfo = new File(strDirTmp + "/" + PrefixInfo + HostName + SuffixInfo);
-                    Runnable worker = new SiteCrawler(HostName, null, fArc,fInfo, cfg, true);
-                    executor.execute(worker);
+                    String Location, HostIP;
+                    HostIP = Domain2IP(HostName);
+                    CrawlerConfig.Status status;
+                    if(HostIP == null){
+                        status = CrawlerConfig.Status.NoHostIP;
+                        cfg.UpdateHostInfo(HostName, null, null, status, 0);
+                        cfg.addCrawledList(HostName);
+                    }else{
+                        Location = GeoIP.IP2ISOCountry(HostIP);
+                        if(Location == null){
+                            status = CrawlerConfig.Status.NoHostLocation;
+                            cfg.UpdateHostInfo(HostName, HostIP, null, status, 0);
+                            cfg.addCrawledList(HostName);
+                        }else if(!Location.equals("TH") && !HostName.endsWith(".th")){
+                            status = CrawlerConfig.Status.NotInScope;
+                            cfg.UpdateHostInfo(HostName, HostIP, Location, status, 0);
+                            cfg.addCrawledList(HostName);
+                        }else{
+                            fArc = new File(strDirTmp + "/" + PrefixArc + HostName + SuffixArc);
+                            fInfo = new File(strDirTmp + "/" + PrefixInfo + HostName + SuffixInfo);
+                            Runnable worker = new SiteCrawler(HostName, null, fArc,fInfo, cfg, true);
+                            executor.execute(worker);
+                        }
+                    }
                 }
             }
             

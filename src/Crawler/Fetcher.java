@@ -14,7 +14,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.apache.commons.io.IOUtils;
 
 /**
  *
@@ -22,6 +21,7 @@ import org.apache.commons.io.IOUtils;
  */
 public class Fetcher {
     
+    private static boolean isKeepAlive = true;
     private final int size_buff = 2048; 
     private byte[] buff = new byte[size_buff];
     public boolean isSuccess;
@@ -52,22 +52,30 @@ public class Fetcher {
     public String UserAgent = "Mojfabbs-princeofvamp@gmail.com";
     public long MaxContentLength = 2000000;
     
-    public Fetcher() {}
+    public Fetcher() {
+        if(!isKeepAlive){
+            System.setProperty("http.keepAlive", "false");
+            isKeepAlive = false;
+        }
+    }
     
     
     public Fetcher(String UserAgent,int Timeout) {
+        this();
         this.UserAgent = UserAgent;
         this.Timeout = Timeout;
         this.Details.IPAddress = GetMyIP();
     }
     
     public Fetcher(String UserAgent) {
+        this();
         this.UserAgent = UserAgent;
         this.Details.IPAddress = GetMyIP();
         
     }
 
     public Fetcher(int Timeout) {
+        this();
         this.Timeout = Timeout;
         this.Details.IPAddress = GetMyIP();
     }
@@ -112,7 +120,7 @@ public class Fetcher {
             uc = null;
             uc = (HttpURLConnection) Url.openConnection();
             
-
+           
             uc.setRequestProperty("User-agent", UserAgent);
             //uc.setRequestProperty("Content-Language", "en-US"); 
             uc.setConnectTimeout(Timeout);
@@ -138,17 +146,21 @@ public class Fetcher {
         }catch (SocketTimeoutException ex) {
             // this.ResponseCode = 408;
             System.err.println("Error: Header gathering: " + ex.getMessage());
+            uc.disconnect();
             return false;
         } catch (ProtocolException ex) {
             // Never happen
             System.err.println("Error: Header gathering: " + ex.getMessage());
+            uc.disconnect();
             return false;
         } catch (IOException ex) {
             // IO
             System.err.println("Error: Header gathering: " + ex.getMessage());
+            uc.disconnect();
             return false;
         } catch (Exception e){
             System.err.println("Error: Header gathering: " + e.getMessage());
+            uc.disconnect();
             return false;
         }
         return true;

@@ -23,7 +23,9 @@ import org.jsoup.select.Elements;
 public class ReadArcFile {
     
     public static void main(String[] args){
-        String FileName = args.length > 0 ? args[0] : "data/crawldata/crawl-gamecenter.kapook.com.arc.gz";
+        
+        //String FileName = args.length > 0 ? args[0] : "data/crawldata/crawl-gamecenter.kapook.com.arc.gz";
+        String FileName = args.length > 0 ? args[0] : "data/crawler/arc/task-0003/crawl-resource.thaihealth.or.th.arc.gz";
         String FileOut = args.length > 1 ? args[1] : "data/testarc.txt";
         try (BufferedWriter bw = new BufferedWriter(new FileWriter(FileOut))) {
             try (WebArcReader aar = new WebArcReader(new File(FileName), false)) {

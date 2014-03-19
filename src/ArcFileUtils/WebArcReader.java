@@ -73,6 +73,7 @@ public class WebArcReader extends ArcReader{
                 try{
                     Record.ArchiveDate = dateFormat.parse(Fields[i]);
                 }catch(Exception ex){
+                    System.err.println("Error At: " + Record.URL);
                     Logger.getLogger(WebArcReader.class.getName()).log(Level.SEVERE, null, ex);
                 }
                 i++;

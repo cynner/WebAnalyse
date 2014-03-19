@@ -96,6 +96,7 @@ public class WebArcRecord extends ArcRecord{
                         try {
                             ServerTime = webDateFormat.parse(tmp).getTime();
                         } catch (ParseException ex) {
+                            System.err.println("Error At: " + URL);
                             Logger.getLogger(WebArcRecord.class.getName()).log(Level.SEVERE, null, ex);
                         }
                     }
@@ -105,6 +106,7 @@ public class WebArcRecord extends ArcRecord{
                         try {
                             LastModified = webDateFormat.parse(tmp).getTime();
                         } catch (ParseException ex) {
+                            System.err.println("Error At: " + URL);
                             Logger.getLogger(WebArcRecord.class.getName()).log(Level.SEVERE, null, ex);
                         }
                     }
@@ -116,6 +118,7 @@ public class WebArcRecord extends ArcRecord{
                 }
             }
         }catch(Exception ex){
+            System.err.println("Error At: " + URL);
             Logger.getLogger(WebArcRecord.class.getName()).log(Level.SEVERE, null, ex);
         }
         return HeaderLength;
@@ -155,6 +158,7 @@ public class WebArcRecord extends ArcRecord{
                         try {
                             ServerTime = webDateFormat.parse(tmp).getTime();
                         } catch (ParseException ex) {
+                            System.err.println("Error At: " + URL);
                             Logger.getLogger(WebArcRecord.class.getName()).log(Level.SEVERE, null, ex);
                         }
                     }
@@ -164,6 +168,7 @@ public class WebArcRecord extends ArcRecord{
                         try {
                             LastModified = webDateFormat.parse(tmp).getTime();
                         } catch (ParseException ex) {
+                            System.err.println("Error At: " + URL);
                             Logger.getLogger(WebArcRecord.class.getName()).log(Level.SEVERE, null, ex);
                         }
                     }
@@ -178,6 +183,7 @@ public class WebArcRecord extends ArcRecord{
             WebContent = ArchiveContent.substring(beg);
             //return new WebArcRecord(this);
         }catch(Exception ex){
+            System.err.println("Error At: " + URL);
             Logger.getLogger(WebArcRecord.class.getName()).log(Level.SEVERE, null, ex);
             WebContent = ArchiveContent;
         }

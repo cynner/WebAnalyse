@@ -424,7 +424,8 @@ public class SiteCrawler implements Runnable {
                             break;
                         }
                     } catch (Exception ex) {
-                        Logger.getLogger(SiteCrawler.class.getName()).log(Level.SEVERE, null, ex);
+                        //Not importance silence
+                        //Logger.getLogger(SiteCrawler.class.getName()).log(Level.SEVERE, null, ex);
                     }
                 }
 
