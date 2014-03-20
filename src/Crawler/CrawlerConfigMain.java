@@ -46,8 +46,8 @@ public class CrawlerConfigMain extends CrawlerConfig implements AutoCloseable{
     
     
     @Override
-    public boolean isAccept(WebArcRecord f){
-        return "th".equals(LanguageDetector.Detect(f.Doc.text()));
+    public boolean isAccept(SiteCrawler s){
+        return "th".equals(s.curPageLanguage);
         //return true;
     }
     

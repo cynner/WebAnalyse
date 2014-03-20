@@ -9,6 +9,7 @@ package Crawler;
 import ArcFileUtils.BGZFCompress;
 import ArcFileUtils.MyRandomAccessFile;
 import ArcFileUtils.WebArcRecord;
+import LanguageUtils.LanguageDetector;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -122,15 +123,13 @@ public class CrawlerConfigList extends CrawlerConfig {
     
     @Override
     public void Finishing(SiteCrawler s){
-        if(s.URLLoaded.size() > 0){
+        if(s.URLLoaded.size() > 0 && s.status == Status.Finished){
             addWebInfo(s.WebDBFile);
             BGZFCompress.Compress(s.ArcFile, new File(this.strDirArcGZ + "/" + s.ArcFile.getName() + SuffixGZ));
         }
         String Location = null;
         if(s.HostIP != null)
             Location = GeoIP.IP2ISOCountry(s.HostIP);
-        if(Location != null)
-            s.status = Status.Finished;
         UpdateHostInfo(s.HostName, s.HostIP, Location, s.status, s.URLLoaded.size());
         addCrawledList(s.HostName);
         if(s.WebDBFile.exists())
@@ -141,8 +140,8 @@ public class CrawlerConfigList extends CrawlerConfig {
     }
 
     @Override
-    public boolean isAccept(WebArcRecord f) {
-        return true;
+    public boolean isAccept(SiteCrawler s) {
+        return "th".equals(s.curPageLanguage);
         //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
     

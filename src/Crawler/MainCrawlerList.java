@@ -90,8 +90,8 @@ public class MainCrawlerList{
     
     public static void main(String[] args) throws IOException{
         String Dir = args.length > 0 ? args[0] : DefaultWorkingDirectory;
-        String TaskName = args.length > 1 ? args[1] : "task-0003";
-        String strFileSeed = args.length > 2 ? args[2] : (args.length > 0 ? null : "seed0001.txt");
+        String TaskName = args.length > 1 ? args[1] : "task-0028";
+        String strFileSeed = args.length > 2 ? args[2] : (args.length > 0 ? null : "seed0028-all.txt");
         LanguageDetector.init();
         GeoIP.LoadToMem();
         if(strFileSeed != null){
@@ -169,15 +169,16 @@ public class MainCrawlerList{
                             status = CrawlerConfig.Status.NoHostLocation;
                             cfg.UpdateHostInfo(HostName, HostIP, null, status, 0);
                             cfg.addCrawledList(HostName);
-                        }else if(!Location.equals("TH") && !HostName.endsWith(".th")){
-                            status = CrawlerConfig.Status.NotInScope;
-                            cfg.UpdateHostInfo(HostName, HostIP, Location, status, 0);
-                            cfg.addCrawledList(HostName);
-                        }else{
+                        }else{ 
                             fArc = new File(strDirTmp + "/" + PrefixArc + HostName + SuffixArc);
                             fInfo = new File(strDirTmp + "/" + PrefixInfo + HostName + SuffixInfo);
-                            Runnable worker = new SiteCrawler(HostName, null, fArc,fInfo, cfg, true);
-                            executor.execute(worker);
+                            if(!Location.equals("TH") && !HostName.endsWith(".th")){
+                                Runnable worker = new SiteCrawler(HostName, HostIP, fArc,fInfo, cfg, CrawlerConfig.Mode.preCrawl, true);
+                                executor.execute(worker);
+                            }else{
+                                Runnable worker = new SiteCrawler(HostName, HostIP, fArc,fInfo, cfg, CrawlerConfig.Mode.Crawl, true);
+                                executor.execute(worker);
+                            }
                         }
                     }
                 }

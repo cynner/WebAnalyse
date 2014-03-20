@@ -62,6 +62,8 @@ public class SiteCrawler implements Runnable {
 
     public CrawlerConfig crawlConf = null;
     public CrawlerConfig.Status status;
+    public String curPageLanguage;
+    public final CrawlerConfig.Mode crawlMode;
 
     
 
@@ -77,13 +79,14 @@ public class SiteCrawler implements Runnable {
         return s;
     }
     
-    public SiteCrawler(String HostName, String HostIP, File ArcFile, File InfoFile, CrawlerConfig crawlConf, boolean isAppend) {
+    public SiteCrawler(String HostName, String HostIP, File ArcFile, File InfoFile, CrawlerConfig crawlConf, CrawlerConfig.Mode crawlMode, boolean isAppend) {
         this.HostName = HostName;
         this.HostIP = HostIP;
         this.isAppend = isAppend;
         this.crawlConf = crawlConf;
         this.ArcFile = ArcFile;
         this.WebDBFile = InfoFile;
+        this.crawlMode = crawlMode;
         if(!isSetTimeZone){
             TimeZone.setDefault(TimeZone.getTimeZone("GMT"));
             isSetTimeZone = true;
@@ -155,16 +158,16 @@ public class SiteCrawler implements Runnable {
             } else {
                 this.waw = new WebArcWriter(this.ArcFile, this.ArcFile.getName(), this.isAppend, this.HostIP);
             }
-            Crawl();
-
-            if (rafWebDB != null) {
-                rafWebDB.close();
-            }
-            if (waw != null) {
-                waw.close();
-            }
+            if(crawlMode == CrawlerConfig.Mode.Crawl || preCrawl()){
+                Crawl();
+                status = Status.Finished;
+            } else {
+                status = Status.NotInScope;
+            } 
+            
         } catch (IOException ex) {
             Logger.getLogger(SiteCrawler.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
             try{
                 if(rafWebDB != null){
                     rafWebDB.close();
@@ -175,11 +178,7 @@ public class SiteCrawler implements Runnable {
             } catch (IOException ex1) {
                 Logger.getLogger(SiteCrawler.class.getName()).log(Level.SEVERE, null, ex1);
             }
-            return;
-        } 
-        
-        status = Status.Finished;
-
+        }
     }
 
     public boolean preCrawl() {
@@ -196,7 +195,8 @@ public class SiteCrawler implements Runnable {
                         LinkFromRedir(Url, Fetch.Details.Doc);
                         AnalyseLink(Url, Fetch.Details.Doc);
                         URLLoaded.add(URLQueue.remove(0));
-                        writeUpdateDB(Url, LanguageDetector.Detect(Fetch.Details.Doc.text()));
+                        curPageLanguage = LanguageDetector.Detect(Fetch.Details.Doc.text());
+                        writeUpdateDB(Url);
                         waw.WriteRecord(Fetch.Details);
                         try {
                             //Success & delay
@@ -205,7 +205,7 @@ public class SiteCrawler implements Runnable {
                             System.err.println("Interupt while delay!...");
                             Logger.getLogger(SiteCrawler.class.getName()).log(Level.SEVERE, null, ex);
                         }
-                        if (crawlConf.isAccept(Fetch.Details)) {
+                        if (crawlConf.isAccept(this)) {
                             return true;
                         }
                     } else {
@@ -248,7 +248,8 @@ public class SiteCrawler implements Runnable {
                         LinkFromRedir(Url, Fetch.Details.Doc);
                         AnalyseLink(Url, Fetch.Details.Doc);
                         URLLoaded.add(URLQueue.remove(0));
-                        writeUpdateDB(Url, LanguageDetector.Detect(Fetch.Details.Doc.text().trim()));
+                        curPageLanguage = LanguageDetector.Detect(Fetch.Details.Doc.text());
+                        writeUpdateDB(Url);
                         
                         try {
                             //Success & delay
@@ -274,10 +275,10 @@ public class SiteCrawler implements Runnable {
         }
     }
 
-    public void writeUpdateDB(String Url, String lang) {
+    public void writeUpdateDB(String Url) {
         //"url","language",file_size,comment_size,js_size,style_size,content_size
         try {
-            rafWebDB.write(("\"" + Url.replaceAll("\"", "\"\"") + "\"," + (lang == null ? "null" : "\"" + lang + "\"") + "," + wu.FileSize + "," + wu.CommentSize + "," + wu.ScriptSize + "," + wu.StyleSize + "," + wu.ContentSize + "\n").getBytes("utf-8"));
+            rafWebDB.write(("\"" + Url.replaceAll("\"", "\"\"") + "\"," + (curPageLanguage == null ? "null" : "\"" + curPageLanguage + "\"") + "," + wu.FileSize + "," + wu.CommentSize + "," + wu.ScriptSize + "," + wu.StyleSize + "," + wu.ContentSize + "\n").getBytes("utf-8"));
             //System.out.println("\"" + Url.replaceAll("\"", "\"\"") + "\"," + (lang == null ? "null" : "\"" + lang + "\"") + "," + wu.FileSize + "," + wu.CommentSize + "," + wu.ScriptSize + "," + wu.StyleSize + "," + wu.ContentSize);
         } catch (IOException ex) {
             Logger.getLogger(SiteCrawler.class.getName()).log(Level.SEVERE, null, ex);
@@ -475,7 +476,7 @@ public class SiteCrawler implements Runnable {
             cfg.MarginPage = cfg.MaxPage * 3;
             cfg.MaxPreCrawl = 3;
             
-            SiteCrawler c = new SiteCrawler(HostName,null, new File(StoreDir + "/" + HostName + ".arc"),new File(StoreDir + "/" + HostName + ".info"), cfg, false);
+            SiteCrawler c = new SiteCrawler(HostName,null, new File(StoreDir + "/" + HostName + ".arc"),new File(StoreDir + "/" + HostName + ".info"), cfg, CrawlerConfig.Mode.Crawl, false);
             c.run();
         } catch (IOException ex) {
             Logger.getLogger(SiteCrawler.class.getName()).log(Level.SEVERE, null, ex);

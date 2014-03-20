@@ -32,7 +32,6 @@ public abstract class CrawlerConfig {
         preCrawl, Crawl
     };
     
-    public Mode mode = Mode.Crawl;
     public String AcceptOnlyPrefixPath = "/";
     
     public int MaxPreCrawl;
@@ -42,5 +41,5 @@ public abstract class CrawlerConfig {
     
     public abstract void Finishing(SiteCrawler s);
     
-    public abstract boolean isAccept(WebArcRecord f);
+    public abstract boolean isAccept(SiteCrawler s);
 }
