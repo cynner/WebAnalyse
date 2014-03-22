@@ -30,6 +30,8 @@ public class FixURLRecord {
         HashSet<String> hs = new HashSet<>();
         if(OutDir.exists())
             hs.addAll(Arrays.asList(OutDir.list(new ArcFilenameFilter(ArcFilenameFilter.AcceptType.All))));
+        else
+            OutDir.mkdirs();
         MyURL url;
         for (File f : InDir.listFiles(new ArcFilenameFilter(ArcFilenameFilter.AcceptType.All))) {
             File tmp = new File(OutDirName + "/." + f.getName() + ".fixurl");
