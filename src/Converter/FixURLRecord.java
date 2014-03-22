@@ -11,6 +11,7 @@ import ArcFileUtils.CompressedArcWriter;
 import Crawler.MyURL;
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -27,8 +28,8 @@ public class FixURLRecord {
         File InDir = new File(InDirName);
         File OutDir = new File(OutDirName);
         HashSet<String> hs = new HashSet<>();
-        for (String s : OutDir.list(new ArcFilenameFilter(ArcFilenameFilter.AcceptType.All)))
-            hs.add(s);
+        if(OutDir.exists())
+            hs.addAll(Arrays.asList(OutDir.list(new ArcFilenameFilter(ArcFilenameFilter.AcceptType.All))));
         MyURL url;
         for (File f : InDir.listFiles(new ArcFilenameFilter(ArcFilenameFilter.AcceptType.All))) {
             File tmp = new File(OutDirName + "/." + f.getName() + ".fixurl");
