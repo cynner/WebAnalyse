@@ -172,13 +172,14 @@ public class MainCrawlerList{
                         }else{ 
                             fArc = new File(strDirTmp + "/" + PrefixArc + HostName + SuffixArc);
                             fInfo = new File(strDirTmp + "/" + PrefixInfo + HostName + SuffixInfo);
-                            if(!Location.equals("TH") && !HostName.endsWith(".th")){
-                                Runnable worker = new SiteCrawler(HostName, HostIP, fArc,fInfo, cfg, CrawlerConfig.Mode.preCrawl, true);
-                                executor.execute(worker);
-                            }else{
-                                Runnable worker = new SiteCrawler(HostName, HostIP, fArc,fInfo, cfg, CrawlerConfig.Mode.Crawl, true);
-                                executor.execute(worker);
-                            }
+
+                                if(!Location.equals("TH") && !HostName.endsWith(".th")){
+                                    Runnable worker = new SiteCrawler(HostName, HostIP, fArc,fInfo, cfg, CrawlerConfig.Mode.preCrawl, true);
+                                    executor.execute(worker);
+                                }else{
+                                    Runnable worker = new SiteCrawler(HostName, HostIP, fArc,fInfo, cfg, CrawlerConfig.Mode.Crawl, true);
+                                    executor.execute(worker);
+                                }
                         }
                     }
                 }

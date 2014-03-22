@@ -8,8 +8,6 @@ package Crawler;
 
 import ArcFileUtils.BGZFCompress;
 import ArcFileUtils.MyRandomAccessFile;
-import ArcFileUtils.WebArcRecord;
-import LanguageUtils.LanguageDetector;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -64,6 +62,10 @@ public class CrawlerConfigList extends CrawlerConfig {
                 }
             }
         }
+    }
+    
+    public File getArcGZFile(String ArcFileName){
+        return new File(this.strDirArcGZ + "/" + ArcFileName + SuffixGZ);
     }
 
     public void addWebInfo(File InfoFile) {
@@ -125,7 +127,7 @@ public class CrawlerConfigList extends CrawlerConfig {
     public void Finishing(SiteCrawler s){
         if(s.URLLoaded.size() > 0 && s.status == Status.Finished){
             addWebInfo(s.WebDBFile);
-            BGZFCompress.Compress(s.ArcFile, new File(this.strDirArcGZ + "/" + s.ArcFile.getName() + SuffixGZ));
+            BGZFCompress.Compress(s.ArcFile, getArcGZFile(s.ArcFile.getName()));
         }
         String Location = null;
         if(s.HostIP != null)
