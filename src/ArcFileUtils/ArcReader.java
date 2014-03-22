@@ -107,6 +107,7 @@ public class ArcReader implements AutoCloseable{
                 if (Fields.length == 5) {
                     break;
                 }else if (Fields.length > 5){
+                    //break;
                     return false;
                 }
             }
