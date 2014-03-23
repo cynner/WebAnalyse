@@ -27,19 +27,24 @@ public class ImportWebDB {
         String PathName = base_dir + "/" + task_name + "/" + webdb_name;
         try(MyRandomAccessFile raf = new MyRandomAccessFile(PathName, "r")){
             raf.readLong();
-            String Line;
+            String Line,cmd;
             String[] cols;
             try{
                 db.open();
                 db.exec("BEGIN;");
+                System.out.println("BEGIN");
                 while((Line = raf.readLine()) != null){
                     cols = Line.split(",");
                     if(cols.length >= SiteCrawler.WebDBColumnWidth){
                         Line = Line.replaceAll(" ", "%20");
-                        db.exec("INSERT OR IGNORE INTO website(url,language,file_size,comment_size,js_size,style_size,content_size) VALUES(" + Line + ");");
+                        cmd = "INSERT OR IGNORE INTO website(url,language,file_size,comment_size,js_size,style_size,content_size) VALUES(" + Line + ");";
+                        System.out.println(cmd);
+                        db.exec(cmd);
                     }
                 }
+                System.out.println("COMMIT");
                 db.exec("COMMIT;");
+                System.out.println("SUCCESS");
             } catch ( SQLiteException | IOException ex) {
                 Logger.getLogger(ImportWebDB.class.getName()).log(Level.SEVERE, null, ex);
             } finally{
