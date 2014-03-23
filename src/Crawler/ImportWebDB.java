@@ -35,12 +35,12 @@ public class ImportWebDB {
                 System.out.println("BEGIN");
                 while((Line = raf.readLine()) != null){
                     cols = Line.split(",");
-                    if(cols.length >= SiteCrawler.WebDBColumnWidth){
+                    //if(cols.length >= SiteCrawler.WebDBColumnWidth){
                         Line = Line.replaceAll(" ", "%20");
                         cmd = "INSERT OR IGNORE INTO website(url,language,file_size,comment_size,js_size,style_size,content_size) VALUES(" + Line + ");";
                         System.out.println(cmd);
                         db.exec(cmd);
-                    }
+                    //}
                 }
                 System.out.println("COMMIT");
                 db.exec("COMMIT;");
