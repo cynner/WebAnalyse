@@ -41,6 +41,7 @@ public class ImportWebDB {
                         System.out.println(cmd);
                         db.exec(cmd);
                     }
+                    System.err.println(Line);
                 }
                 System.out.println("COMMIT");
                 db.exec("COMMIT;");
