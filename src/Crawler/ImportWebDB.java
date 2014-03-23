@@ -37,7 +37,7 @@ public class ImportWebDB {
                     cols = Line.split(",");
                     //if(cols.length >= SiteCrawler.WebDBColumnWidth){
                         Line = Line.replaceAll(" ", "%20");
-                        cmd = "INSERT OR IGNORE INTO website(url,language,file_size,comment_size,js_size,style_size,content_size) VALUES(" + Line + ");";
+                        cmd = "INSERT OR IGNORE INTO webpage(url,language,file_size,comment_size,js_size,style_size,content_size) VALUES(" + Line + ");";
                         System.out.println(cmd);
                         db.exec(cmd);
                     //}
