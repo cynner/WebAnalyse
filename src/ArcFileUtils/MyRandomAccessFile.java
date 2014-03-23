@@ -85,7 +85,7 @@ public class MyRandomAccessFile implements DataOutput, DataInput, AutoCloseable 
             } while ((v = (byte) raf.read()) != -1);
             return ans + new String(b, 0, i, "utf-8");
         }
-        return "";
+        return null;
     }
 
     @Override
