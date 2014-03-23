@@ -38,10 +38,11 @@ public class MyURL {
         if (URL.contains("\n")) {
             throw new MalformedURLException("Newline char could not be contain in url.");
         }
-        URL = URL.replaceAll("\r", "");
+        URL = URL.replaceAll("\\r", "");
+        URL = StandardURLEncode(URL);
         this.SepURL(URL);
         this.toAbsolutePath();
-        this.NormPath();
+        //this.NormPath();
         this.MakeUniqueURL();
     }
 
@@ -56,6 +57,7 @@ public class MyURL {
             return new MyURL(URL);
         } else {
             MyURL rel = new MyURL();
+            URL = StandardURLEncode(URL);
             rel.SepPathQueryTarget(URL);
             if (URL.charAt(0) == '?' || URL.charAt(0) == '#') {
                 rel.Path = this.Path;
@@ -67,7 +69,7 @@ public class MyURL {
             rel.Host = this.Host;
             rel.Port = this.Port;
             rel.toAbsolutePath();
-            rel.NormPath();
+            //rel.NormPath();
             rel.MakeUniqueURL();
             return rel;
         }
@@ -203,20 +205,29 @@ public class MyURL {
         }
     }
 
-    public static void main(String[] args) throws Exception {
-        String URLLL= "http://campus.sanook.com/951989/%E0%B9%80%E0%B8%94%E0%B8%B4%E0%B8%99%E0%B9%80%E0%B8%97%E0%B9%89%E0%B8%B2%E0%B9%80%E0%B8%9B%E0%B8%A5%E0%B9%88%E0%B8%B2%";
-        MyURL A = new MyURL(URLLL);
-        System.out.println(A.UniqURL);
-        
-        
-    }
+    
 
     /**
      * Decode URL Except Space & Percent sign or %25 that will be Encode
      */
     public void NormPath() throws MalformedURLException {
+        Path=StandardURLEncode(Path);
+    }
+    
+    public static String NormQuery(String query){
+        String [] s = query.split("&");
+        Arrays.sort(s);
+        StringBuilder sb = new StringBuilder(s[0]);
         
-        int numChars = Path.length();
+        for(int i=1;i<s.length;i++){
+            sb.append("&").append(s[i]);
+        }
+        return sb.toString();
+    }
+    
+    public static String StandardURLEncode(String str) throws MalformedURLException{
+        
+        int numChars = str.length();
         StringBuilder sb = new StringBuilder(numChars > 500 ? numChars / 2 : numChars);
         int i = 0;
 
@@ -226,7 +237,7 @@ public class MyURL {
         byte[] bytes = new byte[blen];
         
         while (i < numChars) {
-            c = Path.charAt(i);
+            c = str.charAt(i);
             switch (c) {
                 case ' ':
                     sb.append("%20");
@@ -247,7 +258,7 @@ public class MyURL {
                             
                         while (((i + 2) < numChars)
                                 && (c == '%')) {
-                            v = Integer.parseInt(Path.substring(i + 1, i + 3), 16);
+                            v = Integer.parseInt(str.substring(i + 1, i + 3), 16);
                             switch(v){
                                 case 0x0A:
                                     bytes[pos++] = '%';
@@ -275,7 +286,7 @@ public class MyURL {
                             }
                             i += 3;
                             if (i < numChars) {
-                                c = Path.charAt(i);
+                                c = str.charAt(i);
                             }
                             
                             if(pos >= maxblen){
@@ -307,21 +318,8 @@ public class MyURL {
             }
         }
         //if(needToChange)
-        Path = sb.toString();
-    }
-    
-    public static String NormQuery(String query){
-        String [] s = query.split("&");
-        Arrays.sort(s);
-        StringBuilder sb = new StringBuilder(s[0]);
-        
-        for(int i=1;i<s.length;i++){
-            sb.append("&").append(s[i]);
-        }
         return sb.toString();
     }
-    
-    
     
     
      /**
@@ -533,5 +531,15 @@ public class MyURL {
         }
 
         return (needToChange ? out.toString() : s);
+    }
+    
+    
+    
+    public static void main(String[] args) throws Exception {
+        String URLLL= "http://funlekclub.com/gallery_s2_vote.php?id=1&id_p hoto=FS 1\r";
+        MyURL A = new MyURL(URLLL);
+        MyURL B = A.resolve(" ddc c ");
+        System.out.println(A.UniqURL);
+        System.out.println(B.UniqURL);   
     }
 }

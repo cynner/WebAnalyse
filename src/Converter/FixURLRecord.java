@@ -6,8 +6,6 @@
 package Converter;
 
 import ArcFileUtils.ArcFilenameFilter;
-import ArcFileUtils.ArcReader;
-import ArcFileUtils.CompressedArcWriter;
 import ArcFileUtils.CompressedWebArcWriter;
 import ArcFileUtils.WebArcReader;
 import Crawler.MyURL;
@@ -48,9 +46,10 @@ public class FixURLRecord {
                                 ar.Record.URL = url.UniqURL;
                                 aw.WriteRecordKeepDate(ar.Record);
                             } catch (Exception ex) {
+                                System.err.println("In : " + f.getName());
                                 System.err.println("At : " + ar.Record.URL);
                                 Logger.getLogger(FixURLRecord.class.getName()).log(Level.SEVERE, null, ex);
-                                System.exit(2);
+                                //System.exit(2);
                             }
                         }
                     }
