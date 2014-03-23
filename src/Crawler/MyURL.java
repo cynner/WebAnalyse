@@ -42,7 +42,6 @@ public class MyURL {
         URL = StandardURLEncode(URL);
         this.SepURL(URL);
         this.toAbsolutePath();
-        //this.NormPath();
         this.MakeUniqueURL();
     }
 
@@ -69,7 +68,6 @@ public class MyURL {
             rel.Host = this.Host;
             rel.Port = this.Port;
             rel.toAbsolutePath();
-            //rel.NormPath();
             rel.MakeUniqueURL();
             return rel;
         }
@@ -207,13 +205,6 @@ public class MyURL {
 
     
 
-    /**
-     * Decode URL Except Space & Percent sign or %25 that will be Encode
-     */
-    public void NormPath() throws MalformedURLException {
-        Path=StandardURLEncode(Path);
-    }
-    
     public static String NormQuery(String query){
         String [] s = query.split("&");
         Arrays.sort(s);
