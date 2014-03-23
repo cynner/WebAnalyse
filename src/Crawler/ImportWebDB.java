@@ -23,7 +23,7 @@ public class ImportWebDB {
     public static void main(String[] args){
         String base_dir = args.length > 0 ? args[0] : "data/crawler";
         String task_name = args.length > 1 ? args[1] : "task0001";
-        String webdb_name = "websiteinfo.txt";
+        String webdb_name = "webpageinfo.txt";
         String PathName = base_dir + "/" + task_name + "/" + webdb_name;
         try(MyRandomAccessFile raf = new MyRandomAccessFile(PathName, "r")){
             raf.readLong();
