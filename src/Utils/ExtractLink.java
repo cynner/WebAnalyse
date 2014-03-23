@@ -52,7 +52,7 @@ public class ExtractLink {
     
     public void runExtractLinkDir(File Dir) throws IOException{
         HashMap <String,MutableInt> HOSTs = new HashMap<>();
-        HashSet <String> URLs;
+        HashMap <String,MutableInt> URLs;
         MyURL src;
         String srcDomain,srcURL = "";
         bwWebLink = new BufferedWriter(new FileWriter(OutWebLink));
@@ -95,7 +95,7 @@ public class ExtractLink {
         bwHostLink.close();
     }
     
-    private void WriteWebLink(MyURL src, HashSet<String> URLs) {
+    private void WriteWebLink(MyURL src, HashMap<String, MutableInt> URLs) {
         String srcID, dstID;
         SQLiteStatement st;
         try {
@@ -105,12 +105,12 @@ public class ExtractLink {
                 st.dispose();
                 bwWebLink.write(srcID);
 
-                for (String url : URLs) {
+                for (Map.Entry<String, MutableInt> url : URLs.entrySet()) {
                     try {
-                        st = dbWeb.prepare("SELECT id FROM webpage WHERE url='" + url.replaceAll("'", "''") + "';");
+                        st = dbWeb.prepare("SELECT id FROM webpage WHERE url='" + url.getKey().replaceAll("'", "''") + "';");
                         if (st.step()) {
                             dstID = st.columnString(0);
-                            bwWebLink.write(";" + dstID);
+                            bwWebLink.write(";" + dstID + ":" + url.getValue().value );
                         }
                         st.dispose();
                     } catch (SQLiteException | IOException ex) {
@@ -154,18 +154,21 @@ public class ExtractLink {
         }
     }
     
-    private HashSet<String> ExtractWebPageNHostCount(MyURL src, Document doc, HashMap<String,MutableInt> HOSTs){
+    private HashMap<String,MutableInt> ExtractWebPageNHostCount(MyURL src, Document doc, HashMap<String,MutableInt> HOSTs){
         MyURL lnk;
         String href,host;
         MutableInt mi;
-        HashSet<String> URLs = new HashSet<>();
+        HashMap<String,MutableInt> URLs = new HashMap<>();
         for(Element e : doc.getElementsByTag("a")){
             href = e.attr("href");
             if(href != null && !href.isEmpty()){
                 try {
                     lnk = src.resolve(href);
-                    if(!URLs.contains(lnk.UniqURL)){
-                        URLs.add(lnk.UniqURL);
+                    mi = URLs.get(lnk.UniqURL);
+                    if(mi == null){
+                        URLs.put(href,new MutableInt());
+                    }else{
+                        mi.increment();
                     }
                     
                     host = lnk.getHost();
@@ -183,16 +186,20 @@ public class ExtractLink {
         return URLs;
     }
     
-    private HashSet<String> ExtractWebPage(MyURL src, Document doc){
+    private HashMap<String,MutableInt> ExtractWebPage(MyURL src, Document doc ){
         String href;
-        HashSet<String> URLs = new HashSet<>();
+        MutableInt mi;
+        HashMap<String,MutableInt> URLs = new HashMap<>();
         for(Element e : doc.getElementsByTag("a")){
             href = e.attr("href");
             if(href != null && !href.isEmpty()){
                 try {
                     href = src.resolve(href).UniqURL;
-                    if(!URLs.contains(href)){
-                        URLs.add(href);
+                    mi = URLs.get(href);
+                    if(mi == null){
+                        URLs.put(href,new MutableInt());
+                    }else{
+                        mi.increment();
                     }
                 } catch (Exception ex) {
                     Logger.getLogger(ExtractLink.class.getName()).log(Level.SEVERE, null, ex);
