@@ -175,7 +175,7 @@ public class ExtractLink {
                     lnk = src.resolve(href);
                     mi = URLs.get(lnk.UniqURL);
                     if(mi == null){
-                        URLs.put(href,new MutableInt());
+                        URLs.put(lnk.UniqURL,new MutableInt());
                     }else{
                         mi.increment();
                     }
@@ -188,8 +188,7 @@ public class ExtractLink {
                         mi.increment();
                     }
                 } catch (Exception ex) {
-                    System.err.println("At : " + src.UniqURL);
-                    Logger.getLogger(ExtractLink.class.getName()).log(Level.SEVERE, null, ex);
+                    System.err.println("At : " + src.UniqURL + " -> " + href);
                 }
             }
         }
