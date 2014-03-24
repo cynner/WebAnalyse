@@ -88,6 +88,8 @@ public class ExtractLink {
                         }
                     }
                     WriteHostLink(srcDomain, HOSTs);
+                    bwHostLink.flush();
+                    bwWebLink.flush();
                 } catch (IOException ex) {
                     System.err.println("Error At : " + srcURL);
                     Logger.getLogger(ExtractLink.class.getName()).log(Level.SEVERE, null, ex);
