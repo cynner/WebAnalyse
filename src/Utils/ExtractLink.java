@@ -51,6 +51,8 @@ public class ExtractLink {
     }
     
     public void runExtractLinkDir(File Dir) throws IOException{
+        boolean skipfordebug=true;
+        String fileskipto = "crawl-www.yopi.co.th.arc.gz";
         HashMap <String,MutableInt> HOSTs = new HashMap<>();
         HashMap <String,MutableInt> URLs;
         MyURL src;
@@ -62,6 +64,13 @@ public class ExtractLink {
             dbHost.openReadonly();
 
             for (File f : Dir.listFiles(new ArcFilenameFilter(ArcFilenameFilter.AcceptType.ArcOnly))) {
+                if(skipfordebug){
+                    if(f.getName().equals(fileskipto)){
+                        skipfordebug = false;
+                    }else{
+                        continue;
+                    }
+                }
                 System.out.println(f.getName());
                 try (WebArcReader war = new WebArcReader(f, "utf-8")) {
                     srcDomain = "";
