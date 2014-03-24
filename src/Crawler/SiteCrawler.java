@@ -274,7 +274,10 @@ public class SiteCrawler implements Runnable {
         //"url","language",file_size,comment_size,js_size,style_size,content_size
         long pos;
         try {
-            
+            if (rafWebDB.getFilePointer() <= 0){
+                rafWebDB.seek(0);
+                rafWebDB.writeLong(Long.SIZE);
+            }
             rafWebDB.write(("\"" + Url.replaceAll("\"", "\"\"") + "\"," + (curPageLanguage == null ? "null" : "\"" + curPageLanguage + "\"") + "," + wu.FileSize + "," + wu.CommentSize + "," + wu.ScriptSize + "," + wu.StyleSize + "," + wu.ContentSize + "\n").getBytes("utf-8"));
             pos = rafWebDB.getFilePointer();
             rafWebDB.seek(0);

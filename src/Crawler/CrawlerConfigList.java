@@ -73,7 +73,7 @@ public class CrawlerConfigList extends CrawlerConfig {
         String Line;
         synchronized (fileMergeWebInfo) {
             boolean fileExists = fileMergeWebInfo.exists();
-            try (BufferedReader br = new BufferedReader(new FileReader(InfoFile));
+            try (MyRandomAccessFile br = new MyRandomAccessFile(InfoFile,"r");
                     MyRandomAccessFile raf = new MyRandomAccessFile(fileMergeWebInfo, "rw")) {
 
                 if (fileExists) {
@@ -83,8 +83,9 @@ public class CrawlerConfigList extends CrawlerConfig {
                     pos = (long) (Long.SIZE / 8);
                     raf.writeLong(pos);
                 }
+                long filepos = br.readLong();
 
-                while ((Line = br.readLine()) != null) {
+                while ((Line = br.readLine()) != null && br.getFilePointer() <= filepos) {
                     raf.write((Line + "\n").getBytes("utf-8"));
                 }
                 pos = raf.getFilePointer();
