@@ -51,7 +51,7 @@ public class ExtractLink {
     }
     
     public void runExtractLinkDir(File Dir) throws IOException{
-        boolean skipfordebug=true;
+        boolean skipfordebug=false;
         String fileskipto = "crawl-www.yopi.co.th.arc.gz";
         HashMap <String,MutableInt> HOSTs = new HashMap<>();
         HashMap <String,MutableInt> URLs;
