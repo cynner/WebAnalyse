@@ -27,6 +27,8 @@ public class SCCDynamic {
     public static class Node{
         int visited;
         int curNodeNo;
+        int InSize;
+        int OutSize;
         ArrayList<Node> Link;
         ArrayList<Node> LinkReverse;
         Node Back;
@@ -127,9 +129,10 @@ public class SCCDynamic {
      *  
      * @param FileName CSV File Path
      * @param sep Separated string
+     * @param sec_sep Separated 2nd string
      */
-    public void ImportCSV(String FileName, String sep){
-        ImportCSV(new File(FileName),sep);
+    public void ImportCSV(String FileName, String sep, String sec_sep){
+        ImportCSV(new File(FileName), sep, sec_sep);
     }
     
     /**
@@ -139,12 +142,13 @@ public class SCCDynamic {
      *  
      * @param file CSV File
      * @param sep Separated string
+     * @param sec_sep Separated 2nd string
      */
-    public void ImportCSV(File file,String sep){
+    public void ImportCSV(File file, String sep, String sec_sep){
         try(BufferedReader br = new BufferedReader(new FileReader(file))){
             String Line;
-            String[] strs;
-            int src,dst,i;
+            String[] strs,subs;
+            int src,dst,i,tmpo;
             Node NSrc,NDst;
             while((Line = br.readLine()) != null){
                 strs = Line.split(sep);
@@ -155,14 +159,24 @@ public class SCCDynamic {
                 }
                 NSrc = Graph.get(src);
                 for (i = 1; i < strs.length; i++) {
-                    dst = Integer.parseInt(strs[i]);
+                    subs = strs[i].split(sec_sep);
+                    dst = Integer.parseInt(subs[0]);
+                    
                     while(NodeSize <= dst){
                         Graph.add(new Node());
                         NodeSize++;
                     }
+                    
+                    // Linker
                     NDst = Graph.get(dst);
                     NSrc.Link.add(NDst);
                     NDst.LinkReverse.add(NSrc);
+                    
+                    if(subs.length > 1){
+                        tmpo = Integer.parseInt(subs[1]);
+                        NSrc.OutSize += tmpo;
+                        NDst.InSize += tmpo;
+                    }
                 }
             }
         } catch (FileNotFoundException ex) {
@@ -296,6 +310,22 @@ public class SCCDynamic {
         }
     }
     
+    /**
+     * Write scc info
+     * @param file Output File
+     */
+    public void WriteInOutLink(File file){
+        try(BufferedWriter bw = new BufferedWriter(new FileWriter(file))){
+            Node n;
+            for(int i=0;i<NodeSize;i++){
+                n = Graph.get(i);
+                bw.write(i + ":" + n.InSize + ":" + n.OutSize + "\n");
+            }
+        } catch (IOException ex) {
+            Logger.getLogger(SCCDynamic.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+    
     
     public static void main(String[] args){
         //Mode has sd or csv mode
@@ -303,12 +333,13 @@ public class SCCDynamic {
         String FileInName = args.length > 1 ? args[1] : "web-Stanford.txt";
         String FileOutName = args.length > 2 ? args[2] : "data/testscc.result";
         String FileInfo = FileOutName + ".info";
+        String FileIO = FileOutName + ".io";
         SCCDynamic scc = new SCCDynamic();
         
         System.out.println("Importing...");
         switch(Mode.toLowerCase()){
             case "csv":
-                scc.ImportCSV(FileInName, ";");
+                scc.ImportCSV(FileInName, ";", ":");
                 break;
             case "sd":
                 scc.ImportSD(FileInName, ";");
@@ -318,6 +349,8 @@ public class SCCDynamic {
                 System.exit(1);
                 break;
         }
+        System.out.println("Writing IO...");
+        scc.WriteInOutLink(new File(FileIO));
         System.out.println("Computing...");
         scc.Compute();
         System.out.println("Writting...");
