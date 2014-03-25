@@ -23,12 +23,21 @@ import java.util.logging.Logger;
  * @author wiwat
  */
 public class SCCDynamic {
+    // Status 4 = inlink, 8 = outlink, 1 = Trendril (Point from IN) , 2 = Trendril (Point to OUT) , 3 = Tube
+    public static final byte INLINK = 4;
+    public static final byte OUTLINK = 8;
+    public static final byte ITRENDRIL = 1;
+    public static final byte OTRENDRIL = 2;
+    public static final byte TUBE = 3;
+    public static final byte CORE = 16;
+    public static final byte ISLAND = 0;
     
     public static class Node{
         int visited;
         int curNodeNo;
         int InSize;
         int OutSize;
+        byte Status;
         ArrayList<Node> Link;
         ArrayList<Node> LinkReverse;
         Node Back;
@@ -38,6 +47,7 @@ public class SCCDynamic {
             LinkReverse = new ArrayList<>();
             visited = 0;
             curNodeNo = 0;
+            Status = 0;
             Back = null;
         }
     }
@@ -45,10 +55,180 @@ public class SCCDynamic {
     public int NodeSize = 0;
     public int GroupNo = 1;
     public int GroupCnt;
+    public int MaxSizeGroupNo;
+    public int MaxSize;
     public ArrayList<Node> Graph = new ArrayList<>();
     public ArrayList<Integer> GroupSize = new ArrayList<>();
     public Stack<Node> LastAccess = new Stack<>();
-    public Stack<Node> StackList = new Stack<>();
+    //public Stack<Node> StackList = new Stack<>();
+    
+    public void MarkOutLink(Node N){
+        Node n;
+        N.Back = null;
+        while (true){
+            if(N.curNodeNo < N.Link.size()){
+                N.Status = OUTLINK;
+                n = N.Link.get(N.curNodeNo++);
+                if(N.Status == ISLAND){
+                    n.Back = N;
+                    N = n;
+                }
+            }else{
+                N = N.Back;
+                if(N == null)
+                    break;
+            }
+        }
+    }
+    
+    public void MarkInLink(Node N){
+        Node n;
+        N.Back = null;
+        while (true){
+            if(N.curNodeNo < N.LinkReverse.size()){
+                N.Status = INLINK;
+                n = N.LinkReverse.get(N.curNodeNo++);
+                //if(n.visited != MaxSizeGroupNo){ // Never not Happen
+                if(N.Status == ISLAND){
+                    n.Back = N;
+                    N = n;
+                }
+            }else{
+                N = N.Back;
+                if(N == null)
+                    break;
+            }
+        }
+    }
+    
+    public void MakeTrendrilOut(Node N){
+        Node n;
+        N.Back = null;
+        N.Status = OTRENDRIL;
+        while (true){
+            if(N.curNodeNo < N.LinkReverse.size()){
+                n = N.LinkReverse.get(N.curNodeNo++);
+                if(n.Status == ISLAND){
+                    n.Back = N;
+                    N = n;
+                    n.Status = OTRENDRIL;
+                }else if(n.Status == INLINK){
+                    N.Status = TUBE;
+                    N.Back.Status = TUBE;
+                }
+            }else{
+                if(N.Back == null){
+                    break;
+                }else{
+                    if(N.Status == TUBE)
+                        N.Back.Status = TUBE;
+                    N = N.Back;
+                }
+            }
+        }
+    }
+    
+    public void MakeTrendrilIn(Node N){
+        Node n;
+        N.Back = null;
+        N.Status = ITRENDRIL;
+        while (true){
+            if(N.curNodeNo < N.Link.size()){
+                n = N.Link.get(N.curNodeNo++);
+                if(n.Status == ISLAND){
+                    n.Back = N;
+                    N = n;
+                    n.Status = ITRENDRIL;
+                }else if(n.Status == OUTLINK){
+                    N.Status = TUBE;
+                    N.Back.Status = TUBE;
+                }
+            }else{
+                if(N.Back == null){
+                    break;
+                }else{
+                    if(N.Status == TUBE)
+                        N.Back.Status = TUBE;
+                    N = N.Back;
+                }
+            }
+        }
+    }
+    
+    public void FindTubeTendril(){
+        for(Node N : Graph){
+            switch(N.Status){
+                case OUTLINK:
+                    for (Node n : N.LinkReverse){
+                        if(n.Status == ISLAND)
+                            MakeTrendrilOut(n);
+                    }
+                    break;
+                case INLINK:
+                    for (Node n : N.Link){
+                        if(n.Status == ISLAND)
+                            MakeTrendrilIn(n);
+                    }
+                    break;
+            }
+        }
+    }
+    
+    public void FindInOutLinkStatus(){
+        for(Node N : Graph)
+            N.curNodeNo = 0;
+        
+        for(Node N : Graph){
+            if(N.visited == MaxSizeGroupNo){
+                N.Status = CORE;
+                // In Link
+                for(Node n : N.LinkReverse){
+                    if(n.visited != MaxSizeGroupNo)
+                        MarkInLink(n);
+                }
+                
+                // Out Link
+                for(Node n : N.Link){
+                    if(n.visited != MaxSizeGroupNo)
+                        MarkOutLink(n);
+                }
+            }
+        }
+    }
+    
+    public void FindBowTieAfterSCC(){
+        FindInOutLinkStatus();
+        FindTubeTendril();
+        int cntTRENDRIL=0,cntTUBE=0,cntSCC=0,cntIN=0,cntOUT=0,cntISLAND=0;
+        for(Node n : Graph){
+            switch (n.Status){
+                case ITRENDRIL: case OTRENDRIL:
+                    cntTRENDRIL++;
+                    break;
+                case TUBE:
+                    cntTUBE++;
+                    break;
+                case CORE:
+                    cntSCC++;
+                    break;
+                case OUTLINK:
+                    cntOUT++;
+                    break;
+                case INLINK:
+                    cntIN++;
+                    break;
+                case ISLAND:
+                    cntISLAND++;
+                    break;
+            }
+        }
+        System.out.println("SCC: " + cntSCC);
+        System.out.println("IN: " + cntIN);
+        System.out.println("OUT: " + cntOUT);
+        System.out.println("Trendril: " + cntTRENDRIL);
+        System.out.println("Tube: " + cntTUBE);
+        System.out.println("Island: " + cntISLAND);
+    }
     
     public void TraverseGraph(Node N){
         /*
@@ -356,6 +536,7 @@ public class SCCDynamic {
         scc.WriteInOutLink(new File(FileIO));
         System.out.println("Computing...");
         scc.Compute();
+        scc.FindBowTieAfterSCC();
         System.out.println("Writting...");
         scc.WriteMap(FileOutName);
         scc.WriteInfo(FileInfo);
