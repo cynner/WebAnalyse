@@ -1,11 +1,14 @@
 #!/usr/bin/python
 
 # Numpy is a library for handling arrays (like data points)
-import numpy as np
 import sys
 import argparse
 
 # Pyplot is a module within the matplotlib library for plotting
+
+from numpy import *
+from pylab import *
+#from matplotlib import rc, rcParams
 import matplotlib.pyplot as plt
 
 
@@ -13,11 +16,11 @@ parser = argparse.ArgumentParser(description='Plot graph distribution.')
 #parser.add_argument('--sumf', dest='accumulate', action='store_const', const=sum, default=max, help='sum the integers (default: find the max)')
 #parser.add_argument('integers', metavar='Ng', type=int, nargs='+',help='an integer for the accumulator')
 parser.add_argument('-d', metavar='delim',default=':',help='delimiter default \':\'')
-parser.add_argument('-f', metavar='field_no',type=int,default=2,help='filed no start from 1 default 2')
+parser.add_argument('-f', metavar='field_no',type=int,default=3,help='filed no start from 1 default 2')
 parser.add_argument('-s', metavar='Style', default='b.', help='Style default \'b.\'')
-parser.add_argument('-o', metavar='IMG_File', default='graph/outdist.png', help='Output png file')
-parser.add_argument('-t', metavar='TITLE',default='Out-Degree Distribution',help='Title')
-parser.add_argument('-xl', metavar='x-label',default='Out-Degree',help='x label')
+parser.add_argument('-o', metavar='IMG_File', default='graph/indist.png', help='Output png file')
+parser.add_argument('-t', metavar='TITLE',default='In-Degree Distribution',help='Title')
+parser.add_argument('-xl', metavar='x-label',default='In-Degree',help='x label')
 parser.add_argument('-yl', metavar='y-label',default='Number of page',help='y label')
 parser.add_argument('DataFile',help='Input CSV File')
 args = parser.parse_args()
@@ -60,7 +63,11 @@ for i in inl:
 x = [i for i in dic]
 y = [dic[i] for i in dic]
 
-#plot
+#plot inlink
+
+#plt.title(r'$\int_0^{\infty} t^{x-1} e^{-t} dt$', fontsize=18)
+#plt.xlabel(r'$\alpha \sim \Gamma \leftarrow (M_{\odot})$',fontsize=17)
+#plt.ylabel(r'Text in Computer Modern font', fontsize=17)
 plt.grid(True)
 plt.xscale('log')
 plt.yscale('log')
@@ -70,6 +77,10 @@ plt.ylabel(ylabel, fontsize=22)
 plt.tick_params(axis='both', which='major', labelsize=20)
 plt.tick_params(axis='both', which='minor', labelsize=20)
 plt.tight_layout()
+
+# Create the plot
+#plt.plot(x,y)
+#plt.scatter(xinl,yinl)
 plt.plot(x,y,style)
 
 

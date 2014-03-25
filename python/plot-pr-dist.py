@@ -60,23 +60,16 @@ for i in inl:
 x = [i for i in dic]
 y = [dic[i] for i in dic]
 
-#plot inlink
-
+#plot
 plt.grid(True)
 plt.xscale('log')
 plt.yscale('log')
-
-#plt.title(r'$\int_0^{\infty} t^{x-1} e^{-t} dt$', fontsize=18)
-#plt.xlabel(r'$\alpha \sim \Gamma \leftarrow (M_{\odot})$',fontsize=17)
-#plt.ylabel(r'Text in Computer Modern font', fontsize=17)
-
-plt.title(title, fontsize=18)
-plt.xlabel(xlabel,fontsize=14)
-plt.ylabel(ylabel, fontsize=14)
-
-# Create the plot
-#plt.plot(x,y)
-#plt.scatter(xinl,yinl)
+plt.title(title, fontsize=24)
+plt.xlabel(xlabel,fontsize=22)
+plt.ylabel(ylabel, fontsize=22)
+plt.tick_params(axis='both', which='major', labelsize=20)
+plt.tick_params(axis='both', which='minor', labelsize=20)
+plt.tight_layout()
 plt.plot(x,y,style)
 
 
