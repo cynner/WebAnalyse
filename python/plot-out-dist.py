@@ -74,7 +74,8 @@ plt.plot(x,y,style)
 
 
 # Save the figure in a separate file
-plt.savefig(imgname)
+plt.savefig(imgname, format='png', dpi=300)
+plt.savefig(imgname+".eps", format='eps', dpi=300)
 
 # Draw the plot to the screen
 plt.show()

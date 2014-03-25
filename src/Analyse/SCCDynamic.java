@@ -112,7 +112,7 @@ public class SCCDynamic {
                     n.Back = N;
                     N = n;
                     n.Status = OTRENDRIL;
-                }else if(n.Status == INLINK){
+                }else if(n.Status == INLINK && N.Back != null){
                     N.Status = TUBE;
                     N.Back.Status = TUBE;
                 }
@@ -139,7 +139,7 @@ public class SCCDynamic {
                     n.Back = N;
                     N = n;
                     n.Status = ITRENDRIL;
-                }else if(n.Status == OUTLINK){
+                }else if(n.Status == OUTLINK && N.Back != null){
                     N.Status = TUBE;
                     N.Back.Status = TUBE;
                 }
@@ -438,6 +438,11 @@ public class SCCDynamic {
                 GroupCnt = 0;
                 TraverseGraphReverse(n);
                 GroupSize.add(GroupCnt);
+                if(GroupCnt > MaxSize){
+                    MaxSize = GroupCnt;
+                    MaxSizeGroupNo = GroupNo;
+                }
+                    
                 GroupNo++;
             }
         }
