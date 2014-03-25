@@ -176,6 +176,9 @@ public class SCCDynamic {
                         tmpo = Integer.parseInt(subs[1]);
                         NSrc.OutSize += tmpo;
                         NDst.InSize += tmpo;
+                    }else{
+                        NSrc.OutSize ++;
+                        NDst.InSize ++;
                     }
                 }
             }
@@ -329,9 +332,9 @@ public class SCCDynamic {
     
     public static void main(String[] args){
         //Mode has sd or csv mode
-        String Mode = args.length > 0 ? args[0] : "sd";
-        String FileInName = args.length > 1 ? args[1] : "web-Stanford.txt";
-        String FileOutName = args.length > 2 ? args[2] : "data/testscc.result";
+        String Mode = args.length > 0 ? args[0] : "csv";
+        String FileInName = args.length > 1 ? args[1] : "../graph.webpage";
+        String FileOutName = args.length > 2 ? args[2] : "../scc.webpage";
         String FileInfo = FileOutName + ".info";
         String FileIO = FileOutName + ".io";
         SCCDynamic scc = new SCCDynamic();
