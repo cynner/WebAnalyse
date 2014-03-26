@@ -42,7 +42,7 @@ public class ImportWebDBTmp {
                             cols[0] = (new MyURL("\"http://" + cols[0])).UniqURL;
                             Line = cols[0];
                             for(int i=1;i<cols.length;i++)
-                                Line += cols[i];
+                                Line += "," + cols[i];
                             cmd = "INSERT OR IGNORE INTO webpage(url,language,file_size,comment_size,js_size,style_size,content_size) VALUES(" + Line + ");";
                             System.out.println(cmd);
                             db.exec(cmd);
