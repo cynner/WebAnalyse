@@ -39,7 +39,7 @@ public class MakeSQLUnique {
         SQLiteStatement stmt = null;
         String oldURL,newURL;
         int id;
-        beg=0;
+        beg= args.length > 0 ? Integer.parseInt(args[0]) : 0;
         try {
             db.open();
             while(true){
