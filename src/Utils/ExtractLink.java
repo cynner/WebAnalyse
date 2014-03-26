@@ -12,13 +12,11 @@ import Crawler.MyURL;
 import com.almworks.sqlite4java.SQLiteConnection;
 import com.almworks.sqlite4java.SQLiteException;
 import com.almworks.sqlite4java.SQLiteStatement;
-import com.sun.org.apache.xalan.internal.xsltc.runtime.BasisLibrary;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -37,13 +35,13 @@ public class ExtractLink {
     }
     
     
-    private File OutHostLink, OutWebLink;
+    private final File OutHostLink, OutWebLink;
             
     private BufferedWriter bwWebLink;
     private BufferedWriter bwHostLink;
     
-    private SQLiteConnection dbWeb = new SQLiteConnection(DBDriver.TableConfig.FileWebPageDB);
-    private SQLiteConnection dbHost= new SQLiteConnection(DBDriver.TableConfig.FileWebSiteDB);
+    private final SQLiteConnection dbWeb = new SQLiteConnection(DBDriver.TableConfig.FileWebPageDB);
+    private final SQLiteConnection dbHost= new SQLiteConnection(DBDriver.TableConfig.FileWebSiteDB);
     
     public ExtractLink(File OutHostLink, File OutWebLink){
         this.OutWebLink = OutWebLink;
@@ -123,9 +121,10 @@ public class ExtractLink {
                             dstID = st.columnString(0);
                             bwWebLink.write(";" + dstID + ":" + url.getValue().value );
                         }
-                        st.dispose();
                     } catch (SQLiteException | IOException ex) {
                         Logger.getLogger(ExtractLink.class.getName()).log(Level.SEVERE, null, ex);
+                    } finally {
+                        st.dispose();
                     }
                 }
                 bwWebLink.write("\n");
@@ -145,22 +144,25 @@ public class ExtractLink {
             if (st.step()) {
                 srcID = st.columnString(0);
                 st.dispose();
+                bwHostLink.write(srcID);
                 for (Map.Entry<String, MutableInt> host : HOSTs.entrySet()) {
                     try {
                         st = dbHost.prepare("SELECT id FROM website WHERE hostname = '" + host.getKey().replaceAll("'", "''") + "';");
                         if (st.step()) {
                             dstID = st.columnString(0);
-                            bwHostLink.write(srcID + ";" + dstID + ";" + host.getValue().value + "\n");
-                            st.dispose();
+                            bwHostLink.write(";" + dstID + ":" + host.getValue().value);
                         }
                     } catch (SQLiteException | IOException ex) {
                         Logger.getLogger(ExtractLink.class.getName()).log(Level.SEVERE, null, ex);
+                    } finally {
+                        st.dispose();
                     }
                 }
+                bwHostLink.write("\n");
             } else {
                 st.dispose();
             }
-        } catch (SQLiteException ex) {
+        } catch (SQLiteException | IOException ex) {
             Logger.getLogger(ExtractLink.class.getName()).log(Level.SEVERE, null, ex);
         }
     }

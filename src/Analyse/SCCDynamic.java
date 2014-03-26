@@ -31,6 +31,12 @@ public class SCCDynamic {
     public static final byte TUBE = 3;
     public static final byte CORE = 16;
     public static final byte ISLAND = 0;
+    public static final String[] MAP = new String[]{"Isla","TreI","TreO","Tube","In",
+                                                         null, null, null, "Out",
+                                                         null, null, null, null,
+                                                         null, null, null, "Core"};
+    
+    public int cntTRENDRIL=0, cntTUBE=0, cntCORE=0, cntIN=0, cntOUT=0, cntISLAND=0;
     
     public static class Node{
         int visited;
@@ -199,7 +205,7 @@ public class SCCDynamic {
     public void FindBowTieAfterSCC(){
         FindInOutLinkStatus();
         FindTubeTendril();
-        int cntTRENDRIL=0,cntTUBE=0,cntSCC=0,cntIN=0,cntOUT=0,cntISLAND=0;
+        cntTRENDRIL=0;cntTUBE=0;cntCORE=0;cntIN=0;cntOUT=0;cntISLAND=0;
         for(Node n : Graph){
             switch (n.Status){
                 case ITRENDRIL: case OTRENDRIL:
@@ -209,7 +215,7 @@ public class SCCDynamic {
                     cntTUBE++;
                     break;
                 case CORE:
-                    cntSCC++;
+                    cntCORE++;
                     break;
                 case OUTLINK:
                     cntOUT++;
@@ -222,7 +228,7 @@ public class SCCDynamic {
                     break;
             }
         }
-        System.out.println("SCC: " + cntSCC);
+        System.out.println("CORE: " + cntCORE);
         System.out.println("IN: " + cntIN);
         System.out.println("OUT: " + cntOUT);
         System.out.println("Trendril: " + cntTRENDRIL);
@@ -398,7 +404,7 @@ public class SCCDynamic {
         try(BufferedReader br = new BufferedReader(new FileReader(file))){
             String Line;
             String[] strs;
-            int src,dst,i;
+            int src,dst,i,tmpo;
             Node NSrc,NDst;
             while((Line = br.readLine()) != null) {
                 strs = Line.split(sep);
@@ -416,6 +422,14 @@ public class SCCDynamic {
                 NDst = Graph.get(dst);
                 NSrc.Link.add(NDst);
                 NDst.LinkReverse.add(NSrc);
+                if(strs.length >= 3){
+                    tmpo = Integer.parseInt(strs[2]);
+                    NSrc.OutSize += tmpo;
+                    NDst.InSize += tmpo;
+                }else{
+                    NSrc.OutSize++;
+                    NDst.InSize++;
+                }
             }
         } catch (FileNotFoundException ex) {
             Logger.getLogger(SCCDynamic.class.getName()).log(Level.SEVERE, null, ex);
@@ -462,10 +476,11 @@ public class SCCDynamic {
      */
     public void WriteMap(File file){
         try(BufferedWriter bw = new BufferedWriter(new FileWriter(file))){
+            bw.write("id:Group:InDegree:OutDegree:BowtieStatus\n");
             Node n;
             for(int i=0;i<Graph.size();i++){
                 n = Graph.get(i);
-                bw.write(i + ":" + n.visited + "\n");
+                bw.write(i + ":" + n.visited + ":" + n.InSize + ":" + n.OutSize + ":" + MAP[n.Status]  + "\n");
             }
         } catch (IOException ex) {
             Logger.getLogger(SCCDynamic.class.getName()).log(Level.SEVERE, null, ex);
@@ -488,7 +503,19 @@ public class SCCDynamic {
      */
     public void WriteInfo(File file){
         try(BufferedWriter bw = new BufferedWriter(new FileWriter(file))){
-            bw.write("Component:" + (this.GroupNo-1) + "\n") ;
+            bw.write("...SCC sumary..." + "\n");
+            bw.write("Component = " + (this.GroupNo-1) + "\n") ;
+            bw.write("MaxGroupSize = " + (this.MaxSize) + "\n") ;
+            bw.write("MaxGroupID = " + (this.MaxSizeGroupNo) + "\n") ;
+            bw.write("...Bowtie sumary..." + "\n");
+            bw.write("CORE = " + cntCORE + "\n");
+            bw.write("IN = " + cntIN + "\n");
+            bw.write("OUT = " + cntOUT + "\n");
+            bw.write("Trendril = " + cntTRENDRIL + "\n");
+            bw.write("Tube = " + cntTUBE + "\n");
+            bw.write("Island = " + cntISLAND + "\n");
+            bw.write("...Group size dist..." + "\n");
+            bw.write("GroupID:GroupSize" + "\n");
             int n;
             for(int i=0;i<GroupSize.size();i++){
                 bw.write((i+1) + ":" + GroupSize.get(i) + "\n");
@@ -498,6 +525,7 @@ public class SCCDynamic {
         }
     }
     
+    @Deprecated
     /**
      * Write scc info
      * @param file Output File
@@ -538,7 +566,7 @@ public class SCCDynamic {
                 break;
         }
         System.out.println("Writing IO...");
-        scc.WriteInOutLink(new File(FileIO));
+        //scc.WriteInOutLink(new File(FileIO));
         System.out.println("Computing...");
         scc.Compute();
         scc.FindBowTieAfterSCC();
