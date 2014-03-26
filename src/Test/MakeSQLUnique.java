@@ -55,7 +55,7 @@ public class MakeSQLUnique {
                                 Logger.getLogger(MakeSQLUnique.class.getName()).log(Level.SEVERE, null, ex);
                                 newURL = null;
                             }
-                            if(!oldURL.equals(newURL)){
+                            if(newURL != null && !oldURL.equals(newURL)){
                                 System.out.println("OLD : " + oldURL);
                                 System.out.println("NEW : " + newURL);
                                 arr.add(new LAU(stmt.columnInt(0), newURL));
