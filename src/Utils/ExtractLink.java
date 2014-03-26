@@ -57,9 +57,12 @@ public class ExtractLink {
         String srcDomain,srcURL = "";
         bwWebLink = new BufferedWriter(new FileWriter(OutWebLink));
         bwHostLink = new BufferedWriter(new FileWriter(OutHostLink));
+        
         try {
             dbWeb.openReadonly();
             dbHost.openReadonly();
+            
+            System.out.println("===Start runExtractLinkDir===");
 
             for (File f : Dir.listFiles(new ArcFilenameFilter(ArcFilenameFilter.AcceptType.ArcOnly))) {
                 if(skipfordebug){
@@ -89,11 +92,13 @@ public class ExtractLink {
                     bwHostLink.flush();
                     bwWebLink.flush();
                 } catch (IOException ex) {
-                    System.err.println("Error At : " + srcURL);
+                    System.err.println("Error At FILE : " + f.getName());
+                    System.err.println("Error At URL  : " + srcURL);
                     Logger.getLogger(ExtractLink.class.getName()).log(Level.SEVERE, null, ex);
                 }
                 HOSTs.clear();
             }
+            System.out.println("===runExtractLinkDir SUCCESS===");
         } catch (SQLiteException ex) {
             Logger.getLogger(ExtractLink.class.getName()).log(Level.SEVERE, null, ex);
         } finally {
