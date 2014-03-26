@@ -51,7 +51,13 @@ public class ImportWebDBTmp {
                         }
                     }
                     System.err.println(Line);
-                    raf.readLong();
+                    try{
+                        if(raf.getFilePointer() < raf.length())
+                            raf.readLong();
+                    }catch(IOException ex){
+                        System.out.println("EOF EOF---");
+                        break;
+                    }
                 }
                 System.out.println("COMMIT");
                 db.exec("COMMIT;");
