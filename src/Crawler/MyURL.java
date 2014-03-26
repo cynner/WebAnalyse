@@ -31,14 +31,15 @@ public class MyURL {
     public String UniqURL;
     //public String Pos
 
-    public MyURL() {
+    private MyURL() {
     }
 
     public MyURL(String URL) throws Exception {
+        URL = URL.trim();
+        URL = URL.replaceAll("\\r", "");
         if (URL.contains("\n")) {
             throw new MalformedURLException("Newline char could not be contain in url.");
         }
-        URL = URL.replaceAll("\\r", "");
         URL = StandardURLEncode(URL);
         this.SepURL(URL);
         this.toAbsolutePath();
@@ -46,10 +47,11 @@ public class MyURL {
     }
 
     public MyURL resolve(String URL) throws Exception {
+        URL = URL.trim();
+        URL = URL.replaceAll("\\r", "");
         if (URL.contains("\n")) {
             throw new MalformedURLException("Newline char could not be contain in url.");
         }
-        URL = URL.replaceAll("\\r", "");
         if (URL.equals("")) {
             return this;
         } else if (isDirectURL(URL)) {
@@ -173,7 +175,13 @@ public class MyURL {
         for (int i = 0; i < cur; i++) {
             Result += "/" + dir[i];
         }
+        /*
         if (Path.charAt(Path.length() - 1) == '/') {
+            Result += "/";
+        }
+        */
+        // Add slash tail
+        if(cur <= 0 || !dir[cur-1].contains(".")){
             Result += "/";
         }
         Path = Result;
@@ -526,11 +534,24 @@ public class MyURL {
     
     
     
-    public static void main(String[] args) throws Exception {
-        String URLLL= "http://funlekclub.com/gallery_s2_vote.php?id=1&id_p hoto=FS 1\r";
-        MyURL A = new MyURL(URLLL);
-        MyURL B = A.resolve(" ddc c ");
-        System.out.println(A.UniqURL);
-        System.out.println(B.UniqURL);   
+    public static void main(String[] args) {
+        String URLLL= "http://funlekclub.com/gallery_s2_vote.php?id=1&id_photo=FS1&a=7&a=5&a=6\r";
+        MyURL A;
+        try {
+            A = new MyURL(URLLL);
+            System.out.println(A.UniqURL);
+            MyURL B = A.resolve(" ddc \nc ");
+            System.out.println(B.UniqURL);   
+        } catch (Exception ex) {
+            Logger.getLogger(MyURL.class.getName()).log(Level.SEVERE, null, ex);
+        } 
+        
+        try {
+            A = new MyURL(URLLL);
+            MyURL B = A.resolve(" ddc c ");
+            System.out.println(B.UniqURL);   
+        } catch (Exception ex) {
+            Logger.getLogger(MyURL.class.getName()).log(Level.SEVERE, null, ex);
+        } 
     }
 }
