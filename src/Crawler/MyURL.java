@@ -534,24 +534,11 @@ public class MyURL {
     
     
     
-    public static void main(String[] args) {
-        String URLLL= "http://funlekclub.com/gallery_s2_vote.php?id=1&id_photo=FS1&a=7&a=5&a=6\r";
-        MyURL A;
-        try {
-            A = new MyURL(URLLL);
-            System.out.println(A.UniqURL);
-            MyURL B = A.resolve(" ddc \nc ");
-            System.out.println(B.UniqURL);   
-        } catch (Exception ex) {
-            Logger.getLogger(MyURL.class.getName()).log(Level.SEVERE, null, ex);
-        } 
-        
-        try {
-            A = new MyURL(URLLL);
-            MyURL B = A.resolve(" ddc c ");
-            System.out.println(B.UniqURL);   
-        } catch (Exception ex) {
-            Logger.getLogger(MyURL.class.getName()).log(Level.SEVERE, null, ex);
-        } 
+    public static void main(String[] args) throws Exception {
+        String URLLL= "http://edutainment.ku.ac.th/";
+        MyURL A = new MyURL(URLLL);
+        MyURL B = A.resolve("gg@jabber/index.php");
+        System.out.println(A.UniqURL);
+        System.out.println(B.UniqURL);   
     }
 }
