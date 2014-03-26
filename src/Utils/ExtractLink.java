@@ -197,7 +197,7 @@ public class ExtractLink {
                         mi.increment();
                     }
                 } catch (Exception ex) {
-                    System.err.println("At : " + src.UniqURL + " -> " + href);
+                    //System.err.println("At : " + src.UniqURL + " -> " + href);
                 }
             }
         }
