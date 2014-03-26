@@ -35,11 +35,12 @@ public class MakeSQLUnique {
     public static void main(String[] args){
         ArrayList<LAU> arr = new ArrayList<>();
         SQLiteConnection db = new SQLiteConnection(TableConfig.FileWebPageDB);
-        int beg,step=100000;
+        int beg,step;
         SQLiteStatement stmt = null;
         String oldURL,newURL;
         int id;
-        beg= args.length > 0 ? Integer.parseInt(args[0]) : 0;
+        beg = args.length > 0 ? Integer.parseInt(args[0]) : 0;
+        step = args.length > 0 ? Integer.parseInt(args[0]) : 100000;
         try {
             db.open();
             while(true){
