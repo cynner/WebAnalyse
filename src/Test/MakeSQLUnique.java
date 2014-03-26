@@ -40,7 +40,7 @@ public class MakeSQLUnique {
         String oldURL,newURL;
         int id;
         beg = args.length > 0 ? Integer.parseInt(args[0]) : 0;
-        step = args.length > 0 ? Integer.parseInt(args[0]) : 100000;
+        step = args.length > 1 ? Integer.parseInt(args[1]) : 100000;
         try {
             db.open();
             while(true){
