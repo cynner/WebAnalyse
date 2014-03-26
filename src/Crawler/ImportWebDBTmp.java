@@ -39,8 +39,8 @@ public class ImportWebDBTmp {
                     cols = Line.split(",");
                     if(cols.length >= SiteCrawler.WebDBColumnWidth){
                         try {
-                            cols[0] = (new MyURL("\"http://" + cols[0])).UniqURL;
-                            Line = cols[0];
+                            cols[0] = (new MyURL("http://" + cols[0].substring(0, cols[0].length() - 1))).UniqURL;
+                            Line = "\"" + cols[0] + "\"";
                             for(int i=1;i<cols.length;i++)
                                 Line += "," + cols[i];
                             cmd = "INSERT OR IGNORE INTO webpage(url,language,file_size,comment_size,js_size,style_size,content_size) VALUES(" + Line + ");";
