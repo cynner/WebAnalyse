@@ -18,7 +18,7 @@ parser.add_argument('-s', metavar='Style', default='b.', help='Style default \'b
 parser.add_argument('-o', metavar='IMG_File', default='graph/outdist.png', help='Output png file')
 parser.add_argument('-t', metavar='TITLE',default='Out-Degree Distribution',help='Title')
 parser.add_argument('-xl', metavar='x-label',default='Out-Degree',help='x label')
-parser.add_argument('-yl', metavar='y-label',default='Number of page',help='y label')
+parser.add_argument('-yl', metavar='y-label',default='Number of pages',help='y label')
 parser.add_argument('DataFile',help='Input CSV File')
 args = parser.parse_args()
 
@@ -75,7 +75,7 @@ plt.plot(x,y,style)
 
 # Save the figure in a separate file
 plt.savefig(imgname, format='png', dpi=300)
-plt.savefig(imgname+".eps", format='eps', dpi=300)
+plt.savefig(imgname+".pdf", format='pdf', dpi=300)
 
 # Draw the plot to the screen
 plt.show()
