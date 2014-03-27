@@ -98,7 +98,7 @@ public class SCCDynamic {
                 N.Status = INLINK;
                 n = N.LinkReverse.get(N.curNodeNo++);
                 //if(n.visited != MaxSizeGroupNo){ // Never not Happen
-                if(N.Status == ISLAND){
+                if(n.Status == ISLAND){
                     n.Back = N;
                     N = n;
                 }
