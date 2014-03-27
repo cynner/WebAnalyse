@@ -12,11 +12,14 @@ import Crawler.MyURL;
 import com.almworks.sqlite4java.SQLiteConnection;
 import com.almworks.sqlite4java.SQLiteException;
 import com.almworks.sqlite4java.SQLiteStatement;
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -48,14 +51,30 @@ public class ExtractLink {
         this.OutHostLink = OutHostLink;
     }
     
-    public void runExtractLinkDir(File Dir,String fileskipto) throws IOException{
-        boolean skipfordebug = (fileskipto != null);
+    public void runExtractLinkDir(File Dir,File FSkipList) throws IOException{
+        
+        HashSet<String> SkipList = new HashSet<>();
         HashMap <String,MutableInt> HOSTs = new HashMap<>();
         HashMap <String,MutableInt> URLs;
         MyURL src;
         String srcDomain,srcURL = "";
         bwWebLink = new BufferedWriter(new FileWriter(OutWebLink));
         bwHostLink = new BufferedWriter(new FileWriter(OutHostLink));
+        
+        
+        if (FSkipList.exists()) {
+            try (BufferedReader brz = new BufferedReader(new FileReader(FSkipList))) {
+                String Line;
+                while ((Line = brz.readLine()) != null) {
+                    if(!Line.startsWith("crawl-") && !Line.endsWith(".arc.gz")){
+                        Line = "crawl-" + Line + ".arc.gz";
+                    }
+                    SkipList.add(Line);
+                }
+            } catch (IOException ex) {
+                Logger.getLogger(ExtractLink.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
         
         try {
             dbWeb.openReadonly();
@@ -64,12 +83,8 @@ public class ExtractLink {
             System.out.println("===Start runExtractLinkDir===");
 
             for (File f : Dir.listFiles(new ArcFilenameFilter(ArcFilenameFilter.AcceptType.ArcOnly))) {
-                if(skipfordebug){
-                    if(f.getName().equals(fileskipto)){
-                        skipfordebug = false;
-                    }else{
-                        continue;
-                    }
+                if(SkipList.contains(f.getName())){
+                    continue;
                 }
                 System.out.println(f.getName());
                 try (WebArcReader war = new WebArcReader(f, "utf-8")) {
@@ -248,15 +263,18 @@ public class ExtractLink {
     }
     
     public static void main(String[] args){
-        String FNDirIn = args.length > 0 ? args[0] : "data/testarc";
+        String FNDirIn = args.length > 0 ? args[0] : "data/test";
         String FNOut = args.length > 1 ? args[1] : "data/graph.result";
-        String FNSkipto = args.length > 2 ? args[2] : null;
-        
+        String FNSkipList = args.length > 2 ? args[2] : null;
+        File FSkipList = new File(FNSkipList);
         ExtractLink el = new ExtractLink(new File(FNOut + ".host"),new File(FNOut + ".webpage"));
+        
+        
         try {
-            el.runExtractLinkDir(new File(FNDirIn),FNSkipto);
+            el.runExtractLinkDir(new File(FNDirIn),FSkipList);
         } catch (IOException ex) {
             Logger.getLogger(ExtractLink.class.getName()).log(Level.SEVERE, null, ex);
         }
-    }
+        
+     }
 }
