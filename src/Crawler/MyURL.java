@@ -535,7 +535,7 @@ public class MyURL {
     
     
     public static void main(String[] args) throws Exception {
-        String URLLL= "http://edutainment.ku.ac.th/";
+        String URLLL= "http://edutainment.ku.ac.th./";
         MyURL A = new MyURL(URLLL);
         MyURL B = A.resolve("gg@jabber/index.php");
         System.out.println(A.UniqURL);
