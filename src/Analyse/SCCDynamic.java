@@ -78,7 +78,7 @@ public class SCCDynamic {
             if(N.curNodeNo < N.Link.size()){
                 N.Status = OUTLINK;
                 n = N.Link.get(N.curNodeNo++);
-                if(N.Status == ISLAND){
+                if(n.Status == ISLAND){
                     n.Back = N;
                     N = n;
                 }
