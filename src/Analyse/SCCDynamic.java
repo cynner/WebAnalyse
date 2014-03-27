@@ -583,5 +583,6 @@ public class SCCDynamic {
         scc.WriteInfo(FileInfo);
         System.out.println("Writting Map...");
         scc.WriteMap(FileOutName);
+        System.out.println("=== Success ===");
     }
 }
