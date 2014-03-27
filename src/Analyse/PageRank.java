@@ -144,6 +144,7 @@ public class PageRank {
         public static void main(String[] args) throws FileNotFoundException{
             PageRank pr = new  PageRank();
             HashMap<Integer, HashMap<Integer, Double>>HM = pr.importCSVFreq();
+            
             System.out.println("ReadCSV Finished" );
             double[] d = pr.cal(HM,4002746);
             /*

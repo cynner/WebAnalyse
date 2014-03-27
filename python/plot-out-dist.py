@@ -12,8 +12,10 @@ import matplotlib.pyplot as plt
 parser = argparse.ArgumentParser(description='Plot graph distribution.')
 #parser.add_argument('--sumf', dest='accumulate', action='store_const', const=sum, default=max, help='sum the integers (default: find the max)')
 #parser.add_argument('integers', metavar='Ng', type=int, nargs='+',help='an integer for the accumulator')
+parser.add_argument('-head',action='store_true', help='has header?')
+parser.add_argument('-cuttail',action='store_true', help='remove tail?')
 parser.add_argument('-d', metavar='delim',default=':',help='delimiter default \':\'')
-parser.add_argument('-f', metavar='field_no',type=int,default=2,help='filed no start from 1 default 2')
+parser.add_argument('-f', metavar='field_no',type=int,default=4,help='filed no start from 1 default 4')
 parser.add_argument('-s', metavar='Style', default='b.', help='Style default \'b.\'')
 parser.add_argument('-o', metavar='IMG_File', default='graph/outdist.png', help='Output png file')
 parser.add_argument('-t', metavar='TITLE',default='Out-Degree Distribution',help='Title')
@@ -42,7 +44,10 @@ f.close()
 
 data = data.split("\n")
 #Remove the empty line
-del(data[-1])
+if args.cuttail:
+	del(data[-1])
+if args.head:
+	del(data[0])
 
 #gatering inlink info
 inl = [int(i.split(sep)[fNo]) for i in data]
@@ -74,7 +79,7 @@ plt.plot(x,y,style)
 
 
 # Save the figure in a separate file
-plt.savefig(imgname, format='png', dpi=300)
+plt.savefig(imgname, format='png', dpi=600)
 plt.savefig(imgname+".pdf", format='pdf', dpi=300)
 
 # Draw the plot to the screen
