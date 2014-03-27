@@ -31,6 +31,9 @@ public class SCCDynamic {
     public static final byte TUBE = 3;
     public static final byte CORE = 16;
     public static final byte ISLAND = 0;
+    public static final byte ACTIVE = 0;
+    public static final byte INACTIVE = -1;
+    
     public static final String[] MAP = new String[]{"Isla","TreI","TreO","Tube","In",
                                                          null, null, null, "Out",
                                                          null, null, null, null,
@@ -53,7 +56,7 @@ public class SCCDynamic {
             LinkReverse = new ArrayList<>();
             visited = 0;
             curNodeNo = 0;
-            Status = 0;
+            Status = INACTIVE;
             Back = null;
         }
     }
@@ -189,13 +192,13 @@ public class SCCDynamic {
                 N.Status = CORE;
                 // In Link
                 for(Node n : N.LinkReverse){
-                    if(n.visited != MaxSizeGroupNo)
+                    if(n.Status == ACTIVE && n.visited != MaxSizeGroupNo)
                         MarkInLink(n);
                 }
                 
                 // Out Link
                 for(Node n : N.Link){
-                    if(n.visited != MaxSizeGroupNo)
+                    if(n.Status == ACTIVE && n.visited != MaxSizeGroupNo)
                         MarkOutLink(n);
                 }
             }
@@ -253,7 +256,7 @@ public class SCCDynamic {
                 if (N.curNodeNo < N.Link.size()) {
                     n = N.Link.get(N.curNodeNo);
                     N.curNodeNo++;
-                    if(n.visited != 0)
+                    if(n.Status == INACTIVE || n.visited != 0)
                         continue;
                     else 
                         n.visited = -1;
@@ -289,7 +292,7 @@ public class SCCDynamic {
                 if (N.curNodeNo < N.LinkReverse.size()) {
                     n = N.LinkReverse.get(N.curNodeNo);
                     N.curNodeNo++;
-                    if(n.visited != -1)
+                    if(n.Status == INACTIVE || n.visited != -1)
                         continue;
                     else {
                         n.visited = GroupNo;
@@ -344,6 +347,7 @@ public class SCCDynamic {
                     NodeSize++;
                 }
                 NSrc = Graph.get(src);
+                NSrc.Status = ACTIVE;
                 for (i = 1; i < strs.length; i++) {
                     subs = strs[i].split(sec_sep);
                     dst = Integer.parseInt(subs[0]);
@@ -414,6 +418,7 @@ public class SCCDynamic {
                     NodeSize++;
                 }
                 NSrc = Graph.get(src);
+                NSrc.Status = ACTIVE;
                 dst = Integer.parseInt(strs[1]);
                 while (NodeSize <= dst) {
                     Graph.add(new Node());
@@ -441,7 +446,8 @@ public class SCCDynamic {
     
     public void Compute(){
         for(Node n : Graph){
-            TraverseGraph(n);
+            if(n.Status == ACTIVE)
+                TraverseGraph(n);
         }
         Node n;
         
@@ -480,7 +486,10 @@ public class SCCDynamic {
             Node n;
             for(int i=0;i<Graph.size();i++){
                 n = Graph.get(i);
-                bw.write(i + ":" + n.visited + ":" + n.InSize + ":" + n.OutSize + ":" + MAP[n.Status]  + "\n");
+                
+                if(n.Status != INACTIVE){
+                    bw.write(i + ":" + n.visited + ":" + n.InSize + ":" + n.OutSize + ":" + MAP[n.Status]  + "\n");
+                }
             }
         } catch (IOException ex) {
             Logger.getLogger(SCCDynamic.class.getName()).log(Level.SEVERE, null, ex);
