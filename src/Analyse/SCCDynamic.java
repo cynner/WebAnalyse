@@ -574,13 +574,14 @@ public class SCCDynamic {
                 System.exit(1);
                 break;
         }
-        System.out.println("Writing IO...");
+        //System.out.println("Writing IO...");
         //scc.WriteInOutLink(new File(FileIO));
         System.out.println("Computing...");
         scc.Compute();
         scc.FindBowTieAfterSCC();
-        System.out.println("Writting...");
-        scc.WriteMap(FileOutName);
+        System.out.println("Writting INFo...");
         scc.WriteInfo(FileInfo);
+        System.out.println("Writting Map...");
+        scc.WriteMap(FileOutName);
     }
 }
