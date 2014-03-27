@@ -184,8 +184,8 @@ public class SCCDynamic {
     }
     
     public void FindInOutLinkStatus(){
-        //for(Node N : Graph)
-        //    N.curNodeNo = 0;
+        for(Node N : Graph)
+            N.curNodeNo = 0;
         
         for(Node N : Graph){
             if(N.visited == MaxSizeGroupNo){
@@ -257,12 +257,11 @@ public class SCCDynamic {
                 if (N.curNodeNo < N.Link.size()) {
                     n = N.Link.get(N.curNodeNo);
                     N.curNodeNo++;
-                    if(n.Status == INACTIVE || n.visited != 0)
-                        continue;
-                    else 
+                    if(n.Status != INACTIVE && n.visited == 0){
                         n.visited = -1;
-                    n.Back = N;
-                    N = n;
+                        n.Back = N;
+                        N = n;
+                    }
                 } else {
                     LastAccess.push(N);
                     N.curNodeNo = 0;
@@ -292,16 +291,13 @@ public class SCCDynamic {
             GroupCnt = 1;
             while (true) {
                 if (N.curNodeNo < N.LinkReverse.size()) {
-                    n = N.LinkReverse.get(N.curNodeNo);
-                    N.curNodeNo++;
-                    if(n.Status == INACTIVE || n.visited != -1)
-                        continue;
-                    else {
-                        n.visited = GroupNo;
+                    n = N.LinkReverse.get(N.curNodeNo++);
+                    if(n.Status != INACTIVE && n.visited == -1){
                         GroupCnt++;
+                        n.visited = GroupNo;
+                        n.Back = N;
+                        N = n;
                     }
-                    n.Back = N;
-                    N = n;
                 } else {
                     if(N.Back == null)
                         break;
