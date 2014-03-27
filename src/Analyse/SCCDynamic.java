@@ -57,7 +57,7 @@ public class SCCDynamic {
             visited = 0;
             curNodeNo = 0;
             Status = INACTIVE;
-            Back = null;
+            //Back = null;
         }
     }
     
@@ -184,8 +184,8 @@ public class SCCDynamic {
     }
     
     public void FindInOutLinkStatus(){
-        for(Node N : Graph)
-            N.curNodeNo = 0;
+        //for(Node N : Graph)
+        //    N.curNodeNo = 0;
         
         for(Node N : Graph){
             if(N.visited == MaxSizeGroupNo){
@@ -250,6 +250,7 @@ public class SCCDynamic {
         }
         */
         Node n;
+        N.Back = null;
         if(N.visited == 0) {
             N.visited = -1;
             while (true) {
@@ -285,6 +286,7 @@ public class SCCDynamic {
         }
         */
         Node n;
+        N.Back = null;
         if(N.visited == -1) {
             N.visited = GroupNo;
             GroupCnt = 1;
