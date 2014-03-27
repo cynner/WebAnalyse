@@ -462,7 +462,7 @@ public class SiteCrawler implements Runnable {
          Logger.getLogger(Crawler.class.getName()).log(Level.SEVERE, null, ex);
          }*/
         //Crawler c = new Crawler("www.sat.or.th", ".", 200, true);
-        String HostName = args.length > 0 ? args[0] : "gamecenter.kapook.com";
+        String HostName = args.length > 0 ? args[0] : "www.constitutionalcourt.or.th";
         String StoreDir = args.length > 1 ? args[1] : "data/crawldata/";
         int limit = args.length > 2 ? Integer.parseInt(args[2]) : 1000;
         String SubHostPath = args.length > 3 ? args[3] : "/";

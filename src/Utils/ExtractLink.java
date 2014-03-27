@@ -48,9 +48,8 @@ public class ExtractLink {
         this.OutHostLink = OutHostLink;
     }
     
-    public void runExtractLinkDir(File Dir) throws IOException{
-        boolean skipfordebug=false;
-        String fileskipto = "crawl-www.yopi.co.th.arc.gz";
+    public void runExtractLinkDir(File Dir,String fileskipto) throws IOException{
+        boolean skipfordebug = (fileskipto != null);
         HashMap <String,MutableInt> HOSTs = new HashMap<>();
         HashMap <String,MutableInt> URLs;
         MyURL src;
@@ -251,10 +250,11 @@ public class ExtractLink {
     public static void main(String[] args){
         String FNDirIn = args.length > 0 ? args[0] : "data/testarc";
         String FNOut = args.length > 1 ? args[1] : "data/graph.result";
+        String FNSkipto = args.length > 2 ? args[2] : null;
         
         ExtractLink el = new ExtractLink(new File(FNOut + ".host"),new File(FNOut + ".webpage"));
         try {
-            el.runExtractLinkDir(new File(FNDirIn));
+            el.runExtractLinkDir(new File(FNDirIn),FNSkipto);
         } catch (IOException ex) {
             Logger.getLogger(ExtractLink.class.getName()).log(Level.SEVERE, null, ex);
         }
