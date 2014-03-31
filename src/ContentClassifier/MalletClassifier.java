@@ -4,115 +4,55 @@
  */
 package ContentClassifier;
 
-import ArcFileUtils.MalletArcIterator;
 import ArcFileUtils.MalletArcWebIterator;
 import cc.mallet.classify.*;
 import cc.mallet.types.Instance;
-import cc.mallet.types.InstanceList;
 import cc.mallet.types.Labeling;
-import com.almworks.sqlite4java.SQLite;
 import com.almworks.sqlite4java.SQLiteConnection;
 import com.almworks.sqlite4java.SQLiteException;
 import java.io.*;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import projecttester.ArgUtils;
 
 /**
  *
  * @author malang
  */
 public final class MalletClassifier {
-    
-    public static String StrFileIn = "crawl-abc.trf.or.th.arc.gz";
-    public static String StrFileOut = "class.out";
-    public static String StrFileSummary = "class.sum";
+    public static String StrDirIn = "data/converted";
     public static String StrFileClassifier = "resource/TH.naive.class";
+    public static String StrFileWebpage = "data/category/converted.web";
+    public static String StrFileWebsite = "data/category/converted.host";
     
-    public BufferedWriter bwOut;
-    public BufferedWriter bwSummary;
+    public BufferedWriter bwWebpage;
+    public BufferedWriter bwWebsite;
     public Classifier classifier;
     
     public SQLiteConnection db = new SQLiteConnection(DBDriver.TableConfig.FileWebPageDB);
     
     
-    public MalletClassifier(File Output, File Summary, File Classifier) throws IOException, FileNotFoundException, ClassNotFoundException{
-        this.bwOut = new BufferedWriter(new FileWriter(Output));
-        this.bwSummary = new BufferedWriter(new FileWriter(Summary));
-        this.loadClassifier(Classifier);
-    }
-    
-    public MalletClassifier(File Output, File Summary, Classifier classifier) throws IOException{
-        this.bwOut = new BufferedWriter(new FileWriter(Output));
-        this.bwSummary = new BufferedWriter(new FileWriter(Summary));
+    public MalletClassifier(Classifier classifier, File WebPage, File WebSite) throws IOException{
+        this.bwWebpage = new BufferedWriter(new FileWriter(WebPage));
+        this.bwWebsite = new BufferedWriter(new FileWriter(WebSite));
         this.classifier = classifier;
     }
     
-    public MalletClassifier(File Output, File Summary, InstanceList trainingInstances) throws IOException{
-        this.bwOut = new BufferedWriter(new FileWriter(Output));
-        this.bwSummary = new BufferedWriter(new FileWriter(Summary));
-        this.trainClassifier(trainingInstances);
+    public MalletClassifier(File classifier, File WebPage, File WebSite) throws IOException, FileNotFoundException, ClassNotFoundException{
+        this.bwWebpage = new BufferedWriter(new FileWriter(WebPage));
+        this.bwWebsite = new BufferedWriter(new FileWriter(WebSite));
+        this.classifier = MalletUtils.loadClassifier(classifier);
     }
     
-    public void trainClassifier(InstanceList trainingInstances) {
-
-        ClassifierTrainer trainer = new NaiveBayesTrainer();
-        classifier = trainer.train(trainingInstances);
-    }
-    
-    public void saveClassifier( File serializedFile)
-        throws IOException {
-        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream (serializedFile))) {
-            oos.writeObject (classifier);
+    public void Classified(File file) throws IOException{
+        if(file.isDirectory()){
+            ClassifiedDir(file);
+        }else{
+            ClassifiedFile(file);
         }
     }
     
-    public void loadClassifier(File serializedFile)
-        throws FileNotFoundException, IOException, ClassNotFoundException {
-        try (ObjectInputStream ois = new ObjectInputStream (new FileInputStream (serializedFile))) {
-            classifier = (Classifier) ois.readObject();
-        }
-
-    }
-    
-    public void printLabelings(File file) throws IOException {
-
-        // Create a new iterator that will read raw instance data from                                     
-        //  the lines of a file.                                                                           
-        // Lines should be formatted as:                                                                   
-        //                                                                                                 
-        //   [name] [label] [data ... ]                                                                    
-        //                                                                                                 
-        //  in this case, "label" is ignored.                                                              
-
-        MalletArcWebIterator reader = new MalletArcWebIterator(file);     
-
-        // Create an iterator that will pass each instance through                                         
-        //  the same pipe that was used to create the training data                                        
-        //  for the classifier.                                                                            
-        Iterator instances = classifier.getInstancePipe().newIteratorFrom(reader);
-
-        // Classifier.classify() returns a Classification object                                           
-        //  that includes the instance, the classifier, and the                                            
-        //  classification results (the labeling). Here we only                                            
-        //  care about the Labeling.                                                                       
-        while (instances.hasNext()) {
-            Labeling labeling = classifier.classify(instances.next()).getLabeling();
-
-            // print the labels with their weights in descending order (ie best first)                     
-
-            for (int rank = 0; rank < labeling.numLocations(); rank++){
-                System.out.print(labeling.getLabelAtRank(rank) + ":" +
-                                 labeling.getValueAtRank(rank) + " ");
-            }
-            System.out.println();
-        }
-    }
-    
-    public void printBestFile(File file) throws IOException {
+    public void ClassifiedFile(File file) throws IOException {
         int [] sum = new int[classifier.getLabelAlphabet().toArray().length];
 
         MalletArcWebIterator reader = new MalletArcWebIterator(file);
@@ -126,9 +66,8 @@ public final class MalletClassifier {
             // print the labels with their weights in descending order (ie best first)
             sum[labeling.getBestIndex()]++;
             //System.out.println(labeling.getBestLabel()+" "+ins.getName());
-            System.out.println(labeling.getLabelAtRank(0)+" "+ins.getName().toString().replaceAll("\"", "\"\"") );
+            bwWebpage.write(labeling.getLabelAtRank(0) + " " + ins.getName().toString() + "\n");
             //System.out.println(labeling.getLabelAtRank(0)+" "+reader.AR.Record.URL.replaceAll("\"", "\"\"") );
-
         }
         reader.remove();
         int max = 0;
@@ -136,23 +75,18 @@ public final class MalletClassifier {
             if(sum[i] > sum[max])
                 max = i;
         }
-        System.out.println(classifier.getLabelAlphabet().lookupLabel(max) + " " + file.getName() + "\n");
+        bwWebsite.write(classifier.getLabelAlphabet().lookupLabel(max) + " " + file.getName() + "\n");
+        bwWebpage.flush();
+        bwWebsite.flush();
+        
     }
     
-    public void printBestDir(File dir) throws IOException{
+    public void ClassifiedDir(File dir) throws IOException{
         for(File f : dir.listFiles()){
             if(f.isDirectory())
-                printBestDir(f);
+                ClassifiedDir(f);
             else
-                printBestFile(f);
-        }
-    }
-    
-    public void printBest(File file) throws IOException {
-        if(file.isDirectory()){
-            printBestDir(file);
-        }else{
-            printBestFile(file);
+                ClassifiedFile(f);
         }
     }
     
@@ -207,36 +141,11 @@ public final class MalletClassifier {
         }
     }
     
-    public void evaluate( File file) throws IOException {
-
-        // Create an InstanceList that will contain the test data.                                         
-        // In order to ensure compatibility, process instances                                             
-        //  with the pipe used to process the original training                                            
-        //  instances.                                                                                     
-
-        InstanceList testInstances = new InstanceList(classifier.getInstancePipe());
-                                        
-        //   [name] [label] [data ... ]                                          
-
-
-        Trial trial = new Trial(classifier, testInstances);
-
-        // The Trial class implements many standard evaluation                                             
-        //  metrics. See the JavaDoc API for more details.                                                 
-
-        System.out.println("Accuracy: " + trial.getAccuracy());
-
-        for(int i=0;i< classifier.getLabelAlphabet().toArray().length;i++){
-            System.out.println("Precision for class '" +
-                 classifier.getLabelAlphabet().lookupLabel(i) + "': " +
-                 trial.getPrecision(i));
-        }
-    }
     
     public void close(){
         try {
-            bwOut.close();
-            bwSummary.close();
+            bwWebsite.close();
+            bwWebpage.close();
         } catch (IOException ex) {
             Logger.getLogger(MalletClassifier.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -253,15 +162,18 @@ public final class MalletClassifier {
         StrFileClassifier = Args.get("c");
         */ 
         //StrFileIn = args.length > 0 ? args[0] : "data/crawldata";
-        StrFileIn = args.length > 0 ? args[0] : "crawl-100kg.diaryclub.com.arc";
+        StrDirIn = args.length > 0 ? args[0] : StrDirIn;
+        StrFileClassifier = args.length > 1 ? args[1] : StrFileClassifier;
+        StrFileWebpage = args.length > 2 ? args[2] : StrFileWebpage;
+        StrFileWebsite = args.length > 3 ? args[3] : StrFileWebsite;
+        
         try {        
-            MC = new MalletClassifier(new File(StrFileOut), new File(StrFileSummary), new File(StrFileClassifier));
+            MC = new MalletClassifier(new File(StrFileClassifier) , new File(StrFileWebpage), new File(StrFileWebsite));
             
             
-            MC.loadClassifier(new File(StrFileClassifier));
-            
-            //MC.printBest(new File(StrFileIn));
-            MC.saveSQL(new File(StrFileIn));
+            MC.classifier = MalletUtils.loadClassifier(new File(StrFileClassifier));
+            MC.Classified(new File(StrDirIn));
+            MC.close();
             
         } catch ( IOException | ClassNotFoundException ex) {
             Logger.getLogger(MalletClassifier.class.getName()).log(Level.SEVERE, null, ex);

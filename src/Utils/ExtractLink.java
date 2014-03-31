@@ -59,9 +59,6 @@ public class ExtractLink {
         HashMap <String,MutableInt> URLs;
         MyURL src;
         String srcDomain,srcURL = "";
-        bwWebLink = new BufferedWriter(new FileWriter(OutWebLink));
-        bwHostLink = new BufferedWriter(new FileWriter(OutHostLink));
-        bwSkipFile = new BufferedWriter(new FileWriter(FSkipList));
         
         if (FSkipList.exists()) {
             try (BufferedReader brz = new BufferedReader(new FileReader(FSkipList))) {
@@ -76,6 +73,10 @@ public class ExtractLink {
                 Logger.getLogger(ExtractLink.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
+        
+        bwWebLink = new BufferedWriter(new FileWriter(OutWebLink));
+        bwHostLink = new BufferedWriter(new FileWriter(OutHostLink));
+        bwSkipFile = new BufferedWriter(new FileWriter(FSkipList,true));
         
         try {
             dbWeb.openReadonly();

@@ -8,7 +8,6 @@ import argparse
 # Pyplot is a module within the matplotlib library for plotting
 import matplotlib.pyplot as plt
 
-
 parser = argparse.ArgumentParser(description='Plot graph distribution.')
 #parser.add_argument('--sumf', dest='accumulate', action='store_const', const=sum, default=max, help='sum the integers (default: find the max)')
 #parser.add_argument('integers', metavar='Ng', type=int, nargs='+',help='an integer for the accumulator')

@@ -12,19 +12,21 @@ import matplotlib.pyplot as plt
 parser = argparse.ArgumentParser(description='Plot graph distribution.')
 #parser.add_argument('--sumf', dest='accumulate', action='store_const', const=sum, default=max, help='sum the integers (default: find the max)')
 #parser.add_argument('integers', metavar='Ng', type=int, nargs='+',help='an integer for the accumulator')
+parser.add_argument('--cuthead', metavar='Nth', type=int, nargs='?', const=1, default=1, help='cut first Nth rows default 1 [const 1]')
+parser.add_argument('--cuttail', metavar="Nth", type=int, nargs='?', const=1, default=1, help='cut last  Nth rows default 1 [const 1]')
 parser.add_argument('-d', metavar='delim',default=':',help='delimiter default \':\'')
 parser.add_argument('-f', metavar='field_no',type=int,default=1,help='filed no start from 1 default 1')
 parser.add_argument('-s', metavar='Style', default='b.', help='Style default \'b.\'')
 parser.add_argument('-o', metavar='IMG_File', default='dist.png', help='Output png file')
 parser.add_argument('-t', metavar='TITLE',default='',help='Title')
-parser.add_argument('-xl', metavar='x-label',default='',help='x label')
-parser.add_argument('-yl', metavar='y-label',default='',help='y label')
+parser.add_argument('-xl', metavar='x-label',help='x label')
+parser.add_argument('-yl', metavar='y-label',help='y label')
 parser.add_argument('DataFile',help='Input CSV File')
 args = parser.parse_args()
 
 #print vars(args)
 title = args.t
-ylabel = args.yl 
+ylabel = args.yl
 xlabel = args.xl
 
 filename = args.DataFile
@@ -42,10 +44,17 @@ f.close()
 
 data = data.split("\n")
 #Remove the empty line
-del(data[-1])
+print "cutHead " + str(args.cuthead)
+print "cutTail " + str(args.cuttail)
+while args.cuttail > 0:
+	del(data[-1])
+	args.cuttail = args.cuttail - 1
+while args.cuthead > 0:
+	del(data[0])
+	args.cuthead = args.cuthead - 1
 
 #gatering inlink info
-inl = [int(i.split(sep)[fNo]) for i in data]
+inl = [i.split(sep)[fNo] for i in data]
 #inl = [int(round(i/1024.0,0)) for i in inl] #round file size
 
 #new dic
@@ -82,6 +91,8 @@ plt.plot(x,y,style)
 
 # Save the figure in a separate file
 plt.savefig(imgname)
+plt.savefig(imgname, format='png', dpi=600)
+plt.savefig(imgname+".svg", format='svg', dpi=300)
 
 # Draw the plot to the screen
 plt.show()

@@ -417,7 +417,7 @@ public class SiteCrawler implements Runnable {
         if (URLQueue.size() < crawlConf.MarginPage) {
             try {
                 MyURL src = new MyURL(url);
-                Elements links = doc.select("a");
+                Elements links = doc.select("a, area");
                 for (Element e : links) {
                     try {
                         if (URLQueue.size() < crawlConf.MarginPage) {

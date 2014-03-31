@@ -130,10 +130,12 @@ public class MalletArcImport {
     public static void main (String[] args) throws IOException {
 
         // = new String[]{"001System.arc", "txtaomy.arc", "txtamnat.arc"};
+        String inputDir = args.length > 0 ? args[0] : "TxtThai";
+        String ResultFile = args.length > 1 ? args[1] : "resource/THContent.mallet";
         MalletArcImport importer = new MalletArcImport();
-        importer.readDirectories(new File("TxtThai"), true);
+        importer.readDirectories(new File(inputDir), true);
         
-        importer.instances.save(new File("THnew.mallet"));
+        importer.instances.save(new File(ResultFile));
         
         
 
