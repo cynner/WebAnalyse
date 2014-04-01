@@ -11,6 +11,7 @@ import cc.mallet.types.Labeling;
 import com.almworks.sqlite4java.SQLiteConnection;
 import com.almworks.sqlite4java.SQLiteException;
 import java.io.*;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -29,8 +30,8 @@ public final class MalletClassifier {
     public BufferedWriter bwWebsite;
     public Classifier classifier;
     
-    public SQLiteConnection db = new SQLiteConnection(DBDriver.TableConfig.FileWebPageDB);
-    
+    public SQLiteConnection db ;//= new SQLiteConnection(DBDriver.TableConfig.FileWebPageDB);
+    public HashSet<String> SkipFileList = new HashSet<>();
     
     public MalletClassifier(Classifier classifier, File WebPage, File WebSite) throws IOException{
         this.bwWebpage = new BufferedWriter(new FileWriter(WebPage));
@@ -39,8 +40,20 @@ public final class MalletClassifier {
     }
     
     public MalletClassifier(File classifier, File WebPage, File WebSite) throws IOException, FileNotFoundException, ClassNotFoundException{
+        if(WebSite.exists()) {
+            try (BufferedReader br = new BufferedReader(new FileReader(WebSite))) {
+                String Line;
+                String[] strs;
+                while ((Line = br.readLine()) != null) {
+                    strs = Line.split(" ", 2);
+                    if (strs.length > 1) {
+                        SkipFileList.add(strs[1]);
+                    }
+                }
+            }
+        }
         this.bwWebpage = new BufferedWriter(new FileWriter(WebPage));
-        this.bwWebsite = new BufferedWriter(new FileWriter(WebSite));
+        this.bwWebsite = new BufferedWriter(new FileWriter(WebSite, true));
         this.classifier = MalletUtils.loadClassifier(classifier);
     }
     
@@ -169,7 +182,6 @@ public final class MalletClassifier {
         
         try {        
             MC = new MalletClassifier(new File(StrFileClassifier) , new File(StrFileWebpage), new File(StrFileWebsite));
-            
             
             MC.classifier = MalletUtils.loadClassifier(new File(StrFileClassifier));
             MC.Classified(new File(StrDirIn));
