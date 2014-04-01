@@ -14,6 +14,7 @@ parser = argparse.ArgumentParser(description='Plot graph distribution.')
 #parser.add_argument('integers', metavar='Ng', type=int, nargs='+',help='an integer for the accumulator')
 parser.add_argument('--cuthead', metavar='Nth', type=int, nargs='?', const=1, default=1, help='cut first Nth rows default 1 [const 1]')
 parser.add_argument('--cuttail', metavar="Nth", type=int, nargs='?', const=1, default=1, help='cut last  Nth rows default 1 [const 1]')
+parser.add_argument('--nodisplay', action='store_true', help='no gui')
 parser.add_argument('-d', metavar='delim',default=':',help='delimiter default \':\'')
 parser.add_argument('-f', metavar='field_no',type=int,default=1,help='filed no start from 1 default 1')
 parser.add_argument('-s', metavar='Style', default='b.', help='Style default \'b.\'')
@@ -95,4 +96,5 @@ plt.savefig(imgname, format='png', dpi=600)
 plt.savefig(imgname+".svg", format='svg', dpi=300)
 
 # Draw the plot to the screen
-plt.show()
+if not args.nodisplay:
+	plt.show()
