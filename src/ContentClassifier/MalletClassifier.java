@@ -67,30 +67,34 @@ public final class MalletClassifier {
     
     public void ClassifiedFile(File file) throws IOException {
         int [] sum = new int[classifier.getLabelAlphabet().toArray().length];
+        
+        if (!SkipFileList.contains(file.getName())) {
 
-        MalletArcWebIterator reader = new MalletArcWebIterator(file);
-                                                     
-        Iterator<Instance> instances = classifier.getInstancePipe().newIteratorFrom(reader);
-        Instance ins;                                                 
-        while (instances.hasNext()) {
-            ins = instances.next();
-            Labeling labeling = classifier.classify(ins).getLabeling();
+            MalletArcWebIterator reader = new MalletArcWebIterator(file);
 
-            // print the labels with their weights in descending order (ie best first)
-            sum[labeling.getBestIndex()]++;
-            //System.out.println(labeling.getBestLabel()+" "+ins.getName());
-            bwWebpage.write(labeling.getLabelAtRank(0) + " " + ins.getName().toString() + "\n");
-            //System.out.println(labeling.getLabelAtRank(0)+" "+reader.AR.Record.URL.replaceAll("\"", "\"\"") );
+            Iterator<Instance> instances = classifier.getInstancePipe().newIteratorFrom(reader);
+            Instance ins;
+            while (instances.hasNext()) {
+                ins = instances.next();
+                Labeling labeling = classifier.classify(ins).getLabeling();
+
+                // print the labels with their weights in descending order (ie best first)
+                sum[labeling.getBestIndex()]++;
+                //System.out.println(labeling.getBestLabel()+" "+ins.getName());
+                bwWebpage.write(labeling.getLabelAtRank(0) + " " + ins.getName().toString() + "\n");
+                //System.out.println(labeling.getLabelAtRank(0)+" "+reader.AR.Record.URL.replaceAll("\"", "\"\"") );
+            }
+            reader.remove();
+            int max = 0;
+            for (int i = 0; i < sum.length; i++) {
+                if (sum[i] > sum[max]) {
+                    max = i;
+                }
+            }
+            bwWebsite.write(classifier.getLabelAlphabet().lookupLabel(max) + " " + file.getName() + "\n");
+            bwWebpage.flush();
+            bwWebsite.flush();
         }
-        reader.remove();
-        int max = 0;
-        for(int i=0;i<sum.length;i++){
-            if(sum[i] > sum[max])
-                max = i;
-        }
-        bwWebsite.write(classifier.getLabelAlphabet().lookupLabel(max) + " " + file.getName() + "\n");
-        bwWebpage.flush();
-        bwWebsite.flush();
         
     }
     
