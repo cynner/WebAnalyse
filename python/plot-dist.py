@@ -5,10 +5,6 @@ import numpy as np
 import sys
 import argparse
 
-# Pyplot is a module within the matplotlib library for plotting
-import matplotlib.pyplot as plt
-
-
 parser = argparse.ArgumentParser(description='Plot graph distribution.')
 #parser.add_argument('--sumf', dest='accumulate', action='store_const', const=sum, default=max, help='sum the integers (default: find the max)')
 #parser.add_argument('integers', metavar='Ng', type=int, nargs='+',help='an integer for the accumulator')
@@ -24,6 +20,13 @@ parser.add_argument('-xl', metavar='x-label',help='x label')
 parser.add_argument('-yl', metavar='y-label',help='y label')
 parser.add_argument('DataFile',help='Input CSV File')
 args = parser.parse_args()
+
+
+# Pyplot is a module within the matplotlib library for plotting
+import matplotlib as mpl
+if args.nodisplay:
+	mpl.use('Agg')
+import matplotlib.pyplot as plt
 
 #print vars(args)
 title = args.t
