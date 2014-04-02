@@ -120,7 +120,6 @@ public final class MalletClassifier {
         } finally {
             db.dispose();
         }
-        
     }
     
     private void saveSQLFile(File file){
@@ -136,15 +135,12 @@ public final class MalletClassifier {
                 ins = instances.next();
                 Labeling labeling = classifier.classify(ins).getLabeling();
                 //System.out.println(labeling.getLabelAtRank(0)+" "+ins.getName().toString().replaceAll("\"", "\"\"") );
-                db.exec("UPDATE webpage SET category=\"" + labeling.getLabelAtRank(0) + "\" WHERE url=\"" + ins.getName().toString().replaceAll("\"", "\"\"") + "\";");
-                
+                db.exec("UPDATE webpage SET category=\"" + labeling.getLabelAtRank(0) + "\" WHERE url=\"" + ins.getName().toString().replaceAll("\"", "\"\"") + "\";");       
             }
             db.exec("COMMIT;");
             reader.remove();
             
-        } catch (IOException ex) {
-            Logger.getLogger(MalletClassifier.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (SQLiteException ex) {
+        } catch (IOException | SQLiteException ex) {
             Logger.getLogger(MalletClassifier.class.getName()).log(Level.SEVERE, null, ex);
         }
     }

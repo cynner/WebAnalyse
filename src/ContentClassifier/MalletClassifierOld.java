@@ -20,6 +20,7 @@ import java.util.logging.Logger;
  *
  * @author malang
  */
+
 public final class MalletClassifierOld {
     
     public static String StrFileIn = "crawl-abc.trf.or.th.arc.gz";
@@ -56,10 +57,8 @@ public final class MalletClassifierOld {
         ClassifierTrainer trainer = new NaiveBayesTrainer();
         classifier = trainer.train(trainingInstances);
     }
-    
-    
+        
     public void printLabelings(File file) throws IOException {
-
         // Create a new iterator that will read raw instance data from                                     
         //  the lines of a file.                                                                           
         // Lines should be formatted as:                                                                   
@@ -149,7 +148,6 @@ public final class MalletClassifierOld {
         } finally {
             db.dispose();
         }
-        
     }
     
     private void saveSQLFile(File file){
@@ -220,7 +218,6 @@ public final class MalletClassifierOld {
         } catch (IOException ex) {
             Logger.getLogger(MalletClassifierOld.class.getName()).log(Level.SEVERE, null, ex);
         }
-        
     }
     
     public static void main(String[] args){
@@ -237,7 +234,6 @@ public final class MalletClassifierOld {
         try {        
             MC = new MalletClassifierOld(new File(StrFileOut), new File(StrFileSummary), new File(StrFileClassifier));
             
-            
             MC.classifier = MalletUtils.loadClassifier(new File(StrFileClassifier));
             
             //MC.printBest(new File(StrFileIn));
@@ -251,7 +247,5 @@ public final class MalletClassifierOld {
             if(MC != null)
                 MC.close();
         }
-        
     }
-    
 }

@@ -5,9 +5,9 @@
  */
 package ContentClassifier;
 
+import cc.mallet.classify.Classifier;
 import cc.mallet.classify.NaiveBayes;
 import cc.mallet.classify.NaiveBayesTrainer;
-import cc.mallet.classify.Trial;
 import cc.mallet.types.InstanceList;
 import java.io.File;
 import java.io.IOException;
@@ -29,7 +29,7 @@ public class MalletTrainer {
             
             //cls.setDocLengthNormalization(16384000.0);
             System.out.println(cls.getDocLengthNormalization());
-            NaiveBayes nb = cls.train(instances);
+            Classifier nb = cls.train(instances);
             System.out.println(nb.getAccuracy(instances));
             
             MalletUtils.saveClassifier(nb, new File(ClassifierFile));
@@ -38,5 +38,4 @@ public class MalletTrainer {
 
         }
     }
-
 }
