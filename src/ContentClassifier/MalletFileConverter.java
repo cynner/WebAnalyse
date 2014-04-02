@@ -38,8 +38,8 @@ public class MalletFileConverter {
         MalletWebArcTokenImport exporter = new MalletWebArcTokenImport();
         InstanceList IL = InstanceList.load(new File(InputFile));
         exporter.pipe.setDataAlphabet(IL.getAlphabet());
-        exporter.instances.setPipe(exporter.pipe);
-        exporter.instances.save(new File(ResultFile));
+        IL.setPipe(exporter.pipe);
+        IL.save(new File(ResultFile));
 
     }
 
