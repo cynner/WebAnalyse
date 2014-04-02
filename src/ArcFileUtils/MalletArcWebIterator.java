@@ -6,12 +6,17 @@ package ArcFileUtils;
 
 import Lexto.LuceneLexicalTH;
 import cc.mallet.types.Instance;
+import cc.mallet.types.Token;
+import cc.mallet.types.TokenSequence;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.apache.lucene.analysis.TokenStream;
+import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 
 /**
  *
@@ -23,7 +28,7 @@ public class MalletArcWebIterator implements Iterator<Instance> {
     public String Label;
     public WebArcReader AR;
     
-    private LuceneLexicalTH lex = new LuceneLexicalTH(true);
+    private final LuceneLexicalTH lex = new LuceneLexicalTH(true);
     
     public MalletArcWebIterator(File ArcFile, String Label) throws IOException{
         AR = new WebArcReader(ArcFile, "utf-8");
@@ -48,12 +53,31 @@ public class MalletArcWebIterator implements Iterator<Instance> {
     public Instance next() {
         //System.out.println(AR.Record.URL);
         AR.Next();
-        String Title = lex.strSplitContent(AR.Record.Doc.title());
-        String Content = "";
-        if(AR.Record.Doc.body() != null){
-            Content = lex.strSplitContent(AR.Record.Doc.body().text());
+        TokenSequence toks = new TokenSequence();
+        try(TokenStream ts = lex.getTokenStream(AR.Record.Doc.title())){
+            ts.reset();
+            CharTermAttribute cta = ts.addAttribute(CharTermAttribute.class);
+            while(ts.incrementToken()){
+                // X2
+                toks.add(new Token(cta.toString()));
+                toks.add(new Token(cta.toString()));
+            }
+            ts.end();
+        } catch (IOException ex) {
+            Logger.getLogger(MalletArcWebIterator.class.getName()).log(Level.SEVERE, null, ex);
         }
-        return new Instance (Title + Title + Content, Label, AR.Record.URL, null);
+        
+        try(TokenStream ts = lex.getTokenStream(AR.Record.Doc.body().text())){
+            ts.reset();
+            CharTermAttribute cta = ts.addAttribute(CharTermAttribute.class);
+            while(ts.incrementToken()){
+                toks.add(new Token(cta.toString()));
+            }
+            ts.end();
+        } catch (IOException ex) {
+            Logger.getLogger(MalletArcWebIterator.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return new Instance (toks, Label, AR.Record.URL, null);
     }
 
     @Override

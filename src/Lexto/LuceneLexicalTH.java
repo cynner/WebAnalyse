@@ -48,32 +48,38 @@ public class LuceneLexicalTH {
     
     public String strSplitContent(String Content){
         String result="";
-        try {
-            TokenStream tokenStream = analyzer.tokenStream(null, Content);
+        try (TokenStream tokenStream = analyzer.tokenStream(null, Content)){
             CharTermAttribute charTermAttribute = tokenStream.addAttribute(CharTermAttribute.class);
             tokenStream.reset();
             while (tokenStream.incrementToken()) {
                 result += charTermAttribute.toString() + " ";
             }
+            tokenStream.end();
         } catch (IOException e){}
         return result;
     }
     
     public String strSplitContent(File F){
-        String result="";
-        try (BufferedReader br = new BufferedReader(new FileReader(F))) {
-            TokenStream tokenStream = analyzer.tokenStream(null, br);
+        String result = "";
+        try (BufferedReader br = new BufferedReader(new FileReader(F));
+                TokenStream tokenStream = analyzer.tokenStream(null, br)) {
             CharTermAttribute charTermAttribute = tokenStream.addAttribute(CharTermAttribute.class);
+            
             tokenStream.reset();
             while (tokenStream.incrementToken()) {
                 result += charTermAttribute.toString() + " ";
             }
+            tokenStream.end();
         } catch (FileNotFoundException ex) {
             Logger.getLogger(LuceneLexicalTH.class.getName()).log(Level.SEVERE, null, ex);
         } catch (IOException ex) {
             Logger.getLogger(LuceneLexicalTH.class.getName()).log(Level.SEVERE, null, ex);
         }
         return result;
+    }
+    
+    public TokenStream getTokenStream(String Content) throws IOException{
+        return analyzer.tokenStream(null, Content);
     }
     
     public static void main(String[] args){
