@@ -33,11 +33,12 @@ public class GeoIP {
         //ConvertCSV2Bin("/home/malang/Desktop/GeoIPCountryWhois.csv", 82078);
         LoadToMem();
         //203.158.177.12
-        String HostName = "denis.darzacq.revue.com";
+        String HostName = "www.exteen.com";
         //System.out.println(IP2ISOCountry("128.0.0.1"));
         try{
             InetAddress address = InetAddress.getByName(HostName);
             System.out.println(address.getHostAddress());
+            System.out.println(IP2ISOCountry("103.253.135.109"));
         }catch(UnknownHostException ex){
             System.err.println(ex.getMessage());
         }
