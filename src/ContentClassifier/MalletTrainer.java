@@ -29,7 +29,7 @@ public class MalletTrainer {
             
             //cls.setDocLengthNormalization(16384000.0);
             System.out.println(cls.getDocLengthNormalization());
-            Classifier nb = cls.train(instances);
+            NaiveBayes nb = cls.train(instances);
             System.out.println(nb.getAccuracy(instances));
             
             MalletUtils.saveClassifier(nb, new File(ClassifierFile));
