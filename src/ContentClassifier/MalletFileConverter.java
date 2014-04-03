@@ -37,12 +37,10 @@ public class MalletFileConverter {
         String ResultFile = args.length > 1 ? args[1] : "resource/THContentNewPipe.mallet";
         MalletWebArcTokenImport exporter = new MalletWebArcTokenImport();
         InstanceList IL = InstanceList.load(new File(InputFile));
-        exporter.pipe.setTargetAlphabet(IL.getTargetAlphabet());
-        exporter.pipe.setDataAlphabet(IL.getDataAlphabet());
+        while(!IL.isEmpty())
+            exporter.instances.addThruPipe(IL.remove(0));
         
-        IL.setPipe(exporter.pipe);
-        
-        IL.save(new File(ResultFile));
+        exporter.instances.save(new File(ResultFile));
 
     }
 
