@@ -69,11 +69,12 @@ public final class MalletClassifier {
         int [] sum = new int[classifier.getLabelAlphabet().toArray().length];
         
         if (!SkipFileList.contains(file.getName())) {
-
+            System.out.println(file.getName());
             MalletArcWebIterator reader = new MalletArcWebIterator(file);
 
             Iterator<Instance> instances = classifier.getInstancePipe().newIteratorFrom(reader);
             Instance ins;
+            
             while (instances.hasNext()) {
                 ins = instances.next();
                 Labeling labeling = classifier.classify(ins).getLabeling();
@@ -186,7 +187,7 @@ public final class MalletClassifier {
             MC.classifier = MalletUtils.loadClassifier(new File(StrFileClassifier));
             MC.Classified(new File(StrDirIn));
             MC.close();
-            
+            System.out.println("Success.");
         } catch ( IOException | ClassNotFoundException ex) {
             Logger.getLogger(MalletClassifier.class.getName()).log(Level.SEVERE, null, ex);
         } catch (Exception ex){
@@ -195,6 +196,7 @@ public final class MalletClassifier {
             if(MC != null)
                 MC.close();
         }
+        System.out.println("Exit.");
         
     }
     
