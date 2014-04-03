@@ -17,6 +17,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
+import org.jsoup.nodes.Element;
 
 /**
  *
@@ -54,6 +55,7 @@ public class MalletArcWebIterator implements Iterator<Instance> {
         //System.out.println(AR.Record.URL);
         AR.Next();
         TokenSequence toks = new TokenSequence();
+        
         try(TokenStream ts = lex.getTokenStream(AR.Record.Doc.title())){
             ts.reset();
             CharTermAttribute cta = ts.addAttribute(CharTermAttribute.class);
@@ -66,16 +68,18 @@ public class MalletArcWebIterator implements Iterator<Instance> {
         } catch (IOException ex) {
             Logger.getLogger(MalletArcWebIterator.class.getName()).log(Level.SEVERE, null, ex);
         }
-        
-        try(TokenStream ts = lex.getTokenStream(AR.Record.Doc.body().text())){
-            ts.reset();
-            CharTermAttribute cta = ts.addAttribute(CharTermAttribute.class);
-            while(ts.incrementToken()){
-                toks.add(new Token(cta.toString()));
+        Element body = AR.Record.Doc.body();
+        if(body != null) {
+            try (TokenStream ts = lex.getTokenStream(body.text())) {
+                ts.reset();
+                CharTermAttribute cta = ts.addAttribute(CharTermAttribute.class);
+                while (ts.incrementToken()) {
+                    toks.add(new Token(cta.toString()));
+                }
+                ts.end();
+            } catch (IOException ex) {
+                Logger.getLogger(MalletArcWebIterator.class.getName()).log(Level.SEVERE, null, ex);
             }
-            ts.end();
-        } catch (IOException ex) {
-            Logger.getLogger(MalletArcWebIterator.class.getName()).log(Level.SEVERE, null, ex);
         }
         return new Instance (toks, Label, AR.Record.URL, null);
     }

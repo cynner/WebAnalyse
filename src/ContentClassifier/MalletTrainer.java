@@ -21,8 +21,8 @@ import java.util.logging.Logger;
 public class MalletTrainer {
 
     public static void main(String[] args) {
-        String MalletFile = args.length > 0 ? args[0] : "resource/THContent.mallet";
-        String ClassifierFile = args.length > 1 ? args[1] : "resource/THContent.class";
+        String MalletFile = args.length > 0 ? args[0] : "resource/NewPipeTHContent.mallet";
+        String ClassifierFile = args.length > 1 ? args[1] : "resource/NewPipeTHContent.class";
         InstanceList instances = InstanceList.load(new File(MalletFile));
         try {
             NaiveBayesTrainer cls = new NaiveBayesTrainer(instances.getPipe());
