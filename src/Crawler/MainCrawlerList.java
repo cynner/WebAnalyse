@@ -10,17 +10,26 @@ import ArcFileUtils.MyRandomAccessFile;
 import static Crawler.GeoIP.Domain2IP;
 import LanguageUtils.LanguageDetector;
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.HashSet;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import net.sourceforge.argparse4j.ArgumentParsers;
+import net.sourceforge.argparse4j.impl.Arguments;
+import net.sourceforge.argparse4j.inf.ArgumentParser;
+import net.sourceforge.argparse4j.inf.ArgumentParserException;
+import net.sourceforge.argparse4j.inf.Namespace;
+import webanalyse.TestArgument;
 
 /**
  *
@@ -75,38 +84,95 @@ public class MainCrawlerList{
     
     public static void Import(String TaskName, String strWorkingDirectory, File fileOrgSeed) throws IOException {
         File fileSeed = new File(getSeedPath(strWorkingDirectory, TaskName));
-        if(fileSeed.exists())
-            throw new IOException("Seed File Exists.");
         File fileDir = fileSeed.getParentFile();
-        if(!fileDir.isDirectory()){
-            if(fileDir.exists()){
+        if (!fileDir.isDirectory()) {
+            if (fileDir.exists()) {
                 throw new IOException("Can't create directory " + fileDir.getCanonicalPath());
-            }else{
+            } else {
                 fileDir.mkdirs();
             }
         }
-        Files.copy(fileOrgSeed.toPath(), new FileOutputStream(fileSeed));
+        HashSet<String> websitelist = new HashSet<>();
+        String Line;
+        int n=0,rep=0;
+        if(fileSeed.isFile()) {
+            try (BufferedReader br = new BufferedReader(new FileReader(fileSeed))) {
+                while ((Line = br.readLine()) != null) {
+                    if (!Line.isEmpty()) {
+                        websitelist.add(Line);
+                    }
+                }
+            }
+        }
+        try(BufferedReader br = new BufferedReader(new FileReader(fileOrgSeed));
+                BufferedWriter bw = new BufferedWriter(new FileWriter(fileSeed, true))) {
+            while ((Line = br.readLine()) != null) {
+                if (!Line.isEmpty() && !websitelist.contains(Line)) {
+                    websitelist.add(Line);
+                    bw.write(Line + "\n");
+                    n++;
+                }else{
+                    rep++;
+                }
+            }
+        }
+        System.out.println("Added " + n + " seed site");
+        System.out.println("Repeat " + rep + " was droped");
     }
     
     public static void main(String[] args) throws IOException{
-        String Dir = args.length > 0 ? args[0] : DefaultWorkingDirectory;
-        String TaskName = args.length > 1 ? args[1] : "task-0085";
-        String strFileSeed = args.length > 2 ? args[2] : (args.length > 0 ? null : "seed0085-all.txt");
-        LanguageDetector.init();
-        GeoIP.LoadToMem();
-        if(strFileSeed != null){
-            if(!(new File(getSeedPath(DefaultWorkingDirectory, TaskName))).exists())
-                MainCrawlerList.Import(TaskName, Dir, new File(strFileSeed));
+        
+        ArgumentParser parser = ArgumentParsers.newArgumentParser("MainCrawlerList")
+                .description("Crawler process from list.");
+        parser.addArgument("-d")
+                .metavar("Dir")
+                .type(String.class)
+                .setDefault(DefaultWorkingDirectory)
+                .help("Working Directory for crawler");
+        parser.addArgument("-i")
+                .metavar("SeedFile")
+                .type(String.class)
+                .help("import or append seed file [format : one line one domain name]");
+        parser.addArgument("--start")
+                .dest("start")
+                .type(Boolean.class)
+                .action(Arguments.storeConst())
+                .setConst(true)
+                .setDefault(false)
+                .help("Start crawler");
+        parser.addArgument("TaskName")
+                .nargs("?")
+                .type(String.class)
+                .setDefault("default")
+                .help("To identify job");
+        
+        try {
+            Namespace res = parser.parseArgs(args);
+            String strWorkDir = res.getString("d");
+            String TaskName = res.get("TaskName");
+            String strImportFile = res.get("i");
+            if(strImportFile != null){
+                // import seed file
+                File fi = new File(strImportFile);
+                if(fi.isFile()){
+                    Import(TaskName, strWorkDir, fi);
+                }else{
+                    System.err.println(res.getString("i") + " is not a seed file.");
+                    System.exit(1);
+                }
+            }
+            
+            if (res.getBoolean("start")) {
+                LanguageDetector.init();
+                GeoIP.LoadToMem();
+
+                MainCrawlerList mc = new MainCrawlerList(TaskName, strWorkDir, 1000, "/");
+                mc.run();
+            }
+            
+        } catch (ArgumentParserException e) {
+            parser.handleError(e);
         }
-        MainCrawlerList mc = new MainCrawlerList(TaskName,Dir,1000,"/");
-        
-        //mc.ImportSeedSite(new File("Hop2.pure"));
-        //mc.RunExampleStatement();
-        //mc.MyImportSeedSite(new File("sumout.txt"));
-        //mc.RunExampleSelect();
-        
-        
-        mc.run();
     }
     
     // 1. ImportSeedSite()

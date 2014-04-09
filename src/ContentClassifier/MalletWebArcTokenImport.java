@@ -4,7 +4,6 @@
  */
 package ContentClassifier;
 
-import ArcFileUtils.MalletArcIterator;
 import ArcFileUtils.MalletArcWebIterator;
 import cc.mallet.pipe.FeatureSequence2FeatureVector;
 import cc.mallet.pipe.Pipe;

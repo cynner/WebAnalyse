@@ -153,13 +153,8 @@ public class SiteCrawler implements Runnable {
             } else {
                 this.waw = new WebArcWriter(this.ArcFile, this.ArcFile.getName(), this.isAppend, this.HostIP);
             }
-            if (crawlMode == CrawlerConfig.Mode.Crawl || preCrawl()) {
-                Crawl();
-                status = Status.Finished;
-            } else {
-                status = Status.NotInScope;
-            }
-
+            Crawl();
+            status = Status.Finished;
         } catch (IOException ex) {
             Logger.getLogger(SiteCrawler.class.getName()).log(Level.SEVERE, null, ex);
         } finally {
@@ -174,49 +169,6 @@ public class SiteCrawler implements Runnable {
                 Logger.getLogger(SiteCrawler.class.getName()).log(Level.SEVERE, null, ex1);
             }
         }
-    }
-
-    public boolean preCrawl() {
-        String Url;
-        while (!URLQueue.isEmpty() && URLLoaded.size() < crawlConf.MaxPreCrawl) {
-            // 2.1 Fetch
-            Url = URLQueue.get(0);
-            System.out.println("Fetch: " + Url);
-            // 2.2 Compress html Extractlink & write to file
-            if (Fetch.getHeader(Url)) {
-                if (isAllowedResponseCode(Fetch.ResponseCode) && isAllowedHeader()) {
-                    if (Fetch.getDocument()) {
-                        Fetch.Details.WebContent = wu.HTMLCompress(Fetch.Details.Doc);
-                        LinkFromRedir(Url, Fetch.Details.Doc);
-                        AnalyseLink(Url, Fetch.Details.Doc);
-                        URLLoaded.add(URLQueue.remove(0));
-                        curPageLanguage = LanguageDetector.Detect(Fetch.Details.Doc.text());
-                        writeUpdateDB(Url);
-                        waw.WriteRecord(Fetch.Details);
-                        try {
-                            //Success & delay
-                            Thread.sleep(this.CrawlDelay);
-                        } catch (InterruptedException ex) {
-                            System.err.println("Interupt while delay!...");
-                            Logger.getLogger(SiteCrawler.class.getName()).log(Level.SEVERE, null, ex);
-                        }
-                        if (crawlConf.isAccept(this)) {
-                            return true;
-                        }
-                    } else {
-                        URLCrash.add(URLQueue.remove(0));
-                    }
-                } else {
-                    if (!CodeHandler()) {
-                        break;
-                    }
-                }
-            } else {
-                // Unknown and add to crash
-                URLCrash.add(URLQueue.remove(0));
-            }
-        }
-        return false;
     }
 
     public byte mySizeData;
@@ -468,7 +420,7 @@ public class SiteCrawler implements Runnable {
         String SubHostPath = args.length > 3 ? args[3] : "/";
 
         try {
-            CrawlerConfigList cfg = new CrawlerConfigList("GG", StoreDir);
+            CrawlerConfigList cfg = new CrawlerConfigList("default", StoreDir);
 
             cfg.AcceptOnlyPrefixPath = SubHostPath;
             cfg.MaxPage = limit;

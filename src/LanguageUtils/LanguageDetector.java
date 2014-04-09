@@ -28,7 +28,7 @@ public class LanguageDetector {
             try {
                 DetectorFactory.loadProfile("resource/profiles");
             } catch (LangDetectException ex) {
-                Logger.getLogger(FileLanguageDetector.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(LanguageDetector.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
     }

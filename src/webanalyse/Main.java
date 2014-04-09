@@ -6,6 +6,12 @@
 
 package webanalyse;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.Arrays;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 /**
  *
  * @author malang
@@ -14,9 +20,24 @@ public class Main {
 
     /**
      * @param args the command line arguments
+     * @throws java.lang.ClassNotFoundException
+     * @throws java.lang.NoSuchMethodException
+     * @throws java.lang.IllegalAccessException
      */
-    public static void main(String[] args) {
+    public static void main(String[] args) throws ClassNotFoundException, NoSuchMethodException, IllegalAccessException{
         // TODO code application logic here
+        if(args.length > 0) {
+            Class<?> cls = Class.forName(args[0]);
+            Method m = cls.getMethod("main", String[].class);
+            String[] params = Arrays.copyOfRange(args, 1, args.length);;
+            try {
+                m.invoke(null, (Object) params);
+            } catch (InvocationTargetException ex) {
+                Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }else{
+            MainForm.main(args);
+        }
     }
     
 }

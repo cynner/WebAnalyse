@@ -1,0 +1,26 @@
+webanalyse.Test gg hh jj 
+webanalyse.Test bukuk sss
+webanalyse.Test bukuk sq
+webanalyse.Test bukuk sq
+webanalyse.Test bukuk sq
+Crawler.SiteCrawler www.octknight.com
+Crawler.SiteCrawler www.splendith.com
+Crawler.SiteCrawler cpe.octknight.com
+Crawler.SiteCrawler cpe.octknight.com
+webanalyse.Test gg
+webanalyse.Test -h
+webanalyse.Test --help
+webanalyse.Test -h
+webanalyse.Test -h
+webanalyse.TestArgument -h
+webanalyse.TestArgument --sum 4 5 6
+webanalyse.TestArgument 4 5 6
+Crawler.MainCrawlerList -h
+Crawler.MainCrawlerList -i seedtest.txt
+Crawler.MainCrawlerList -h
+Crawler.MainCrawlerList -i seedtest.txt
+Crawler.MainCrawlerList -h
+Crawler.MainCrawlerList -i seed2.txt
+Crawler.MainCrawlerList -i seed2.txt
+Crawler.MainCrawlerList --start
+Crawler.MainCrawlerList --start
