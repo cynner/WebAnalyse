@@ -130,10 +130,7 @@ public class CrawlerConfigList extends CrawlerConfig {
             addWebInfo(s.WebDBFile);
             BGZFCompress.Compress(s.ArcFile, getArcGZFile(s.ArcFile.getName()));
         }
-        String Location = null;
-        if(s.HostIP != null)
-            Location = GeoIP.IP2ISOCountry(s.HostIP);
-        UpdateHostInfo(s.HostName, s.HostIP, Location, s.status, s.URLLoaded.size());
+        UpdateHostInfo(s.HostName, s.status, s.URLLoaded.size());
         addCrawledList(s.HostName);
         if(s.WebDBFile.exists())
             s.WebDBFile.delete();
@@ -153,7 +150,7 @@ public class CrawlerConfigList extends CrawlerConfig {
         return chk.exists();
     }
     
-    public void UpdateHostInfo(String HostName, String IP, String Location, Status stat, int page_count){
+    public void UpdateHostInfo(String HostName, Status stat, int page_count){
         //hostname, ip , location , page_count , status , log_id , lastupdate)
         Long pos;
         synchronized (fileHostInfo) {
@@ -167,7 +164,7 @@ public class CrawlerConfigList extends CrawlerConfig {
                     raf.writeLong(pos);
                 }
                 
-                raf.write((HostName + "," + IP + "," + Location + "," + stat.value + "," + page_count + "," + dateFormat.format(new Date()) + "\n").getBytes("utf-8"));
+                raf.write((HostName + "," + stat.value + "," + page_count + "," + dateFormat.format(new Date()) + "\n").getBytes("utf-8"));
                 pos = raf.getFilePointer();
                 raf.seek(0);
                 raf.writeLong(pos);

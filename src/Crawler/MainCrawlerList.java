@@ -7,19 +7,15 @@
 package Crawler;
 
 import ArcFileUtils.MyRandomAccessFile;
-import static Crawler.GeoIP.Domain2IP;
 import LanguageUtils.LanguageDetector;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.util.HashSet;
-import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.logging.Level;
@@ -29,7 +25,6 @@ import net.sourceforge.argparse4j.impl.Arguments;
 import net.sourceforge.argparse4j.inf.ArgumentParser;
 import net.sourceforge.argparse4j.inf.ArgumentParserException;
 import net.sourceforge.argparse4j.inf.Namespace;
-import webanalyse.TestArgument;
 
 /**
  *
@@ -164,7 +159,6 @@ public class MainCrawlerList{
             
             if (res.getBoolean("start")) {
                 LanguageDetector.init();
-                GeoIP.LoadToMem();
 
                 MainCrawlerList mc = new MainCrawlerList(TaskName, strWorkDir, 1000, "/");
                 mc.run();
@@ -221,36 +215,16 @@ public class MainCrawlerList{
             
             while((HostName = br.readLine()) != null){
 
-                if(!hs.contains(HostName)){
-                    String Location, HostIP;
-                    HostIP = Domain2IP(HostName);
+                if (!hs.contains(HostName)) {
                     CrawlerConfig.Status status;
-                    if(HostIP == null){
-                        status = CrawlerConfig.Status.NoHostIP;
-                        cfg.UpdateHostInfo(HostName, null, null, status, 0);
-                        cfg.addCrawledList(HostName);
-                    }else{
-                        Location = GeoIP.IP2ISOCountry(HostIP);
-                        if(Location == null){
-                            status = CrawlerConfig.Status.NoHostLocation;
-                            cfg.UpdateHostInfo(HostName, HostIP, null, status, 0);
-                            cfg.addCrawledList(HostName);
-                        }else{ 
-                            fArc = new File(strDirTmp + "/" + PrefixArc + HostName + SuffixArc);
-                            fInfo = new File(strDirTmp + "/" + PrefixInfo + HostName + SuffixInfo);
+                    fArc = new File(strDirTmp + "/" + PrefixArc + HostName + SuffixArc);
+                    fInfo = new File(strDirTmp + "/" + PrefixInfo + HostName + SuffixInfo);
 
-                                if(!Location.equals("TH") && !HostName.endsWith(".th")){
-                                    Runnable worker = new SiteCrawler(HostName, HostIP, fArc,fInfo, cfg, CrawlerConfig.Mode.preCrawl, true);
-                                    executor.execute(worker);
-                                }else{
-                                    Runnable worker = new SiteCrawler(HostName, HostIP, fArc,fInfo, cfg, CrawlerConfig.Mode.Crawl, true);
-                                    executor.execute(worker);
-                                }
-                        }
-                    }
+                    Runnable worker = new SiteCrawler(HostName, "0.0.0.0", fArc, fInfo, cfg, CrawlerConfig.Mode.Crawl, true);
+                    executor.execute(worker);
                 }
             }
-            
+
             executor.shutdown();
             while (!executor.isTerminated()) {
             }

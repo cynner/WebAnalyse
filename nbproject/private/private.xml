@@ -3,33 +3,31 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/C:/Users/Malang/Documents/NetBeansProjects/WebAnalyse/src/ArcFileUtils/ArcReader.java</file>
-            <file>file:/C:/Users/Malang/Documents/NetBeansProjects/WebAnalyse/src/Crawler/Fetcher.java</file>
-            <file>file:/C:/Users/Malang/Documents/NetBeansProjects/WebAnalyse/src/ArcFileUtils/WebArcWriter.java</file>
-            <file>file:/C:/Users/Malang/Documents/NetBeansProjects/WebAnalyse/src/Converter/ExtrctBGZ.java</file>
-            <file>file:/C:/Users/Malang/Documents/NetBeansProjects/WebAnalyse/src/Crawler/SiteCrawler.java</file>
-            <file>file:/C:/Users/Malang/Documents/NetBeansProjects/WebAnalyse/src/Converter/FixedBGZ.java</file>
-            <file>file:/C:/Users/Malang/Documents/NetBeansProjects/WebAnalyse/src/ArcFileUtils/WebArcReader_Job.java</file>
-            <file>file:/C:/Users/Malang/Documents/NetBeansProjects/WebAnalyse/src/DBDriver/TableConfig.java</file>
-            <file>file:/C:/Users/Malang/Documents/NetBeansProjects/WebAnalyse/src/Analyse/SCCTree.java</file>
-            <file>file:/C:/Users/Malang/Documents/NetBeansProjects/WebAnalyse/src/Analyse/SCC.java</file>
-            <file>file:/C:/Users/Malang/Documents/NetBeansProjects/WebAnalyse/src/ArcFileUtils/WebArcReader.java</file>
-            <file>file:/C:/Users/Malang/Documents/NetBeansProjects/WebAnalyse/src/DBDriver/SQlite3.java</file>
-            <file>file:/C:/Users/Malang/Documents/NetBeansProjects/WebAnalyse/src/Crawler/MainCrawler.java</file>
-            <file>file:/C:/Users/Malang/Documents/NetBeansProjects/WebAnalyse/src/ArcFileUtils/ArcWriter.java</file>
-            <file>file:/C:/Users/Malang/Documents/NetBeansProjects/WebAnalyse/src/Test/frmDBTest.java</file>
-            <file>file:/C:/Users/Malang/Documents/NetBeansProjects/WebAnalyse/src/Test/ReadArcFile.java</file>
-            <file>file:/C:/Users/Malang/Documents/NetBeansProjects/WebAnalyse/src/ArcFileUtils/CompressedArcWriter.java</file>
-            <file>file:/C:/Users/Malang/Documents/NetBeansProjects/WebAnalyse/src/ArcFileUtils/WebUtils.java</file>
-            <file>file:/C:/Users/Malang/Documents/NetBeansProjects/WebAnalyse/src/Crawler/Robotstxt.java</file>
-            <file>file:/C:/Users/Malang/Documents/NetBeansProjects/WebAnalyse/src/ArcFileUtils/WebArcRecord_Job.java</file>
-            <file>file:/C:/Users/Malang/Documents/NetBeansProjects/WebAnalyse/src/DBDriver/QjobPrepare.java</file>
-            <file>file:/C:/Users/Malang/Documents/NetBeansProjects/WebAnalyse/src/Analyse/CheckSizePage.java</file>
-            <file>file:/C:/Users/Malang/Documents/NetBeansProjects/WebAnalyse/src/ArcFileUtils/WebArcRecord.java</file>
-            <file>file:/C:/Users/Malang/Documents/NetBeansProjects/WebAnalyse/src/Converter/ConvertOld2NewARC.java</file>
-            <file>file:/C:/Users/Malang/Documents/NetBeansProjects/WebAnalyse/src/ArcFileUtils/CompressedWebArcWriter.java</file>
-            <file>file:/C:/Users/Malang/Documents/NetBeansProjects/WebAnalyse/src/Analyse/SCC2DB.java</file>
-            <file>file:/C:/Users/Malang/Documents/NetBeansProjects/WebAnalyse/src/ArcFileUtils/WebArcRecord_Old.java</file>
+            <file>file:/data/home/malang/proj/WebAnalyse/src/webanalyse/Main.java</file>
+            <file>file:/data/home/malang/proj/WebAnalyse/src/Crawler/GUICrawler.java</file>
+            <file>file:/data/home/malang/proj/WebAnalyse/src/Crawler/GeoIP.java</file>
+            <file>file:/data/home/malang/proj/WebAnalyse/src/Lexto/LuceneLexicalTH.java</file>
+            <file>jar:file:/data/home/malang/proj/WebAnalyse/lib/argparse4j/argparse4j-0.4.3-sources.jar!/net/sourceforge/argparse4j/ArgumentParsers.java</file>
+            <file>file:/data/home/malang/proj/WebAnalyse/src/ArcFileUtils/MalletArcWebIterator.java</file>
+            <file>file:/data/home/malang/proj/WebAnalyse/src/ContentClassifier/MalletWebArcTokenImport.java</file>
+            <file>file:/data/home/malang/proj/WebAnalyse/src/Crawler/MainCrawlerList.java</file>
+            <file>file:/data/home/malang/proj/WebAnalyse/src/ContentClassifier/MalletClassifier.java</file>
+            <file>file:/data/home/malang/proj/WebAnalyse/src/LanguageUtils/LanguageDetector.java</file>
+            <file>file:/data/home/malang/proj/WebAnalyse/src/ContentClassifier/MalletArcImport.java</file>
+            <file>file:/data/home/malang/proj/WebAnalyse/src/ContentClassifier/MalletWebArcImport.java</file>
+            <file>file:/data/home/malang/proj/WebAnalyse/src/Crawler/CrawlerConfig.java</file>
+            <file>file:/data/home/malang/proj/WebAnalyse/src/ArcFileUtils/BGZFReader.java</file>
+            <file>file:/data/home/malang/proj/WebAnalyse/src/webanalyse/TestArgument.java</file>
+            <file>file:/data/home/malang/proj/WebAnalyse/src/Lexto/MyLexto.java</file>
+            <file>file:/data/home/malang/proj/WebAnalyse/src/ContentClassifier/MalletFileConverter.java</file>
+            <file>file:/data/home/malang/proj/WebAnalyse/src/Crawler/MainCrawler.java</file>
+            <file>file:/data/home/malang/proj/WebAnalyse/src/ContentClassifier/MalletClassifierOld.java</file>
+            <file>file:/data/home/malang/proj/WebAnalyse/src/webanalyse/MainForm.java</file>
+            <file>file:/data/home/malang/proj/WebAnalyse/src/Crawler/CrawlerConfigList.java</file>
+            <file>file:/data/home/malang/proj/WebAnalyse/src/ContentClassifier/MalletTrainer.java</file>
+            <file>file:/data/home/malang/proj/WebAnalyse/src/Crawler/SiteCrawlerChecker.java</file>
+            <file>file:/data/home/malang/proj/WebAnalyse/src/Crawler/ImportHostDB.java</file>
+            <file>file:/data/home/malang/proj/WebAnalyse/src/Crawler/SiteCrawler.java</file>
         </group>
     </open-files>
 </project-private>
