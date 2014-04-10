@@ -28,6 +28,8 @@ import ArcFileUtils.WebUtils;
 import Crawler.CrawlerConfig.Status;
 import LanguageUtils.LanguageDetector;
 import com.almworks.sqlite4java.SQLiteQueue;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  *
@@ -63,8 +65,7 @@ public class SiteCrawler implements Runnable {
     public CrawlerConfig crawlConf = null;
     public CrawlerConfig.Status status;
     public String curPageLanguage;
-    public final CrawlerConfig.Mode crawlMode;
-
+    
     private final WebUtils wu = new WebUtils();
 
     public static String GetMyIP() {
@@ -77,14 +78,14 @@ public class SiteCrawler implements Runnable {
         return s;
     }
 
-    public SiteCrawler(String HostName, String HostIP, File ArcFile, File InfoFile, CrawlerConfig crawlConf, CrawlerConfig.Mode crawlMode, boolean isAppend) {
+    public SiteCrawler(String HostName, String HostIP, File ArcFile, File InfoFile, CrawlerConfig crawlConf, boolean isAppend) {
         this.HostName = HostName;
         this.HostIP = HostIP;
         this.isAppend = isAppend;
         this.crawlConf = crawlConf;
         this.ArcFile = ArcFile;
         this.WebDBFile = InfoFile;
-        this.crawlMode = crawlMode;
+        
         if (!isSetTimeZone) {
             TimeZone.setDefault(TimeZone.getTimeZone("GMT"));
             isSetTimeZone = true;
@@ -100,6 +101,7 @@ public class SiteCrawler implements Runnable {
                 this.HostIP = null;
             }
         }
+        
     }
 
     /*
@@ -285,8 +287,8 @@ public class SiteCrawler implements Runnable {
         return "text/html".equals(Fetch.Details.ArchiveContentType);
     }
 
-    public boolean isAllowedPreFixPath(String Path) {
-        return Path.startsWith(crawlConf.AcceptOnlyPrefixPath);
+    public boolean isAllowedPath(String Path) {
+        return crawlConf.patAcceptedPath.matcher(Path).matches();
     }
 
     public long ReadFile() {
@@ -329,7 +331,7 @@ public class SiteCrawler implements Runnable {
     public void AddURL(MyURL url) {
         if (url.getProtocol().startsWith("http")
                 && HostName.equals(url.getHost())
-                && isAllowedPreFixPath(url.getPath())
+                && isAllowedPath(url.getPath())
                 && robots.isAllowPath(url.getPath())) {
             if (!URLQueue.contains(url.UniqURL)
                     && !URLCrash.contains(url.UniqURL)
@@ -429,7 +431,7 @@ public class SiteCrawler implements Runnable {
             cfg.MarginPage = cfg.MaxPage * 3;
             cfg.MaxPreCrawl = 3;
 
-            SiteCrawler c = new SiteCrawler(HostName, null, new File(StoreDir + "/" + HostName + ".arc"), new File(StoreDir + "/" + HostName + ".info"), cfg, CrawlerConfig.Mode.Crawl, false);
+            SiteCrawler c = new SiteCrawler(HostName, null, new File(StoreDir + "/" + HostName + ".arc"), new File(StoreDir + "/" + HostName + ".info"), cfg, false);
             c.run();
         } catch (IOException ex) {
             Logger.getLogger(SiteCrawler.class.getName()).log(Level.SEVERE, null, ex);

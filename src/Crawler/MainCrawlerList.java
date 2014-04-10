@@ -45,7 +45,6 @@ public class MainCrawlerList{
     public final File fileSeed;
     public final String strDirTmp;
     
-    public CrawlerConfig.Mode mode = CrawlerConfig.Mode.Crawl;
     public String AcceptOnlyPrefixPath;
     public int MaxPreCrawl = 3;
     public int log_id = 9;
@@ -220,7 +219,7 @@ public class MainCrawlerList{
                     fArc = new File(strDirTmp + "/" + PrefixArc + HostName + SuffixArc);
                     fInfo = new File(strDirTmp + "/" + PrefixInfo + HostName + SuffixInfo);
 
-                    Runnable worker = new SiteCrawler(HostName, "0.0.0.0", fArc, fInfo, cfg, CrawlerConfig.Mode.Crawl, true);
+                    Runnable worker = new SiteCrawler(HostName, "0.0.0.0", fArc, fInfo, cfg, true);
                     executor.execute(worker);
                 }
             }

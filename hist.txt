@@ -24,3 +24,12 @@ Crawler.MainCrawlerList -i seed2.txt
 Crawler.MainCrawlerList -i seed2.txt
 Crawler.MainCrawlerList --start
 Crawler.MainCrawlerList --start
+webanalyse.Test -h
+webanalyse.Test -h
+webanalyse.Test -h
+webanalyse.Test -h
+webanalyse.Test regex abc?cd abcd
+webanalyse.Test regex abc?cd abcdd
+webanalyse.Test regex abc?cd abccd
+webanalyse.Test regexbench "^.*(\\.(?i)(html?|aspx?|php)|/)$" www.google.com/index.php
+webanalyse.Test regexbench "^.*(\\.(?i)(html?|aspx?|php)|/)$" www.google.com/index.php

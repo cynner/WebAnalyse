@@ -8,6 +8,8 @@ package Crawler;
 
 import ArcFileUtils.WebArcRecord;
 import java.io.File;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  *
@@ -27,10 +29,6 @@ public abstract class CrawlerConfig {
         }
     };
     
-    public static enum Mode {
-
-        preCrawl, Crawl
-    };
     
     public String AcceptOnlyPrefixPath = "/";
     
@@ -38,6 +36,11 @@ public abstract class CrawlerConfig {
     public int MaxPage;
     public int MarginPage;
     public int log_id;
+    public static final String DefaultRegAcceptedExt = "(\\.(?i)(html?|aspx?|php)|/)$";
+    public static final String DefaultRegAcceptedPre = "^.*";
+    public static final Pattern DefaultPatAcceptedPath = Pattern.compile("^.*(\\.(?i)(html?|aspx?|php)|/)$");
+
+    public Pattern patAcceptedPath = DefaultPatAcceptedPath;
     
     public abstract void Finishing(SiteCrawler s);
     

@@ -146,7 +146,7 @@ public class MainCrawler{
                     
                 }
             
-                worker = new SiteCrawler(HostName, HostIP, new File(Dirname + "/" + HostName + ".arc"),new File(Dirname + "/" + HostName + ".info"), cfg, CrawlerConfig.Mode.Crawl, true);
+                worker = new SiteCrawler(HostName, HostIP, new File(Dirname + "/" + HostName + ".arc"),new File(Dirname + "/" + HostName + ".info"), cfg, true);
                 /*
                 if(Location.equals("TH")){
                     worker = new SiteCrawler(HostName, HostIP, Dirname, MaxPagePerSite, "/",true,this, SiteCrawler.Mode.Crawl);
