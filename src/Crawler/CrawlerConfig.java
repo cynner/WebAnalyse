@@ -36,6 +36,7 @@ public abstract class CrawlerConfig {
     public int MaxPage;
     public int MarginPage;
     public int log_id;
+    public int CrawlDelay = 1000;
     public static final String DefaultRegAcceptedExt = "(\\.(?i)(html?|aspx?|php)|/)$";
     public static final String DefaultRegAcceptedPre = "^.*";
     public static final Pattern DefaultPatAcceptedPath = Pattern.compile("^.*(\\.(?i)(html?|aspx?|php)|/)$");

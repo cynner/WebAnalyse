@@ -49,9 +49,9 @@ public class MainCrawlerList{
     public int MaxPreCrawl = 3;
     public int log_id = 9;
     
+    public final int Threads;
     
     //public int LimitCrawlSite = 10000;
-    public int Threads = 10;
     
     public CrawlerConfigList cfg;
     
@@ -59,13 +59,13 @@ public class MainCrawlerList{
         return strWorkingDirectory + "/" + TaskName + "/" + strSeed;
     }
 
-    public MainCrawlerList(String TaskName, String strWorkingDirectory, int MaxPagePerSite, String AcceptOnlyPrefixPath) throws IOException{
+    public MainCrawlerList(String TaskName, String strWorkingDirectory, int MaxPagePerSite, int Threads, int Delay, String AcceptOnlyPrefixPath) throws IOException {
         //super(MaxPreCrawl);
         this.TaskName = TaskName;
         this.strWorkingDirectory = strWorkingDirectory;
-        this.strDirTmp = strWorkingDirectory + "/" + subDirTmp ;
+        this.strDirTmp = strWorkingDirectory + "/" + subDirTmp;
         this.AcceptOnlyPrefixPath = AcceptOnlyPrefixPath;
-        
+
         cfg = new CrawlerConfigList(TaskName, strWorkingDirectory);
         cfg.AcceptOnlyPrefixPath = this.AcceptOnlyPrefixPath;
         cfg.MaxPreCrawl = this.MaxPreCrawl;
@@ -73,6 +73,8 @@ public class MainCrawlerList{
         cfg.MaxPage = MaxPagePerSite;
         cfg.MarginPage = MaxPagePerSite * 3;
         cfg.log_id = this.log_id;
+        cfg.CrawlDelay = Delay;
+        this.Threads = Threads;
         this.fileSeed = new File(getSeedPath(strWorkingDirectory, TaskName));
     }
     
@@ -134,6 +136,20 @@ public class MainCrawlerList{
                 .setConst(true)
                 .setDefault(false)
                 .help("Start crawler");
+        parser.addArgument("--delay")
+                .type(Integer.class)
+                .setDefault(1000)
+                .help("crawl delay in ms. (default 1000)");
+        parser.addArgument("-t")
+                .metavar("Threads")
+                .type(Integer.class)
+                .setDefault(10)
+                .help("threads no (default 10)");
+        parser.addArgument("-p")
+                .metavar("LimitPage")
+                .type(Integer.class)
+                .setDefault(1000)
+                .help("limit page per site (default 1000)");
         parser.addArgument("TaskName")
                 .nargs("?")
                 .type(String.class)
@@ -159,7 +175,7 @@ public class MainCrawlerList{
             if (res.getBoolean("start")) {
                 LanguageDetector.init();
 
-                MainCrawlerList mc = new MainCrawlerList(TaskName, strWorkDir, 1000, "/");
+                MainCrawlerList mc = new MainCrawlerList(TaskName, strWorkDir, res.getInt("p"),res.getInt("t"),res.getInt("delay"), "/");
                 mc.run();
             }
             

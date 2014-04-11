@@ -42,7 +42,6 @@ public class SiteCrawler implements Runnable {
     public boolean isSetTimeZone = false;
     public static String MyIP = GetMyIP();
     public static String UserAgent = "princeofvamp@gmail.com";
-    public int CrawlDelay = 100;
     public String HostName;
     public ArrayList<String> URLQueue = new ArrayList<>();
     public ArrayList<String> URLCrash = new ArrayList<>();
@@ -202,7 +201,7 @@ public class SiteCrawler implements Runnable {
 
                         try {
                             //Success & delay
-                            Thread.sleep(this.CrawlDelay);
+                            Thread.sleep(crawlConf.CrawlDelay);
                         } catch (InterruptedException ex) {
                             System.err.println("Interupt while delay!...");
                             Logger.getLogger(SiteCrawler.class.getName()).log(Level.SEVERE, null, ex);
