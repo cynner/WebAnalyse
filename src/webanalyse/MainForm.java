@@ -32,6 +32,7 @@ import java.util.regex.Pattern;
  */
 public class MainForm extends javax.swing.JFrame {
 
+    private Thread TASK;
     private File histFile;
     private ArrayList<String> history = new ArrayList<>();
     private int hist_pos = 0;
@@ -58,6 +59,7 @@ public class MainForm extends javax.swing.JFrame {
         labCmd = new javax.swing.JLabel();
         btnRun = new javax.swing.JButton();
         txtCmd = new javax.swing.JTextField();
+        btnStop = new javax.swing.JButton();
         jPanel2 = new javax.swing.JPanel();
         jScrollPane1 = new javax.swing.JScrollPane();
         txtOutConsole = new javax.swing.JTextArea();
@@ -81,6 +83,14 @@ public class MainForm extends javax.swing.JFrame {
             }
         });
 
+        btnStop.setText("Stop");
+        btnStop.setEnabled(false);
+        btnStop.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnStopActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -92,6 +102,8 @@ public class MainForm extends javax.swing.JFrame {
                 .addComponent(txtCmd)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(btnRun)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(btnStop)
                 .addContainerGap())
         );
         jPanel1Layout.setVerticalGroup(
@@ -101,7 +113,8 @@ public class MainForm extends javax.swing.JFrame {
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(labCmd)
                     .addComponent(btnRun)
-                    .addComponent(txtCmd, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(txtCmd, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(btnStop))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
@@ -120,16 +133,16 @@ public class MainForm extends javax.swing.JFrame {
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel2Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jScrollPane1)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 281, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane2)
+                .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 281, Short.MAX_VALUE)
                 .addContainerGap())
         );
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel2Layout.createSequentialGroup()
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 240, Short.MAX_VALUE)
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 277, Short.MAX_VALUE)
                     .addComponent(jScrollPane2))
                 .addContainerGap())
         );
@@ -189,7 +202,30 @@ public class MainForm extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_txtCmdKeyPressed
 
+    private void btnStopActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnStopActionPerformed
+        // TODO add your handling code here:
+        TASK.interrupt();
+        btnRun.setEnabled(true);
+        btnStop.setEnabled(false);
+    }//GEN-LAST:event_btnStopActionPerformed
+
     private void RunCmd(){
+        if (btnRun.isEnabled()) {
+            btnRun.setEnabled(false);
+            btnStop.setEnabled(true);
+            Runnable r = new Runnable() {
+                public void run() {
+                    exeCmd();
+                }
+            };
+
+            TASK = new Thread(r);
+            TASK.start();
+        }
+        
+    }
+    
+    private void exeCmd(){
         
         ArrayList<String> matchList = new ArrayList<>();
         Pattern regex = Pattern.compile("[^\\s\"']+|\"([^\"]*)\"|'([^']*)'");
@@ -225,6 +261,8 @@ public class MainForm extends javax.swing.JFrame {
             Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
         }
         System.out.println("*** Finished ***");
+        btnRun.setEnabled(true);
+        btnStop.setEnabled(false);
 
     }
     
@@ -325,6 +363,7 @@ public class MainForm extends javax.swing.JFrame {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnRun;
+    private javax.swing.JButton btnStop;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JScrollPane jScrollPane1;

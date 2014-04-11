@@ -33,3 +33,8 @@ webanalyse.Test regex abc?cd abcdd
 webanalyse.Test regex abc?cd abccd
 webanalyse.Test regexbench "^.*(\\.(?i)(html?|aspx?|php)|/)$" www.google.com/index.php
 webanalyse.Test regexbench "^.*(\\.(?i)(html?|aspx?|php)|/)$" www.google.com/index.php
+Crawler.MainCrawlerList -i dltest.txt
+Crawler.MainCrawlerList --start
+Crawler.MainCrawlerList -i dltest.txt
+Crawler.MainCrawlerList --start
+Crawler.MainCrawlerList --start
