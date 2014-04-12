@@ -15,6 +15,7 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -116,6 +117,45 @@ public class MainCrawlerList{
         System.out.println("Repeat " + rep + " was droped");
     }
     
+    public void Reload(File fileOrgSeed) throws IOException {
+        String Line;
+        ArrayList<String> hs = new ArrayList<>();
+        int n=0,rep=0;
+        if(cfg.fileHostCrawled.exists()){
+            long len;
+            try(MyRandomAccessFile raf = new MyRandomAccessFile(cfg.fileHostCrawled, "r")){
+                // just skip
+                len = raf.readLong();
+                while(raf.getFilePointer() < len){
+                    hs.add(raf.readLine());
+                }
+            } catch (IOException ex){
+                 Logger.getLogger(MainCrawlerList.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+        
+        try(BufferedReader br = new BufferedReader(new FileReader(fileOrgSeed));
+                MyRandomAccessFile raf = new MyRandomAccessFile(cfg.fileHostCrawled, "rw")) {
+            while ((Line = br.readLine()) != null) {
+                if (!Line.isEmpty() && !hs.contains(Line)) {
+                    hs.remove(Line);
+                    n++;
+                }else{
+                    rep++;
+                }
+            }
+            raf.seek(Long.SIZE);
+            for(String s : hs){
+                raf.write((s + "\n").getBytes());
+            }
+            long pos = raf.getFilePointer();
+            raf.seek(0);
+            raf.writeLong(pos);
+        }
+        System.out.println("Added " + n + " seed site");
+        System.out.println("Repeat " + rep + " was droped");
+    }
+    
     public static void main(String[] args) throws IOException{
         
         ArgumentParser parser = ArgumentParsers.newArgumentParser("MainCrawlerList")
@@ -129,17 +169,10 @@ public class MainCrawlerList{
                 .metavar("SeedFile")
                 .type(String.class)
                 .help("import or append seed file [format : one line one domain name]");
-        parser.addArgument("--start")
-                .dest("start")
-                .type(Boolean.class)
-                .action(Arguments.storeConst())
-                .setConst(true)
-                .setDefault(false)
-                .help("Start crawler");
-        parser.addArgument("--delay")
-                .type(Integer.class)
-                .setDefault(1000)
-                .help("crawl delay in ms. (default 1000)");
+        parser.addArgument("-r")
+                .metavar("SeedFile")
+                .type(String.class)
+                .help("import reload seed file [format : one line one domain name]");
         parser.addArgument("-t")
                 .metavar("Threads")
                 .type(Integer.class)
@@ -155,27 +188,48 @@ public class MainCrawlerList{
                 .type(String.class)
                 .setDefault("default")
                 .help("To identify job");
+        parser.addArgument("--delay")
+                .type(Integer.class)
+                .setDefault(1000)
+                .help("crawl delay in ms. (default 1000)");
+        parser.addArgument("--start")
+                .dest("start")
+                .type(Boolean.class)
+                .action(Arguments.storeConst())
+                .setConst(true)
+                .setDefault(false)
+                .help("Start crawler");
         
         try {
             Namespace res = parser.parseArgs(args);
             String strWorkDir = res.getString("d");
             String TaskName = res.get("TaskName");
             String strImportFile = res.get("i");
-            if(strImportFile != null){
+            if (strImportFile != null){
                 // import seed file
                 File fi = new File(strImportFile);
                 if(fi.isFile()){
                     Import(TaskName, strWorkDir, fi);
                 }else{
-                    System.err.println(res.getString("i") + " is not a seed file.");
+                    System.err.println(strImportFile + " is not a seed file.");
+                    System.exit(1);
+                }
+            }
+            
+            MainCrawlerList mc = new MainCrawlerList(TaskName, strWorkDir, res.getInt("p"),res.getInt("t"),res.getInt("delay"), "/");
+            
+            if (res.get("r") != null){
+                File fi = new File(res.getString("r"));
+                if(fi.isFile()){
+                    mc.Reload(fi);
+                }else{
+                    System.err.println(res.getString("r") + " is not a seed file.");
                     System.exit(1);
                 }
             }
             
             if (res.getBoolean("start")) {
                 LanguageDetector.init();
-
-                MainCrawlerList mc = new MainCrawlerList(TaskName, strWorkDir, res.getInt("p"),res.getInt("t"),res.getInt("delay"), "/");
                 mc.run();
             }
             

@@ -39,3 +39,4 @@ Crawler.MainCrawlerList -i dltest.txt
 Crawler.MainCrawlerList --start
 Crawler.MainCrawlerList --start
 Crawler.MainCrawlerList -h
+Crawler.MainCrawlerList -h
