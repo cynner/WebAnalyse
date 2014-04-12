@@ -208,6 +208,14 @@ public class SiteCrawler implements Runnable {
                         }
                     } else {
                         URLCrash.add(URLQueue.remove(0));
+                        
+                        try {
+                            //Fail & delay
+                            Thread.sleep(crawlConf.CrawlDelayFail);
+                        } catch (InterruptedException ex) {
+                            System.err.println("Interupt while delay!...");
+                            Logger.getLogger(SiteCrawler.class.getName()).log(Level.SEVERE, null, ex);
+                        }
                     }
                 } else {
                     if (!CodeHandler()) {

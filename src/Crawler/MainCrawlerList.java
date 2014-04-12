@@ -60,7 +60,7 @@ public class MainCrawlerList{
         return strWorkingDirectory + "/" + TaskName + "/" + strSeed;
     }
 
-    public MainCrawlerList(String TaskName, String strWorkingDirectory, int MaxPagePerSite, int Threads, int Delay, String AcceptOnlyPrefixPath) throws IOException {
+    public MainCrawlerList(String TaskName, String strWorkingDirectory, int MaxPagePerSite, int Threads, int Delay, int DelayFail, String AcceptOnlyPrefixPath) throws IOException {
         //super(MaxPreCrawl);
         this.TaskName = TaskName;
         this.strWorkingDirectory = strWorkingDirectory;
@@ -75,6 +75,7 @@ public class MainCrawlerList{
         cfg.MarginPage = MaxPagePerSite * 3;
         cfg.log_id = this.log_id;
         cfg.CrawlDelay = Delay;
+        cfg.CrawlDelayFail = DelayFail;
         this.Threads = Threads;
         this.fileSeed = new File(getSeedPath(strWorkingDirectory, TaskName));
     }
@@ -192,6 +193,10 @@ public class MainCrawlerList{
                 .type(Integer.class)
                 .setDefault(1000)
                 .help("crawl delay in ms. (default 1000)");
+        parser.addArgument("--delayfail")
+                .type(Integer.class)
+                .setDefault(200)
+                .help("crawl delay if fail in ms. (default 200)");
         parser.addArgument("--start")
                 .dest("start")
                 .type(Boolean.class)
@@ -216,7 +221,7 @@ public class MainCrawlerList{
                 }
             }
             
-            MainCrawlerList mc = new MainCrawlerList(TaskName, strWorkDir, res.getInt("p"),res.getInt("t"),res.getInt("delay"), "/");
+            MainCrawlerList mc = new MainCrawlerList(TaskName, strWorkDir, res.getInt("p"),res.getInt("t"),res.getInt("delay"),res.getInt("delayfail"), "/");
             
             if (res.get("r") != null){
                 File fi = new File(res.getString("r"));
