@@ -152,8 +152,8 @@ public class MainCrawlerList{
             raf.seek(0);
             raf.writeLong(pos);
         }
-        System.out.println("Added " + n + " seed site");
-        System.out.println("Repeat " + rep + " was droped");
+        System.out.println("Re-Added " + n + " seed site");
+        System.out.println("No effect " + rep + " site");
     }
     
     public static void main(String[] args) throws IOException{
