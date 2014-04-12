@@ -118,13 +118,18 @@ public class MainForm extends javax.swing.JFrame {
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
+        txtOutConsole.setEditable(false);
         txtOutConsole.setColumns(20);
         txtOutConsole.setRows(5);
+        txtOutConsole.setCursor(new java.awt.Cursor(java.awt.Cursor.TEXT_CURSOR));
+        txtOutConsole.setVerifyInputWhenFocusTarget(false);
         jScrollPane1.setViewportView(txtOutConsole);
 
+        txtErrConsole.setEditable(false);
         txtErrConsole.setColumns(20);
         txtErrConsole.setForeground(new java.awt.Color(204, 1, 1));
         txtErrConsole.setRows(5);
+        txtErrConsole.setVerifyInputWhenFocusTarget(false);
         jScrollPane2.setViewportView(txtErrConsole);
 
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
