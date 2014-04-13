@@ -80,6 +80,42 @@ public class MainCrawlerList{
         this.fileSeed = new File(getSeedPath(strWorkingDirectory, TaskName));
     }
     
+    public void Delete(File fileOrgSeed) throws IOException {
+        String Line;
+        ArrayList<String> hs = new ArrayList<>();
+        int n=0,rep=0;
+        if(fileOrgSeed.exists() && fileSeed.exists()){
+            try(BufferedReader br = new BufferedReader(new FileReader(fileSeed))){
+                while((Line = br.readLine()) != null){
+                    hs.add(Line);
+                }
+            } catch (IOException ex){
+                 Logger.getLogger(MainCrawlerList.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            
+            try(BufferedReader br = new BufferedReader(new FileReader(fileOrgSeed))){
+                while((Line = br.readLine()) != null){
+                    if(hs.remove(Line))
+                        n++;
+                    else
+                        rep++;
+                }
+            } catch (IOException ex){
+                 Logger.getLogger(MainCrawlerList.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            
+            try(BufferedWriter bw = new BufferedWriter(new FileWriter(fileSeed, false))){
+                for(String s : hs){
+                    bw.write(s + "\n");   
+                }
+            } catch (IOException ex){
+                 Logger.getLogger(MainCrawlerList.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+        System.out.println("Deleted " + n + " seed site");
+        System.out.println("Delete Fail " + rep + " site");
+    }
+    
     public static void Import(String TaskName, String strWorkingDirectory, File fileOrgSeed) throws IOException {
         File fileSeed = new File(getSeedPath(strWorkingDirectory, TaskName));
         File fileDir = fileSeed.getParentFile();
@@ -138,8 +174,7 @@ public class MainCrawlerList{
         try(BufferedReader br = new BufferedReader(new FileReader(fileOrgSeed));
                 MyRandomAccessFile raf = new MyRandomAccessFile(cfg.fileHostCrawled, "rw")) {
             while ((Line = br.readLine()) != null) {
-                if (!Line.isEmpty() && !hs.contains(Line)) {
-                    hs.remove(Line);
+                if (hs.remove(Line)) {
                     n++;
                 }else{
                     rep++;
@@ -174,6 +209,10 @@ public class MainCrawlerList{
                 .metavar("SeedFile")
                 .type(String.class)
                 .help("import reload seed file [format : one line one domain name]");
+        parser.addArgument("--del")
+                .metavar("SeedFile")
+                .type(String.class)
+                .help("delete seed file contains [format : one line one domain name]");
         parser.addArgument("-t")
                 .metavar("Threads")
                 .type(Integer.class)
@@ -227,6 +266,16 @@ public class MainCrawlerList{
                 File fi = new File(res.getString("r"));
                 if(fi.isFile()){
                     mc.Reload(fi);
+                }else{
+                    System.err.println(res.getString("r") + " is not a seed file.");
+                    System.exit(1);
+                }
+            }
+            
+            if (res.get("del") != null){
+                File fi = new File(res.getString("del"));
+                if(fi.isFile()){
+                    mc.Delete(fi);
                 }else{
                     System.err.println(res.getString("r") + " is not a seed file.");
                     System.exit(1);
