@@ -284,6 +284,7 @@ public class MainCrawlerList{
             
             if (res.getBoolean("start")) {
                 if(res.getString("dns") != null){
+                    System.out.println("Setting DNS to : " + res.getString("dns"));
                     System.setProperty("sun.net.spi.nameservice.nameservers", res.getString("dns"));
                     System.setProperty("sun.net.spi.nameservice.provider.1", "dns,sun");
                 }
