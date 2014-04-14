@@ -10,6 +10,7 @@ import com.cybozu.labs.langdetect.Detector;
 import com.cybozu.labs.langdetect.DetectorFactory;
 import com.cybozu.labs.langdetect.LangDetectException;
 import com.cybozu.labs.langdetect.Language;
+import java.io.File;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -20,15 +21,25 @@ import java.util.logging.Logger;
 public class LanguageDetector {
     
     public static boolean isLoadedProfile = false;
+    public static String strDirProfile = "resource/profiles";
     
     public static void init(){
         if(!isLoadedProfile){
             
             isLoadedProfile = true;
             try {
-                DetectorFactory.loadProfile("resource/profiles");
+                File f = new File(strDirProfile);
+                if(f.exists()){
+                    DetectorFactory.loadProfile(f);
+                }else{
+                    System.err.println(strDirProfile + " not exists");
+                    System.err.println("Exit (9) : Load profile fail.");
+                    System.exit(9);
+                }
             } catch (LangDetectException ex) {
                 Logger.getLogger(LanguageDetector.class.getName()).log(Level.SEVERE, null, ex);
+                System.err.println("Exit (9) : Load profile fail.");
+                System.exit(9);
             }
         }
     }

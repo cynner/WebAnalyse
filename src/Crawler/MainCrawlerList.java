@@ -238,12 +238,12 @@ public class MainCrawlerList{
                 .help("crawl delay if fail in ms. (default 200)");
         parser.addArgument("--start")
                 .dest("start")
-                .type(Boolean.class)
-                .action(Arguments.storeConst())
-                .setConst(true)
-                .setDefault(false)
+                .action(Arguments.storeTrue())
                 .help("Start crawler");
-        
+        parser.addArgument("--dns")
+                .metavar("DNS")
+                .type(String.class)
+                .help("Set specific DNS server ip");
         try {
             Namespace res = parser.parseArgs(args);
             String strWorkDir = res.getString("d");
@@ -283,6 +283,10 @@ public class MainCrawlerList{
             }
             
             if (res.getBoolean("start")) {
+                if(res.getString("dns") != null){
+                    System.setProperty("sun.net.spi.nameservice.nameservers", res.getString("dns"));
+                    System.setProperty("sun.net.spi.nameservice.provider.1", "dns,sun");
+                }
                 LanguageDetector.init();
                 mc.run();
             }
