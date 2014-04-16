@@ -282,6 +282,9 @@ public class MainCrawlerList{
                 }
             }
             
+            // SET PROPERTIES
+            System.setProperty("file.encoding", "utf-8");
+            
             if (res.getBoolean("start")) {
                 if(res.getString("dns") != null){
                     System.out.println("Setting DNS to : " + res.getString("dns"));
