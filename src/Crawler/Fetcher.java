@@ -53,7 +53,7 @@ public class Fetcher {
     public long MaxContentLength = 2000000;
     
     public Fetcher() {
-        if(!isKeepAlive){
+        if(isKeepAlive){
             System.setProperty("http.keepAlive", "false");
             isKeepAlive = false;
         }
