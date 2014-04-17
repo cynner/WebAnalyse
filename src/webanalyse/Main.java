@@ -6,9 +6,14 @@
 
 package webanalyse;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -17,6 +22,7 @@ import java.util.logging.Logger;
  * @author malang
  */
 public class Main {
+    public static final String strFileLastProperties = "lastproperty.txt"; 
 
     /**
      * @param args the command line arguments
@@ -29,7 +35,8 @@ public class Main {
         if(args.length > 0) {
             Class<?> cls = Class.forName(args[0]);
             Method m = cls.getMethod("main", String[].class);
-            String[] params = Arrays.copyOfRange(args, 1, args.length);;
+            String[] params = Arrays.copyOfRange(args, 1, args.length);
+            WriteLastProperties(new File(strFileLastProperties));
             try {
                 m.invoke(null, (Object) params);
             } catch (InvocationTargetException ex) {
@@ -40,4 +47,13 @@ public class Main {
         }
     }
     
+    public static void WriteLastProperties(File f){
+        try(BufferedWriter bw = new BufferedWriter(new FileWriter(f))){
+            for(Map.Entry<Object,Object> e : System.getProperties().entrySet()){
+                bw.write(e.getKey() + " : " + e.getValue() + "\n");
+            }
+        } catch (IOException ex) {
+            Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
 }
