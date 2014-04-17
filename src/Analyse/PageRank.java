@@ -183,7 +183,9 @@ public class PageRank {
     
     public static void filterNode(HashMap<Integer, HashMap<Integer, Double>> linkedList){
         for(HashMap<Integer, Double> v : linkedList.values()){
-            for(Integer k : v.keySet()){
+            Integer[] arr = new Integer[v.size()]; 
+            v.keySet().toArray(arr);
+            for(Integer k : arr){
                 if(!linkedList.containsKey(k))
                     v.remove(k);
             }
