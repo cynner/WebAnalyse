@@ -199,6 +199,10 @@ public class PageRank {
     }
 
     public static void main(String[] args) throws FileNotFoundException {
+        // SET PROPERTIES
+        System.setProperty("sun.jnu.encoding", "UTF-8");
+        System.setProperty("file.encoding", "UTF-8");
+        
         ArgumentParser parser = ArgumentParsers.newArgumentParser("Analyse.PageRank").defaultHelp(true)
                 .description("PageRank calculation from graph file");
         parser.addArgument("-d", "--damping")
@@ -223,7 +227,7 @@ public class PageRank {
                 .nargs("+")
                 .type(String.class)
                 .help("Graph file, each line format: SOURCE;d1:w1;d2:w2; ... ;dn:wn");
-
+        
         HashMap<Integer, HashMap<Integer, Double>> linkedList = new HashMap<>();
         int maxSize = 0;
         try {

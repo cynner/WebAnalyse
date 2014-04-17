@@ -193,6 +193,9 @@ public class Main{
     }
     
     public static void main(String[] args) throws IOException{
+        // SET PROPERTIES
+        System.setProperty("sun.jnu.encoding", "UTF-8");
+        System.setProperty("file.encoding", "UTF-8");
         
         ArgumentParser parser = ArgumentParsers.newArgumentParser("Crawler.Main").defaultHelp(true)
                 .description("Crawler process from list.");
@@ -290,9 +293,6 @@ public class Main{
                     System.exit(1);
                 }
             }
-            
-            // SET PROPERTIES
-            System.setProperty("file.encoding", "utf-8");
             
             if (res.getBoolean("start")) {
                 if(res.getString("dns") != null){

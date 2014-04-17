@@ -32,6 +32,10 @@ public class Main {
      */
     public static void main(String[] args) throws ClassNotFoundException, NoSuchMethodException, IllegalAccessException{
         // TODO code application logic here
+        // SET PROPERTIES
+        System.setProperty("sun.jnu.encoding", "UTF-8");
+        System.setProperty("file.encoding", "UTF-8");
+        
         if(args.length > 0) {
             Class<?> cls = Class.forName(args[0]);
             Method m = cls.getMethod("main", String[].class);
