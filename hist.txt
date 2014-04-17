@@ -41,3 +41,6 @@ Crawler.MainCrawlerList --start
 Crawler.MainCrawlerList -h
 Crawler.MainCrawlerList -h
 Crawler.MainCrawlerList -h
+Analyse.PAgeRank -h
+Analyse.PAgeRank -h
+Analyse.PageRank -h

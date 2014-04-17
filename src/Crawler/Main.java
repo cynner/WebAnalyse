@@ -31,7 +31,7 @@ import net.sourceforge.argparse4j.inf.Namespace;
  *
  * @author malang
  */
-public class MainCrawlerList{
+public class Main{
     public static final String DefaultWorkingDirectory = "data/crawler";
     
     // Config for CrawlerConfigList
@@ -60,7 +60,7 @@ public class MainCrawlerList{
         return strWorkingDirectory + "/" + TaskName + "/" + strSeed;
     }
 
-    public MainCrawlerList(String TaskName, String strWorkingDirectory, int MaxPagePerSite, int Threads, int Delay, int DelayFail, String AcceptOnlyPrefixPath) throws IOException {
+    public Main(String TaskName, String strWorkingDirectory, int MaxPagePerSite, int Threads, int Delay, int DelayFail, String AcceptOnlyPrefixPath) throws IOException {
         //super(MaxPreCrawl);
         this.TaskName = TaskName;
         this.strWorkingDirectory = strWorkingDirectory;
@@ -90,7 +90,7 @@ public class MainCrawlerList{
                     hs.add(Line);
                 }
             } catch (IOException ex){
-                 Logger.getLogger(MainCrawlerList.class.getName()).log(Level.SEVERE, null, ex);
+                 Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
             }
             
             try(BufferedReader br = new BufferedReader(new FileReader(fileOrgSeed))){
@@ -101,7 +101,7 @@ public class MainCrawlerList{
                         rep++;
                 }
             } catch (IOException ex){
-                 Logger.getLogger(MainCrawlerList.class.getName()).log(Level.SEVERE, null, ex);
+                 Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
             }
             
             try(BufferedWriter bw = new BufferedWriter(new FileWriter(fileSeed, false))){
@@ -109,7 +109,7 @@ public class MainCrawlerList{
                     bw.write(s + "\n");   
                 }
             } catch (IOException ex){
-                 Logger.getLogger(MainCrawlerList.class.getName()).log(Level.SEVERE, null, ex);
+                 Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
         System.out.println("Deleted " + n + " seed site");
@@ -167,7 +167,7 @@ public class MainCrawlerList{
                     hs.add(raf.readLine());
                 }
             } catch (IOException ex){
-                 Logger.getLogger(MainCrawlerList.class.getName()).log(Level.SEVERE, null, ex);
+                 Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
         
@@ -194,7 +194,7 @@ public class MainCrawlerList{
     
     public static void main(String[] args) throws IOException{
         
-        ArgumentParser parser = ArgumentParsers.newArgumentParser("MainCrawlerList")
+        ArgumentParser parser = ArgumentParsers.newArgumentParser("Crawler.Main")
                 .description("Crawler process from list.");
         parser.addArgument("-d")
                 .metavar("Dir")
@@ -260,7 +260,7 @@ public class MainCrawlerList{
                 }
             }
             
-            MainCrawlerList mc = new MainCrawlerList(TaskName, strWorkDir, res.getInt("p"),res.getInt("t"),res.getInt("delay"),res.getInt("delayfail"), "/");
+            Main mc = new Main(TaskName, strWorkDir, res.getInt("p"),res.getInt("t"),res.getInt("delay"),res.getInt("delayfail"), "/");
             
             if (res.get("r") != null){
                 File fi = new File(res.getString("r"));
@@ -333,7 +333,7 @@ public class MainCrawlerList{
                     hs.add(raf.readLine());
                 }
             } catch (IOException ex){
-                 Logger.getLogger(MainCrawlerList.class.getName()).log(Level.SEVERE, null, ex);
+                 Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
         
@@ -362,9 +362,9 @@ public class MainCrawlerList{
             
             System.out.println("====== Success ======");
         } catch (FileNotFoundException ex) {
-            Logger.getLogger(MainCrawlerList.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
         } catch (IOException ex) {
-            Logger.getLogger(MainCrawlerList.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
     

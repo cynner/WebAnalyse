@@ -356,9 +356,9 @@ public class SiteCrawlerChecker implements Runnable {
             
             System.out.println("====== Success ======");
         } catch (FileNotFoundException ex) {
-            Logger.getLogger(MainCrawlerList.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(SiteCrawlerChecker.class.getName()).log(Level.SEVERE, null, ex);
         } catch (IOException ex) {
-            Logger.getLogger(MainCrawlerList.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(SiteCrawlerChecker.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
