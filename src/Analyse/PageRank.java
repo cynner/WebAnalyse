@@ -124,7 +124,7 @@ public class PageRank {
      * @param CSVFile each line has format SOURCE;d1:w1;d2:w2;...;dn:wn
      * @param linkedList data will append CSVFile
      * @param prevMaxSize previous maxSize
-     * @return 
+     * @return
      * @throws FileNotFoundException
      */
     public static int importCSVFreq(File CSVFile, HashMap<Integer, HashMap<Integer, Double>> linkedList, int prevMaxSize) throws FileNotFoundException {
@@ -162,8 +162,9 @@ public class PageRank {
                 }
 
                 linkedList.put(source, SubLink);
-                if(source > maxSize)
+                if (source > maxSize) {
                     maxSize = source;
+                }
             }
         } catch (IOException ex) {
             System.err.println("At : '" + Line + "'");
@@ -171,38 +172,42 @@ public class PageRank {
         }
         return maxSize;
     }
-    
-    public static void saveResult(File f, double[] d) throws IOException{
-        BufferedWriter bw = new BufferedWriter(new FileWriter(f));
-        for(int i=0;i<d.length;i++){
-            if (d[i] > 0){
-                bw.write(i + ":" + d[i] + "\n");
+
+    public static void saveResult(File f, double[] d) {
+        try (BufferedWriter bw = new BufferedWriter(new FileWriter(f))) {
+
+            for (int i = 0; i < d.length; i++) {
+                if (d[i] > 0) {
+                    bw.write(i + ":" + d[i] + "\n");
+                }
             }
-        }
-    }
-    
-    public static void filterNode(HashMap<Integer, HashMap<Integer, Double>> linkedList){
-        for(HashMap<Integer, Double> v : linkedList.values()){
-            Integer[] arr = new Integer[v.size()]; 
-            v.keySet().toArray(arr);
-            for(Integer k : arr){
-                if(!linkedList.containsKey(k))
-                    v.remove(k);
-            }
+        } catch (IOException ex) {
+            Logger.getLogger(PageRank.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
+    public static void filterNode(HashMap<Integer, HashMap<Integer, Double>> linkedList) {
+        for (HashMap<Integer, Double> v : linkedList.values()) {
+            Integer[] arr = new Integer[v.size()];
+            v.keySet().toArray(arr);
+            for (Integer k : arr) {
+                if (!linkedList.containsKey(k)) {
+                    v.remove(k);
+                }
+            }
+        }
+    }
 
     public static void main(String[] args) throws FileNotFoundException {
         ArgumentParser parser = ArgumentParsers.newArgumentParser("Analyse.PageRank").defaultHelp(true)
                 .description("PageRank calculation from graph file");
-        parser.addArgument("-d","--damping")
+        parser.addArgument("-d", "--damping")
                 .dest("DAMPING")
                 .metavar("DAMPING")
                 .type(Double.class)
                 .setDefault(DEFAULT_DAMPING_FACTOR)
                 .help("Damping factor [0-1]");
-        parser.addArgument("-e","--epsilon")
+        parser.addArgument("-e", "--epsilon")
                 .dest("EPSILON")
                 .metavar("EPSILON")
                 .type(Double.class)
@@ -223,12 +228,12 @@ public class PageRank {
         int maxSize = 0;
         try {
             Namespace res = parser.parseArgs(args);
-            
+
             System.out.println("Reading CSV...");
-            for(String strFile : (List<String>) res.get("GRAPH_FILE")){
+            for (String strFile : (List<String>) res.get("GRAPH_FILE")) {
                 maxSize = PageRank.importCSVFreq(new File(strFile), linkedList, maxSize);
             }
-            
+
             System.out.println("Read CSV Finished");
             System.out.println("Filtering node...");
             PageRank.filterNode(linkedList);
@@ -241,32 +246,30 @@ public class PageRank {
             System.out.println("Writing Result File Finished");
         } catch (ArgumentParserException e) {
             parser.handleError(e);
-        } catch (IOException ex) {
-            Logger.getLogger(PageRank.class.getName()).log(Level.SEVERE, null, ex);
         }
 
         /*
-        SQLiteConnection db = new SQLiteConnection(DBDriver.TableConfig.FileWebPageDB);
-        try {
-            db.open();
-            db.exec("BEGIN;");
-            int trig = 50000, step = 50000;
-            for (int i = 0; i < d.length; i++) {
-                if (i > trig) {
-                    System.out.println("id: " + i);
-                    db.exec("COMMIT;");
-                    db.exec("BEGIN;");
-                    trig += step;
-                }
-                db.exec("UPDATE webpage SET pagerank=" + d[i] + " WHERE id=" + i + ";");
-            }
-            db.exec("COMMIT;");
-        } catch (SQLiteException ex) {
-            Logger.getLogger(PageRank.class.getName()).log(Level.SEVERE, null, ex);
-        } finally {
-            db.dispose();
-        }
-        */
+         SQLiteConnection db = new SQLiteConnection(DBDriver.TableConfig.FileWebPageDB);
+         try {
+         db.open();
+         db.exec("BEGIN;");
+         int trig = 50000, step = 50000;
+         for (int i = 0; i < d.length; i++) {
+         if (i > trig) {
+         System.out.println("id: " + i);
+         db.exec("COMMIT;");
+         db.exec("BEGIN;");
+         trig += step;
+         }
+         db.exec("UPDATE webpage SET pagerank=" + d[i] + " WHERE id=" + i + ";");
+         }
+         db.exec("COMMIT;");
+         } catch (SQLiteException ex) {
+         Logger.getLogger(PageRank.class.getName()).log(Level.SEVERE, null, ex);
+         } finally {
+         db.dispose();
+         }
+         */
     }
 
 }
