@@ -194,61 +194,70 @@ public class Main{
     
     public static void main(String[] args) throws IOException{
         
-        ArgumentParser parser = ArgumentParsers.newArgumentParser("Crawler.Main")
+        ArgumentParser parser = ArgumentParsers.newArgumentParser("Crawler.Main").defaultHelp(true)
                 .description("Crawler process from list.");
         parser.addArgument("-d")
+                .dest("dir")
                 .metavar("Dir")
                 .type(String.class)
                 .setDefault(DefaultWorkingDirectory)
                 .help("Working Directory for crawler");
-        parser.addArgument("-i")
+        parser.addArgument("-i","--input")
+                .dest("input")
                 .metavar("SeedFile")
                 .type(String.class)
-                .help("import or append seed file [format : one line one domain name]");
-        parser.addArgument("-r")
+                .help("import or append seed file in one line one domain format");
+        parser.addArgument("-r","--reload")
+                .dest("reload")
                 .metavar("SeedFile")
                 .type(String.class)
-                .help("import reload seed file [format : one line one domain name]");
+                .help("import reload seed file in one line one domain format");
         parser.addArgument("--del")
+                .dest("delete")
                 .metavar("SeedFile")
                 .type(String.class)
-                .help("delete seed file contains [format : one line one domain name]");
+                .help("delete seed file in one line one domain format");
         parser.addArgument("-t")
+                .dest("threads")
                 .metavar("Threads")
                 .type(Integer.class)
                 .setDefault(10)
-                .help("threads no (default 10)");
+                .help("threads no");
         parser.addArgument("-p")
+                .dest("limit_page")
                 .metavar("LimitPage")
                 .type(Integer.class)
                 .setDefault(1000)
-                .help("limit page per site (default 1000)");
-        parser.addArgument("TaskName")
-                .nargs("?")
-                .type(String.class)
-                .setDefault("default")
-                .help("To identify job");
+                .help("limit page per site");
         parser.addArgument("--delay")
+                .dest("delay")
                 .type(Integer.class)
                 .setDefault(1000)
-                .help("crawl delay in ms. (default 1000)");
+                .help("crawl delay in ms.");
         parser.addArgument("--delayfail")
+                .dest("delayfail")
                 .type(Integer.class)
                 .setDefault(200)
-                .help("crawl delay if fail in ms. (default 200)");
+                .help("crawl delay if fail in ms.");
         parser.addArgument("--start")
                 .dest("start")
                 .action(Arguments.storeTrue())
                 .help("Start crawler");
         parser.addArgument("--dns")
+                .dest("dns")
                 .metavar("DNS")
                 .type(String.class)
                 .help("Set specific DNS server ip");
+        parser.addArgument("TaskName")
+                .nargs("?")
+                .type(String.class)
+                .setDefault("default")
+                .help("To identify job");
         try {
             Namespace res = parser.parseArgs(args);
-            String strWorkDir = res.getString("d");
+            String strWorkDir = res.getString("dir");
             String TaskName = res.get("TaskName");
-            String strImportFile = res.get("i");
+            String strImportFile = res.get("input");
             if (strImportFile != null){
                 // import seed file
                 File fi = new File(strImportFile);
@@ -260,24 +269,24 @@ public class Main{
                 }
             }
             
-            Main mc = new Main(TaskName, strWorkDir, res.getInt("p"),res.getInt("t"),res.getInt("delay"),res.getInt("delayfail"), "/");
+            Main mc = new Main(TaskName, strWorkDir, res.getInt("limit_page"),res.getInt("threads"),res.getInt("delay"),res.getInt("delayfail"), "/");
             
-            if (res.get("r") != null){
-                File fi = new File(res.getString("r"));
+            if (res.get("reload") != null){
+                File fi = new File(res.getString("reload"));
                 if(fi.isFile()){
                     mc.Reload(fi);
                 }else{
-                    System.err.println(res.getString("r") + " is not a seed file.");
+                    System.err.println(res.getString("reload") + " is not a seed file.");
                     System.exit(1);
                 }
             }
             
-            if (res.get("del") != null){
-                File fi = new File(res.getString("del"));
+            if (res.get("delete") != null){
+                File fi = new File(res.getString("delete"));
                 if(fi.isFile()){
                     mc.Delete(fi);
                 }else{
-                    System.err.println(res.getString("r") + " is not a seed file.");
+                    System.err.println(res.getString("delete") + " is not a seed file.");
                     System.exit(1);
                 }
             }

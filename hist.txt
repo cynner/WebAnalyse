@@ -44,3 +44,12 @@ Crawler.MainCrawlerList -h
 Analyse.PAgeRank -h
 Analyse.PAgeRank -h
 Analyse.PageRank -h
+Crawler.Main -h
+Crawler.Main -h
+Crawler.Main -h
+Crawler.Main -h
+Analyse.PageRank -h
+Analyse.PageRank -h
+Crawler.Main -h
+Crawler.Main -h
+Crawler.Main -h

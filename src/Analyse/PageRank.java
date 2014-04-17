@@ -179,7 +179,15 @@ public class PageRank {
                 bw.write(i + ":" + d[i] + "\n");
             }
         }
-        
+    }
+    
+    public static void filterNode(HashMap<Integer, HashMap<Integer, Double>> linkedList){
+        for(HashMap<Integer, Double> v : linkedList.values()){
+            for(Integer k : v.keySet()){
+                if(!linkedList.containsKey(k))
+                    v.remove(k);
+            }
+        }
     }
 
 
@@ -220,9 +228,11 @@ public class PageRank {
             }
             
             System.out.println("Read CSV Finished");
+            System.out.println("Filtering node...");
+            PageRank.filterNode(linkedList);
+            System.out.println("Filtering node finished");
             System.out.println("Calculation...");
             double[] d = PageRank.cal(linkedList, maxSize, res.getDouble("DAMPING"), res.getDouble("EPSILON"));
-            
             System.out.println("Calculation Finished");
             System.out.println("Writing Result File...");
             PageRank.saveResult(new File(res.getString("OUTFILE")), d);
