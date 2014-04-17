@@ -79,6 +79,7 @@ public class PageRank {
 
     public static double[] cal(HashMap<Integer, HashMap<Integer, Double>> linkedList, int maxSize, double DAMPING_FACTOR, double EPSILON) {
         int Size = linkedList.size();
+        maxSize = maxSize + 1;
         HashSet<Integer> zeroOutdegree = getZeroOutdegree(linkedList);
 
         System.out.println("ZERO OUTLINK SIZE: " + zeroOutdegree.size());
@@ -190,19 +191,19 @@ public class PageRank {
                 .metavar("DAMPING")
                 .type(Double.class)
                 .setDefault(DEFAULT_DAMPING_FACTOR)
-                .help("Damping factor [0-1] default : " + DEFAULT_DAMPING_FACTOR);
+                .help("Damping factor [0-1]");
         parser.addArgument("-e","--epsilon")
                 .dest("EPSILON")
                 .metavar("EPSILON")
                 .type(Double.class)
                 .setDefault(DEFAULT_EPSILON)
-                .help("Maximum error value default : " + DEFAULT_EPSILON);
+                .help("Maximum error value");
         parser.addArgument("-o")
                 .dest("OUTFILE")
                 .metavar("OUTFILE")
                 .type(String.class)
                 .setDefault(DEFAULT_OUTFILE)
-                .help("Output filename default : " + DEFAULT_OUTFILE);
+                .help("Output filename");
         parser.addArgument("GRAPH_FILE")
                 .nargs("+")
                 .type(String.class)
