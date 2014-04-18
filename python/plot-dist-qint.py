@@ -5,15 +5,12 @@ import numpy as np
 import sys
 import argparse
 
-# Pyplot is a module within the matplotlib library for plotting
-import matplotlib.pyplot as plt
-
-
 parser = argparse.ArgumentParser(description='Plot graph distribution.')
 #parser.add_argument('--sumf', dest='accumulate', action='store_const', const=sum, default=max, help='sum the integers (default: find the max)')
 #parser.add_argument('integers', metavar='Ng', type=int, nargs='+',help='an integer for the accumulator')
 parser.add_argument('--cuthead', metavar='Nth', type=int, nargs='?', const=1, default=1, help='cut first Nth rows default 1 [const 1]')
 parser.add_argument('--cuttail', metavar="Nth", type=int, nargs='?', const=1, default=1, help='cut last  Nth rows default 1 [const 1]')
+parser.add_argument('--nodisplay', action='store_true', help='no gui')
 parser.add_argument('-d', metavar='delim',default=':',help='delimiter default \':\'')
 parser.add_argument('-f', metavar='field_no',type=int,default=1,help='filed no start from 1 default 1')
 parser.add_argument('-s', metavar='Style', default='b.', help='Style default \'b.\'')
@@ -25,6 +22,12 @@ parser.add_argument('-q', metavar='divisor',default=1, type=float, help='Quantiz
 parser.add_argument('-p', metavar='FP_Nth',default=0,type=int, help='Floating Point FP_Nth (FP_Nth may 0,1,2,...) 0 is default')
 parser.add_argument('DataFile',help='Input CSV File')
 args = parser.parse_args()
+
+# Pyplot is a module within the matplotlib library for plotting
+import matplotlib as mpl
+if args.nodisplay:
+	mpl.use('Agg')
+import matplotlib.pyplot as plt
 
 #print vars(args)
 title = args.t
@@ -56,7 +59,7 @@ while args.cuthead > 0:
 	args.cuthead = args.cuthead - 1
 
 #gatering inlink info
-inl = [int(round(int(i.split(sep)[fNo])/args.q,0)) for i in data]
+inl = [round(float(i.split(sep)[fNo])/args.q,args.p) for i in data]
 #inl = [int(round(i/1024.0,0)) for i in inl] #round file size
 
 #new dic
@@ -97,4 +100,5 @@ plt.savefig(imgname, format='png', dpi=600)
 plt.savefig(imgname+".svg", format='svg', dpi=300)
 
 # Draw the plot to the screen
-plt.show()
+if not args.nodisplay:
+	plt.show()

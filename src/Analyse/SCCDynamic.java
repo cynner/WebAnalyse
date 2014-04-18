@@ -14,9 +14,14 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Stack;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import net.sourceforge.argparse4j.ArgumentParsers;
+import net.sourceforge.argparse4j.inf.ArgumentParser;
+import net.sourceforge.argparse4j.inf.ArgumentParserException;
+import net.sourceforge.argparse4j.inf.Namespace;
 
 /**
  *
@@ -551,36 +556,62 @@ public class SCCDynamic {
     
     
     public static void main(String[] args){
-        //Mode has sd or csv mode
-        String Mode = args.length > 0 ? args[0] : "csv";
-        String FileInName = args.length > 1 ? args[1] : "../graph.webpage";
-        String FileOutName = args.length > 2 ? args[2] : "../scc.webpage";
-        String FileInfo = FileOutName + ".info";
-        String FileIO = FileOutName + ".io";
-        SCCDynamic scc = new SCCDynamic();
+        // SET PROPERTIES
+        System.setProperty("sun.jnu.encoding", "UTF-8");
+        System.setProperty("file.encoding", "UTF-8");
         
-        System.out.println("Importing...");
-        switch(Mode.toLowerCase()){
-            case "csv":
-                scc.ImportCSV(FileInName, ";", ":");
-                break;
-            case "sd":
-                scc.ImportSD(FileInName, ";");
-                break;
-            default:
-                System.err.println("ERROR: No Input Type '" + Mode + "' in {csv,sd}." );
-                System.exit(1);
-                break;
+        ArgumentParser parser = ArgumentParsers.newArgumentParser("Analyse.SCCDynamic").defaultHelp(true)
+                .description("Determine SCC and BowTie model");
+        parser.addArgument("-d")
+                .dest("delim")
+                .metavar("DELIM")
+                .type(String.class)
+                .setDefault(";")
+                .help("Node delimiter separate");
+        parser.addArgument("-sd")
+                .dest("sub_delim")
+                .metavar("SUB_DELIM")
+                .type(String.class)
+                .setDefault(":")
+                .help("Sub delimiter separated between dest and weight");
+        parser.addArgument("-o")
+                .dest("file_out")
+                .metavar("FILE")
+                .type(String.class)
+                .help("Output filename")
+                .required(true);
+        parser.addArgument("FILE_GRAPH")
+                .dest("file_graph")
+                .nargs("+")
+                .type(String.class)
+                .help("Graph file, each line format: SOURCE;d1:w1;d2:w2; ... ;dn:wn");
+        
+        try {
+            Namespace res = parser.parseArgs(args);
+            String FileInfo = res.getString("file_out") + ".info";
+            
+            SCCDynamic scc = new SCCDynamic();
+            System.out.println("Reading Graph...");
+            for (String strFile : (List<String>) res.get("file_graph")) {
+                System.out.println("Reading " + strFile + " ...");
+                scc.ImportCSV(strFile, res.getString("delim"), res.getString("sub_delim"));
+            }
+            System.out.println("Read Graph Finished");
+            
+            //System.out.println("Filtering node...");
+            //PageRank.filterNode(linkedList);
+            //System.out.println("Filtering node finished");
+            
+            System.out.println("Computing...");
+            scc.Compute();
+            scc.FindBowTieAfterSCC();
+            System.out.println("Writting INFo...");
+            scc.WriteInfo(FileInfo);
+            System.out.println("Writting Map...");
+            scc.WriteMap(res.getString("file_out"));
+            System.out.println("=== Success ===");
+        } catch (ArgumentParserException e) {
+            parser.handleError(e);
         }
-        //System.out.println("Writing IO...");
-        //scc.WriteInOutLink(new File(FileIO));
-        System.out.println("Computing...");
-        scc.Compute();
-        scc.FindBowTieAfterSCC();
-        System.out.println("Writting INFo...");
-        scc.WriteInfo(FileInfo);
-        System.out.println("Writting Map...");
-        scc.WriteMap(FileOutName);
-        System.out.println("=== Success ===");
     }
 }
