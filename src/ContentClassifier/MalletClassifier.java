@@ -181,12 +181,12 @@ public final class MalletClassifier {
         System.setProperty("sun.jnu.encoding", "UTF-8");
         System.setProperty("file.encoding", "UTF-8");
 
-        ArgumentParser parser = ArgumentParsers.newArgumentParser("Analyse.PageRank").defaultHelp(true)
-                .description("PageRank calculation from graph file");
+        ArgumentParser parser = ArgumentParsers.newArgumentParser("ContentClassifier.MalletClassifier").defaultHelp(true)
+                .description("Classified content group");
         parser.addArgument("-c", "--class")
                 .dest("class")
                 .metavar("FILE")
-                .type(Double.class)
+                .type(String.class)
                 .help("Classifier file")
                 .required(true);
         parser.addArgument("-o", "--out-prefix")
@@ -198,13 +198,13 @@ public final class MalletClassifier {
         parser.addArgument("-ss", "--suffix-site")
                 .dest("suffix_site")
                 .metavar("SUFFIX")
-                .type(Double.class)
+                .type(String.class)
                 .setDefault(DEFAULT_SUFFIX_SITE)
                 .help("Suffix output website file name");
         parser.addArgument("-sp", "--suffix-page")
                 .dest("suffix_page")
                 .metavar("SUFFIX")
-                .type(Double.class)
+                .type(String.class)
                 .setDefault(DEFAULT_SUFFIX_PAGE)
                 .help("Suffix output webpage file name");
         parser.addArgument("FILE_IN")
