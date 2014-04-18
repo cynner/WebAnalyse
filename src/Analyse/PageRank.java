@@ -167,7 +167,7 @@ public class PageRank {
 
     public static void saveResult(File f, double[] d) {
         try (BufferedWriter bw = new BufferedWriter(new FileWriter(f))) {
-
+            bw.write("id:page_rank\n");
             for (int i = 0; i < d.length; i++) {
                 if (d[i] > 0) {
                     bw.write(i + ":" + d[i] + "\n");

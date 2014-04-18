@@ -1,0 +1,3 @@
+./plot-dist-qint.py --nodisplay -f3 -o InDegree.png -t 'In-Degree Distribution' -xl 'In-Degree' -yl 'Number of pages' scc.webpage
+./plot-dist-qint.py --nodisplay -f4 -o OutDegree.png -t 'Out-Degree Distribution' -xl 'Out-Degree' -yl 'Number of pages' scc.webpage
+
