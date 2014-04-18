@@ -9,9 +9,6 @@ package Analyse;
  *
  * @author pramote
  */
-import static Crawler.Main.DefaultWorkingDirectory;
-import com.almworks.sqlite4java.SQLiteConnection;
-import com.almworks.sqlite4java.SQLiteException;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -21,8 +18,6 @@ import java.io.FileReader;
 import java.io.FileWriter;
 //import java.io.FileWriter;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -30,11 +25,9 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import net.sourceforge.argparse4j.ArgumentParsers;
-import net.sourceforge.argparse4j.impl.Arguments;
 import net.sourceforge.argparse4j.inf.ArgumentParser;
 import net.sourceforge.argparse4j.inf.ArgumentParserException;
 import net.sourceforge.argparse4j.inf.Namespace;
-import webanalyse.TestArgument;
 
 public class PageRank {
 
@@ -130,7 +123,6 @@ public class PageRank {
     public static int importCSVFreq(File CSVFile, HashMap<Integer, HashMap<Integer, Double>> linkedList, int prevMaxSize) throws FileNotFoundException {
         HashMap<Integer, Double> SubLink;
         HashMap<Integer, MutableInt> tmpSubLink = new HashMap<>();
-        BufferedReader br = new BufferedReader(new FileReader(CSVFile));
         String Line = null;
         String[] strs, substr;
         Integer source;
@@ -138,7 +130,7 @@ public class PageRank {
         Integer weight;
         int sumWeight;
         int maxSize = prevMaxSize;
-        try {
+        try (BufferedReader br = new BufferedReader(new FileReader(CSVFile))){
             while ((Line = br.readLine()) != null) {
                 strs = Line.split(";");
                 source = Integer.parseInt(strs[0]);
