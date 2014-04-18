@@ -235,6 +235,7 @@ public class PageRank {
 
             System.out.println("Reading CSV...");
             for (String strFile : (List<String>) res.get("GRAPH_FILE")) {
+                System.out.println("Reading " + strFile + " ...");
                 maxSize = PageRank.importCSVFreq(new File(strFile), linkedList, maxSize);
             }
 
