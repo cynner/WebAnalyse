@@ -8,18 +8,18 @@ import argparse
 parser = argparse.ArgumentParser(description='Plot graph distribution.')
 #parser.add_argument('--sumf', dest='accumulate', action='store_const', const=sum, default=max, help='sum the integers (default: find the max)')
 #parser.add_argument('integers', metavar='Ng', type=int, nargs='+',help='an integer for the accumulator')
-parser.add_argument('--cuthead', metavar='Nth', type=int, nargs='?', const=1, default=1, help='cut first Nth rows default 1 [const 1]')
-parser.add_argument('--cuttail', metavar="Nth", type=int, nargs='?', const=1, default=1, help='cut last  Nth rows default 1 [const 1]')
+parser.add_argument('-ch','--cuthead', metavar='Nth', type=int, nargs='?', const=1, default=1, help='cut first Nth rows default 1 [const 1]')
+parser.add_argument('-ct','--cuttail', metavar="Nth", type=int, nargs='?', const=1, default=1, help='cut last  Nth rows default 1 [const 1]')
 parser.add_argument('--nodisplay', action='store_true', help='no gui')
 parser.add_argument('-d', metavar='delim',default=':',help='delimiter default \':\'')
 parser.add_argument('-f', metavar='field_no',type=int,default=1,help='filed no start from 1 default 1')
 parser.add_argument('-s', metavar='Style', default='b.', help='Style default \'b.\'')
-parser.add_argument('-o', metavar='IMG_File', default='dist.png', help='Output png file')
 parser.add_argument('-t', metavar='TITLE',default='',help='Title')
 parser.add_argument('-xl', metavar='x-label',help='x label')
 parser.add_argument('-yl', metavar='y-label',help='y label')
 parser.add_argument('-q', metavar='divisor',default=1, type=float, help='Quantization in int (quotient = dividend / divisor) 1 is default')
 parser.add_argument('-p', metavar='FP_Nth',default=0,type=int, help='Floating Point FP_Nth (FP_Nth may 0,1,2,...) 0 is default')
+parser.add_argument('-o', metavar='img_file', help='Output png file', required=True)
 parser.add_argument('DataFile',help='Input CSV File')
 args = parser.parse_args()
 
@@ -28,6 +28,10 @@ import matplotlib as mpl
 if args.nodisplay:
 	mpl.use('Agg')
 import matplotlib.pyplot as plt
+
+#REMOVE BACKGROUND
+frame = plt.getp(plt.gca(), 'frame')
+frame.set_visible(False)
 
 #print vars(args)
 title = args.t
@@ -79,6 +83,12 @@ y = [dic[i] for i in dic]
 plt.grid(True)
 plt.xscale('log')
 plt.yscale('log')
+plt.title(title, fontsize=24)
+plt.xlabel(xlabel,fontsize=22)
+plt.ylabel(ylabel, fontsize=22)
+plt.tick_params(axis='both', which='major', labelsize=20)
+plt.tick_params(axis='both', which='minor', labelsize=20)
+plt.tight_layout()
 
 #plt.title(r'$\int_0^{\infty} t^{x-1} e^{-t} dt$', fontsize=18)
 #plt.xlabel(r'$\alpha \sim \Gamma \leftarrow (M_{\odot})$',fontsize=17)
