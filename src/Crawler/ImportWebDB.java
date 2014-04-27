@@ -70,7 +70,7 @@ public class ImportWebDB {
                 try {
                     File dbFile = new File(res.getString("database"));
                     db = new SQLiteConnection(dbFile);
-                    db.open();
+                    db.open(true);
                     db.exec(DBDriver.TableConfig.CreateTableWebPageDB); //CREATE TABLE IF NOT EXISTS
                     db.exec("BEGIN;");
                     System.out.println("BEGIN");

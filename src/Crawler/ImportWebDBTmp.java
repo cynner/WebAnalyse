@@ -31,7 +31,7 @@ public class ImportWebDBTmp {
             String[] cols;
            
             try{
-                db.open();
+                db.open(true);
                 db.exec("BEGIN;");
                 System.out.println("BEGIN");
                 raf.readLong();
