@@ -239,12 +239,11 @@ public class SiteCrawler implements Runnable {
                 rafWebDB.seek(0);
                 rafWebDB.writeLong(Long.SIZE);
             }
-            rafWebDB.write(("\"" + Url.replaceAll("\"", "\"\"") + "\"," + (curPageLanguage == null ? "null" : "\"" + curPageLanguage + "\"") + "," + wu.FileSize + "," + wu.CommentSize + "," + wu.ScriptSize + "," + wu.StyleSize + "," + wu.ContentSize + "\n").getBytes("utf-8"));
+            rafWebDB.write(("\"" + Url.replace("\"", "\"\"") + "\"," + (curPageLanguage == null ? "null" : "\"" + curPageLanguage + "\"") + "," + wu.FileSize + "," + wu.CommentSize + "," + wu.ScriptSize + "," + wu.StyleSize + "," + wu.ContentSize + "\n").getBytes("utf-8"));
             pos = rafWebDB.getFilePointer();
             rafWebDB.seek(0);
             rafWebDB.writeLong(pos);
             rafWebDB.seek(pos);
-            //System.out.println("\"" + Url.replaceAll("\"", "\"\"") + "\"," + (lang == null ? "null" : "\"" + lang + "\"") + "," + wu.FileSize + "," + wu.CommentSize + "," + wu.ScriptSize + "," + wu.StyleSize + "," + wu.ContentSize);
         } catch (IOException ex) {
             Logger.getLogger(SiteCrawler.class.getName()).log(Level.SEVERE, null, ex);
         }

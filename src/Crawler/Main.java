@@ -259,8 +259,8 @@ public class Main{
         try {
             Namespace res = parser.parseArgs(args);
             String strWorkDir = res.getString("dir");
-            String TaskName = res.get("TaskName");
-            String strImportFile = res.get("input");
+            String TaskName = res.getString("TaskName");
+            String strImportFile = res.getString("input");
             if (strImportFile != null){
                 // import seed file
                 File fi = new File(strImportFile);

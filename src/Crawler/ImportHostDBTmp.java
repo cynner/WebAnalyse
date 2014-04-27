@@ -23,7 +23,7 @@ import net.sourceforge.argparse4j.inf.Namespace;
  *
  * @author wiwat
  */
-public class ImportHostDB {
+public class ImportHostDBTmp {
     
     public static SQLiteConnection db;
     
@@ -32,7 +32,7 @@ public class ImportHostDB {
         System.setProperty("sun.jnu.encoding", "UTF-8");
         System.setProperty("file.encoding", "UTF-8");
 
-        ArgumentParser parser = ArgumentParsers.newArgumentParser("Crawler.ImportHostDB").defaultHelp(true)
+        ArgumentParser parser = ArgumentParsers.newArgumentParser("Crawler.ImportHostDBTmp").defaultHelp(true)
                 .description("Create or import website Sqlite3 database.");
 
         parser.addArgument("-o", "--database")
@@ -80,8 +80,8 @@ public class ImportHostDB {
                         Line = raf.readLine();
                         cols = Line.split(",");
                         cmd = "UPDATE OR REPLACE website SET status=" + cols[1] + 
-                                ",page_count=" + cols[2] + ",lastupdate=" + cols[3] + 
-                                " WHERE hostname=" + cols[0] + ";";
+                                ",page_count=" + cols[2] + ",lastupdate=\"" + cols[3] + 
+                                "\" WHERE hostname=\"" + cols[0] + "\";";
                         System.out.println(Line);
                         db.exec(cmd);
                     }
@@ -89,19 +89,19 @@ public class ImportHostDB {
                     db.exec("COMMIT;");
                     System.out.println("SUCCESS");
                 } catch (SQLiteException | IOException ex) {
-                    Logger.getLogger(ImportHostDB.class.getName()).log(Level.SEVERE, null, ex);
+                    Logger.getLogger(ImportHostDBTmp.class.getName()).log(Level.SEVERE, null, ex);
                 } finally {
                     db.dispose();
                 }
             } catch (FileNotFoundException ex) {
-                Logger.getLogger(ImportHostDB.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(ImportHostDBTmp.class.getName()).log(Level.SEVERE, null, ex);
             } catch (IOException ex) {
-                Logger.getLogger(ImportHostDB.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(ImportHostDBTmp.class.getName()).log(Level.SEVERE, null, ex);
             }
         } catch (ArgumentParserException e) {
             parser.handleError(e);
         } catch (IOException ex) {
-            Logger.getLogger(ImportHostDB.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(ImportHostDBTmp.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 }

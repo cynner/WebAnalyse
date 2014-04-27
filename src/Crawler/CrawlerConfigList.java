@@ -46,7 +46,7 @@ public class CrawlerConfigList extends CrawlerConfig {
     public CrawlerConfigList(String TaskName, String strWorkingDirectory) throws IOException {
         this.TaskName = TaskName;
         this.strWorkingDirectory = strWorkingDirectory;
-        this.strDirArcGZ = strWorkingDirectory + "/" + subDirArcGZ + "/" + TaskName;
+        this.strDirArcGZ = strWorkingDirectory + "/" + TaskName + "/" + subDirArcGZ ;
         this.fileMergeWebInfo = new File(strWorkingDirectory + "/" + TaskName + "/" + strMergeWebInfo);
         this.fileHostInfo = new File(strWorkingDirectory + "/" + TaskName + "/" + strHostInfo);
         this.fileHostCrawled = new File(strWorkingDirectory + "/" + TaskName + "/" + strHostCrawled);
@@ -165,7 +165,7 @@ public class CrawlerConfigList extends CrawlerConfig {
                     raf.writeLong(pos);
                 }
                 
-                raf.write((HostName + "," + stat.value + "," + page_count + "," + dateFormat.format(new Date()) + "\n").getBytes("utf-8"));
+                raf.write(("\"" + HostName.replace("\"", "\"\"") + "\"," + stat.value + "," + page_count + ",\"" + dateFormat.format(new Date()) + "\"\n").getBytes("utf-8"));
                 pos = raf.getFilePointer();
                 raf.seek(0);
                 raf.writeLong(pos);
