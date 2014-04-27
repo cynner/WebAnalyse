@@ -10,6 +10,14 @@
 <project name="WebAnalyse" default="default" basedir=".">
     <description>Builds, tests, and runs the project WebAnalyse.</description>
     <import file="nbproject/build-impl.xml"/>
+    
+    <target name="-post-jar"> 
+        <copy file="lib/sqlite4java-282/libsqlite4java-android-armv7.so" flatten="true" todir="${dist.dir}/lib"/>
+        <copy file="lib/sqlite4java-282/libsqlite4java-linux-amd64.so" flatten="true" todir="${dist.dir}/lib"/>  
+        <copy file="lib/sqlite4java-282/libsqlite4java-linux-i386.so" flatten="true" todir="${dist.dir}/lib"/>  
+        <copy file="lib/sqlite4java-282/sqlite4java-win32-x64.dll" flatten="true" todir="${dist.dir}/lib"/>  
+        <copy file="lib/sqlite4java-282/sqlite4java-win32-x86.dll" flatten="true" todir="${dist.dir}/lib"/>  
+    </target> 
     <!--
 
     There exist several targets which are by default empty and which can be 
