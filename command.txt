@@ -1,5 +1,7 @@
+./plot-dist-qint.py --nodisplay --cuthead 0 -d':' -f2 -p 8 -o PageRank.png -t 'PageRank Distribution' -xl 'PageRank score' -yl 'Number of pages' pagerank.txt
 ./plot-dist-qint.py --nodisplay -f3 -o InDegree.png -t 'In-Degree Distribution' -xl 'In-Degree' -yl 'Number of pages' scc.webpage
 ./plot-dist-qint.py --nodisplay -f4 -o OutDegree.png -t 'Out-Degree Distribution' -xl 'Out-Degree' -yl 'Number of pages' scc.webpage
+
 ./plot-bar.py -f1 -d' ' -yl 'Number of sites (x$10^3$)' -ch 0 -q 1000 -m map -o class.png ../../../sum.site
 nohup java -jar WebAnalyse.jar ContentClassifier.MalletClassifier -c resource/th.class -o task ../data/crawler/arc/task-00* > nohup.class &
 
