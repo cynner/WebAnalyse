@@ -23,7 +23,7 @@ import net.sourceforge.argparse4j.inf.Namespace;
  *
  * @author wiwat
  */
-public class ImportHostDBTmp {
+public class UpdateSiteDB {
     
     public static SQLiteConnection db;
     
@@ -32,7 +32,7 @@ public class ImportHostDBTmp {
         System.setProperty("sun.jnu.encoding", "UTF-8");
         System.setProperty("file.encoding", "UTF-8");
 
-        ArgumentParser parser = ArgumentParsers.newArgumentParser("Crawler.ImportHostDBTmp").defaultHelp(true)
+        ArgumentParser parser = ArgumentParsers.newArgumentParser("Crawler.ImportHostDB").defaultHelp(true)
                 .description("Create or import website Sqlite3 database.");
 
         parser.addArgument("-o", "--database")
@@ -66,42 +66,43 @@ public class ImportHostDBTmp {
             CrawlerConfigList cfg = new CrawlerConfigList(TaskName, strWorkDir);
 
             try (MyRandomAccessFile raf = new MyRandomAccessFile(cfg.fileHostInfo, "r")) {
-                long length = raf.readLong();
+                long length;
+                int i,lastcol;
                 String Line, cmd;
-                try {
-                    File dbFile = new File(res.getString("database"));
-                    String[] cols;
-                    db = new SQLiteConnection(dbFile);
-                    db.open(true);
-                    db.exec(DBDriver.TableConfig.CreateTableWebSiteDB); //CREATE TABLE IF NOT EXISTS
-                    db.exec("BEGIN;");
-                    System.out.println("BEGIN");
-                    while (raf.getFilePointer() < length) {
-                        Line = raf.readLine();
-                        cols = Line.split(",");
-                        cmd = "UPDATE OR REPLACE website SET status=" + cols[1] + 
-                                ",page_count=" + cols[2] + ",lastupdate=\"" + cols[3] + 
-                                "\" WHERE hostname=\"" + cols[0] + "\";";
-                        System.out.println(Line);
-                        db.exec(cmd);
-                    }
-                    System.out.println("COMMIT");
-                    db.exec("COMMIT;");
-                    System.out.println("SUCCESS");
-                } catch (SQLiteException | IOException ex) {
-                    Logger.getLogger(ImportHostDBTmp.class.getName()).log(Level.SEVERE, null, ex);
-                } finally {
-                    db.dispose();
+                String[] cols, colnames;
+                File dbFile = new File(res.getString("database"));
+                db = new SQLiteConnection(dbFile);
+                db.open(true);
+                db.exec(DBDriver.TableConfig.CreateTableWebSiteDB); //CREATE TABLE IF NOT EXISTS
+                db.exec("BEGIN;");
+                System.out.println("BEGIN");
+                length = raf.readLong();
+                colnames = raf.readLine().split(",");
+                lastcol = colnames.length - 1;
+                while (raf.getFilePointer() < length) {
+                    Line = raf.readLine();
+                    cols = Line.split(",");
+                    cmd = "UPDATE OR IGNORE website SET ";
+                    for(i = 1; i < lastcol; i++)
+                        cmd += colnames[i] + "=" + cols[i] + ",";
+                    cmd += colnames[lastcol] + "=" + cols[lastcol];
+                    cmd += " WHERE " + colnames[0] + "=" + cols[0] + ";";
+                    db.exec(cmd);
                 }
+                System.out.println("COMMIT");
+                db.exec("COMMIT;");
+                System.out.println("SUCCESS");
             } catch (FileNotFoundException ex) {
-                Logger.getLogger(ImportHostDBTmp.class.getName()).log(Level.SEVERE, null, ex);
-            } catch (IOException ex) {
-                Logger.getLogger(ImportHostDBTmp.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(UpdateSiteDB.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (SQLiteException | IOException ex) {
+                Logger.getLogger(UpdateSiteDB.class.getName()).log(Level.SEVERE, null, ex);
+            } finally {
+                db.dispose();
             }
         } catch (ArgumentParserException e) {
             parser.handleError(e);
         } catch (IOException ex) {
-            Logger.getLogger(ImportHostDBTmp.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(UpdateSiteDB.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 }

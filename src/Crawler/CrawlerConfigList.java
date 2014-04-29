@@ -8,10 +8,8 @@ package Crawler;
 
 import ArcFileUtils.BGZFCompress;
 import ArcFileUtils.MyRandomAccessFile;
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -19,7 +17,6 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.regex.Pattern;
 
 /**
  * Included crawler structure
@@ -36,6 +33,7 @@ public class CrawlerConfigList extends CrawlerConfig {
     public static final String strMergeWebInfo = "webpageinfo.txt";
     public static final String strHostInfo = "websiteinfo.txt";
     public static final String strHostCrawled = "websitecrawled.txt";
+    public static final String strSiteDBColumnHeader = "hostname,status,page_count,lastupdate";
     public final String TaskName;
     public final File fileMergeWebInfo;
     public final File fileHostInfo;
@@ -152,17 +150,20 @@ public class CrawlerConfigList extends CrawlerConfig {
     }
     
     public void UpdateHostInfo(String HostName, Status stat, int page_count){
-        //hostname, ip , location , page_count , status , log_id , lastupdate)
+        //hostname,status,page_count,lastupdate
         Long pos;
         synchronized (fileHostInfo) {
             boolean fileExists = fileHostInfo.exists();
             try (MyRandomAccessFile raf = new MyRandomAccessFile(fileHostInfo, "rw")) {
                 if (fileExists) {
+                    raf.seek(0);
                     pos = raf.readLong();
                     raf.seek(pos);
                 } else {
-                    pos = (long) (Long.SIZE / 8);
-                    raf.writeLong(pos);
+                    raf.seek(0);
+                    byte[] b = (strSiteDBColumnHeader + "\n").getBytes();
+                    raf.writeLong((long) (Long.SIZE + b.length));
+                    raf.write(b);
                 }
                 
                 raf.write(("\"" + HostName.replace("\"", "\"\"") + "\"," + stat.value + "," + page_count + ",\"" + dateFormat.format(new Date()) + "\"\n").getBytes("utf-8"));

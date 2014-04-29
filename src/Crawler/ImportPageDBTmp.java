@@ -22,7 +22,7 @@ import net.sourceforge.argparse4j.inf.Namespace;
  *
  * @author wiwat
  */
-public class ImportWebDB {
+public class ImportPageDBTmp {
 
     public static SQLiteConnection db;
 
@@ -65,38 +65,35 @@ public class ImportWebDB {
             CrawlerConfigList cfg = new CrawlerConfigList(TaskName, strWorkDir);
 
             try (MyRandomAccessFile raf = new MyRandomAccessFile(cfg.fileMergeWebInfo, "r")) {
-                long length = raf.readLong();
+                long length;
                 String Line, cmd;
-                try {
-                    File dbFile = new File(res.getString("database"));
-                    db = new SQLiteConnection(dbFile);
-                    db.open(true);
-                    db.exec(DBDriver.TableConfig.CreateTableWebPageDB); //CREATE TABLE IF NOT EXISTS
-                    db.exec("BEGIN;");
-                    System.out.println("BEGIN");
-                    while (raf.getFilePointer() < length) {
-                        Line = raf.readLine();
-                        cmd = "INSERT OR REPLACE INTO webpage(url,language,file_size,comment_size,js_size,style_size,content_size) VALUES(" + Line + ");";
-                        System.out.println(Line);
-                        db.exec(cmd);
-                    }
-                    System.out.println("COMMIT");
-                    db.exec("COMMIT;");
-                    System.out.println("SUCCESS");
-                } catch (SQLiteException | IOException ex) {
-                    Logger.getLogger(ImportWebDB.class.getName()).log(Level.SEVERE, null, ex);
-                } finally {
-                    db.dispose();
+                File dbFile = new File(res.getString("database"));
+                db = new SQLiteConnection(dbFile);
+                db.open(true);
+                db.exec(DBDriver.TableConfig.CreateTableWebPageDB); //CREATE TABLE IF NOT EXISTS
+                db.exec("BEGIN;");
+                System.out.println("BEGIN");
+                length = raf.readLong();
+                while (raf.getFilePointer() < length) {
+                    Line = raf.readLine();
+                    cmd = "INSERT OR REPLACE INTO webpage(url,language,file_size,comment_size,js_size,style_size,content_size) VALUES(" + Line + ");";
+                    System.out.println(Line);
+                    db.exec(cmd);
                 }
+                System.out.println("COMMIT");
+                db.exec("COMMIT;");
+                System.out.println("SUCCESS");
             } catch (FileNotFoundException ex) {
-                Logger.getLogger(ImportWebDB.class.getName()).log(Level.SEVERE, null, ex);
-            } catch (IOException ex) {
-                Logger.getLogger(ImportWebDB.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(ImportPageDBTmp.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (SQLiteException | IOException ex) {
+                Logger.getLogger(ImportPageDBTmp.class.getName()).log(Level.SEVERE, null, ex);
+            } finally {
+                db.dispose();
             }
         } catch (ArgumentParserException e) {
             parser.handleError(e);
         } catch (IOException ex) {
-            Logger.getLogger(ImportWebDB.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(ImportPageDBTmp.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 }

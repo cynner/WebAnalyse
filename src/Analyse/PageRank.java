@@ -9,14 +9,13 @@ package Analyse;
  *
  * @author pramote
  */
+import Types.MutableInt;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
-//import java.io.BufferedWriter;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
-//import java.io.FileWriter;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -30,19 +29,6 @@ import net.sourceforge.argparse4j.inf.ArgumentParserException;
 import net.sourceforge.argparse4j.inf.Namespace;
 
 public class PageRank {
-
-    private static class MutableInt {
-
-        public int value; // note that we start at 1 since we're counting
-
-        public MutableInt() {
-            value = 1;
-        }
-
-        public MutableInt(int value) {
-            this.value = value;
-        }
-    }
 
     /*
      * linkedlist : webpage-i <interger> ==> webpage <j> with score <double>

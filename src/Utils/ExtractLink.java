@@ -54,7 +54,7 @@ public class ExtractLink {
     
     public void runExtractLinkDir(File Dir,File FSkipList) throws IOException{
         
-        HashSet<String> SkipList = new HashSet<>();
+        HashSet <String> SkipList = new HashSet<>();
         HashMap <String,MutableInt> HOSTs = new HashMap<>();
         HashMap <String,MutableInt> URLs;
         MyURL src;

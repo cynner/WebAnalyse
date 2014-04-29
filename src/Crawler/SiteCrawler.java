@@ -28,8 +28,6 @@ import ArcFileUtils.WebUtils;
 import Crawler.CrawlerConfig.Status;
 import LanguageUtils.LanguageDetector;
 import com.almworks.sqlite4java.SQLiteQueue;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  *
@@ -56,7 +54,7 @@ public class SiteCrawler implements Runnable {
     public String HostIP;
 
     public MyRandomAccessFile rafWebDB;
-    public static int WebDBColumnWidth = 7;
+    public static String strWebDBColumnHeader = "url,language,file_size,comment_size,js_size,style_size,content_size";
     public WebArcWriter waw = null;
     public WebArcRecord record;
     public boolean PrintEnqueue = false;
@@ -237,7 +235,9 @@ public class SiteCrawler implements Runnable {
         try {
             if (rafWebDB.getFilePointer() <= 0){
                 rafWebDB.seek(0);
-                rafWebDB.writeLong(Long.SIZE);
+                byte[] b = (strWebDBColumnHeader + "\n").getBytes();
+                rafWebDB.writeLong(Long.SIZE + b.length);
+                rafWebDB.write(b);
             }
             rafWebDB.write(("\"" + Url.replace("\"", "\"\"") + "\"," + (curPageLanguage == null ? "null" : "\"" + curPageLanguage + "\"") + "," + wu.FileSize + "," + wu.CommentSize + "," + wu.ScriptSize + "," + wu.StyleSize + "," + wu.ContentSize + "\n").getBytes("utf-8"));
             pos = rafWebDB.getFilePointer();
@@ -303,6 +303,7 @@ public class SiteCrawler implements Runnable {
         String Line;
         try (WebArcReader war = new WebArcReader(ArcFile, "utf-8")) {
             // Read Update db
+            rafWebDB.seek(0);
             dbPos = rafWebDB.readLong();
             //rafWebDB.seek(dbPos);
 
