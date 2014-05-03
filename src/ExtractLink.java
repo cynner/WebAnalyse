@@ -4,9 +4,10 @@
  * and open the template in the editor.
  */
 
-package Crawler;
+
 
 import ArcFileUtils.ArcFilenameFilter;
+import ArcFileUtils.ArcReader;
 import ArcFileUtils.ArcRecord;
 import ArcFileUtils.ArcWriter;
 import ArcFileUtils.MyRandomAccessFile;
@@ -15,8 +16,10 @@ import Types.MutableInt;
 import com.almworks.sqlite4java.SQLiteConnection;
 import com.almworks.sqlite4java.SQLiteException;
 import com.almworks.sqlite4java.SQLiteStatement;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Date;
 import java.util.HashMap;
@@ -30,6 +33,8 @@ import net.sourceforge.argparse4j.inf.ArgumentParserException;
 import net.sourceforge.argparse4j.inf.Namespace;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
+import Crawler.MyURL;
+import Crawler.CrawlerConfigList;
 
 /**
  *
@@ -42,8 +47,8 @@ import org.jsoup.nodes.Element;
  * |<-long->|<-int->|<-Int->|<-Int>|<Int>|<--Int-->|<-int>|...|<--Int-->|<-Int->|<-Int>|<Int>|<-Int-->|...|<--Int-->|<-Int->|...|
  * 
  * HIST format
- * |<length>|<len_page1>|<len_site1>|<len_remain1>|<str_file1>|...|
- * |<-long->|<--long--->|<--long--->|<---long---->|<-~-~-~-~->|...|
+ * |<length>|<len_page1>|<len_site1>|<len_page_remain1>|<len_site_remain1>|<str_file1>|...|
+ * |<-long->|<--long--->|<--long--->|<------long------>|<------long------>|<-~-~-~-~->|...|
  * 
  * ARC remain format in record
  * <URL1><Tab><Count1><newLine>
@@ -65,23 +70,25 @@ public class ExtractLink {
     //public static final String DEFAULT_SUFFIX_BIN = ".bin";
     public static final String DEFAULT_SUFFIX_CSV = ".csv";
     public static final String DEFAULT_SUFFIX_ARC = ".arc";
+    public static final String DEFAULT_SUFFIX_TEXT = ".txt";
     
     
-    private final File OutSiteLink, OutPageLink, OutHistFile, OutRemain;
+    private final File OutSiteLink, OutPageLink, OutHistFile, OutPageRemain,OutSiteRemain;
     
     private final HashSet <String> SkipList = new HashSet<>();
     
     private final SQLiteConnection dbPage;
     private final SQLiteConnection dbSite;
     
-    private long posSite=0, posPage=0, posRemain=0, posHist;
+    private long posSite=0, posPage=0, posPageRemain=0, posSiteRemain=0, posHist;
     
-    public ExtractLink(File dbPage, File dbSite, File OutPageLink, File OutSiteLink, File OutPageRemain, File OutHistFile){
+    public ExtractLink(File dbPage, File dbSite, File OutPageLink, File OutSiteLink, File OutPageRemain, File OutSiteRemain, File OutHistFile){
         this.dbPage = new SQLiteConnection(dbPage);
         this.dbSite = new SQLiteConnection(dbSite);
         this.OutPageLink = OutPageLink;
         this.OutSiteLink = OutSiteLink;
-        this.OutRemain = OutPageRemain;
+        this.OutPageRemain = OutPageRemain;
+        this.OutSiteRemain = OutSiteRemain;
         this.OutHistFile = OutHistFile;
     }
     
@@ -92,7 +99,8 @@ public class ExtractLink {
                 while (br.getFilePointer() < posHist) {
                     posPage = br.readLong();
                     posSite = br.readLong();
-                    posRemain = br.readLong();
+                    posPageRemain = br.readLong();
+                    posSiteRemain = br.readLong();
                     SkipList.add(br.readUTF());
                 }
             } catch (FileNotFoundException ex) {
@@ -111,7 +119,8 @@ public class ExtractLink {
         
         try (MyRandomAccessFile bwPageLink = new MyRandomAccessFile(OutPageLink,"rw");
                 MyRandomAccessFile bwSiteLink = new MyRandomAccessFile(OutSiteLink,"rw");
-                ArcWriter awRemain = new ArcWriter(OutRemain, posRemain);
+                ArcWriter awPageRemain = new ArcWriter(OutPageRemain, posPageRemain);
+                ArcWriter awSiteRemain = new ArcWriter(OutSiteRemain, posSiteRemain);
                 MyRandomAccessFile bwHistFile = new MyRandomAccessFile(OutHistFile,"rw")){
             
             dbPage.openReadonly();
@@ -141,15 +150,16 @@ public class ExtractLink {
                                 srcDomain = src.getHost();
                             }
                             URLs = ExtractWebPageNHostCount(src, war.Record.Doc, HOSTs);
-                            WritePageLink(bwPageLink, awRemain, src, URLs);
+                            WritePageLink(bwPageLink, awPageRemain, src, URLs);
                         } catch (Exception ex) {
                             Logger.getLogger(Utils.ExtractLink.class.getName()).log(Level.SEVERE, null, ex);
                         }
                     }
-                    WriteSiteLink(bwSiteLink, srcDomain, HOSTs);
+                    WriteSiteLink(bwSiteLink, awSiteRemain, srcDomain, HOSTs);
                     bwHistFile.writeLong(posPage);
                     bwHistFile.writeLong(posSite);
-                    bwHistFile.writeLong(posRemain);
+                    bwHistFile.writeLong(posPageRemain);
+                    bwHistFile.writeLong(posSiteRemain);
                     bwHistFile.writeUTF(f.getName());
                     posHist = bwHistFile.getFilePointer();
                     bwHistFile.seek(0);
@@ -208,7 +218,7 @@ public class ExtractLink {
                 }
                 bwPageLink.write("\n".getBytes());
                 posPage = bwPageLink.getFilePointer();
-                posRemain = awRemain.bw.getFilePointer();
+                posPageRemain = awRemain.bw.getFilePointer();
             } else {
                 st.dispose();
             }
@@ -217,12 +227,13 @@ public class ExtractLink {
         }
     }
 
-    private void WriteSiteLink(MyRandomAccessFile bwSiteLink, String srcDomain, HashMap<String, MutableInt> HOSTs) {
+    private void WriteSiteLink(MyRandomAccessFile bwSiteLink, ArcWriter awRemain, String srcDomain, HashMap<String, MutableInt> HOSTs) {
         String srcID, dstID;
         SQLiteStatement st;
         try {
             st = dbSite.prepare("SELECT id FROM website WHERE hostname = '" + srcDomain.replaceAll("'", "''") + "';");
             if (st.step()) {
+                String strRemain = "";
                 srcID = st.columnString(0);
                 st.dispose();
                 bwSiteLink.write(srcID.getBytes());
@@ -232,6 +243,9 @@ public class ExtractLink {
                         if (st.step()) {
                             dstID = st.columnString(0);
                             bwSiteLink.write((";" + dstID + ":" + host.getValue().value).getBytes());
+                        } else {
+                            strRemain += host.getKey() + "\t" + host.getValue().value + "\n";
+                            
                         }
                     } catch (SQLiteException | IOException ex) {
                         Logger.getLogger(Utils.ExtractLink.class.getName()).log(Level.SEVERE, null, ex);
@@ -239,8 +253,18 @@ public class ExtractLink {
                         st.dispose();
                     }
                 }
+                if(!strRemain.isEmpty()){
+                    ArcRecord ar = new ArcRecord();
+                    ar.ArchiveContent = strRemain;
+                    ar.ArchiveContentType = "text/plain";
+                    ar.ArchiveDate = new Date();
+                    ar.IPAddress = "0.0.0.0";
+                    ar.URL = srcDomain;
+                    awRemain.WriteRecord(ar);
+                }
                 bwSiteLink.write("\n".getBytes());
                 posSite = bwSiteLink.getFilePointer();
+                posSiteRemain = awRemain.bw.getFilePointer();
             } else {
                 st.dispose();
             }
@@ -279,6 +303,24 @@ public class ExtractLink {
             }
         }
         return URLs;
+    }
+    
+    public void ExtractRemainSeedSite(File Output){
+        String[] data,tmp;
+        HashSet<String> UniqSite = new HashSet<>();
+        try(ArcReader ar = new ArcReader(OutSiteRemain);
+                BufferedWriter bw = new BufferedWriter(new FileWriter(Output))){
+            while(ar.Next()){
+                data = ar.Record.ArchiveContent.split("\n");
+                for(String datum : data){
+                    tmp = datum.split("\t");
+                    if(UniqSite.add(tmp[0]))
+                        bw.write(tmp[0] + "\n");
+                }
+            }
+        } catch (IOException ex) {
+            Logger.getLogger(ExtractLink.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
     
     /*
@@ -402,6 +444,12 @@ public class ExtractLink {
                 .type(String.class)
                 .setDefault(DEFAULT_SUFFIX_ARC)
                 .help("Suffix remaining link output arc");
+        parser.addArgument("-st", "--suffix-text")
+                .dest("suffix_text")
+                .metavar("SUFFIX")
+                .type(String.class)
+                .setDefault(DEFAULT_SUFFIX_TEXT)
+                .help("Suffix text file for remaining seed site");
         //parser.addArgument("-m")
         //        .dest("memory")
         //        .action(Arguments.storeTrue())
@@ -417,16 +465,22 @@ public class ExtractLink {
             String TaskName = res.getString("TaskName");
             File OutPageLink = new File(res.getString("out_prefix") + res.getString("suffix_page") + res.getString("suffix_csv"));
             File OutSiteLink = new File(res.getString("out_prefix") + res.getString("suffix_site") + res.getString("suffix_csv"));
-            File OutRemainArc = new File(res.getString("out_prefix") + res.getString("suffix_arc"));
+            File OutPageRemainArc = new File(res.getString("out_prefix") + res.getString("suffix_page") + res.getString("suffix_arc"));
+            File OutSiteRemainArc = new File(res.getString("out_prefix") + res.getString("suffix_site") + res.getString("suffix_arc"));
+            File OutSiteRemainTxt = new File(res.getString("out_prefix") + res.getString("suffix_site") + res.getString("suffix_text"));
             File OutHistFile = new File(res.getString("out_prefix") + res.getString("suffix_hist"));
             
             CrawlerConfigList cfg = new CrawlerConfigList(TaskName, strWorkDir);
             
-            
             ExtractLink el = new ExtractLink(new File(res.getString("pagedb")), 
-                    new File(res.getString("sitedb")), OutPageLink, OutSiteLink, OutRemainArc, OutHistFile);
+                    new File(res.getString("sitedb")), OutPageLink, OutSiteLink, 
+                    OutPageRemainArc, OutSiteRemainArc, OutHistFile);
             el.loadHistFile();
+            System.out.println("Extract link to csv ...");
             el.DirExtractAll2CSV(new File(cfg.strDirArcGZ));
+            System.out.println("Writing Next Seed to " + OutSiteRemainTxt.getName() + " ...");
+            el.ExtractRemainSeedSite(OutSiteRemainTxt);
+            System.out.println("Success.");
         } catch (ArgumentParserException e) {
             parser.handleError(e);
         } catch (IOException ex) {
