@@ -17,12 +17,12 @@ import java.util.logging.Logger;
  * @author Malang
  */
 public class TableConfig {
-    public static final String FileNameWebSiteDB = "resource/crawler.sqlite3";
-    public static final String FileNameWebPageDB = "resource/webpage.sqlite3";
+    public static final String FileNameWebSiteDB = "data/website.sqlite3";
+    public static final String FileNameWebPageDB = "data/webpage.sqlite3";
     public static final File FileWebSiteDB = new File(FileNameWebSiteDB);
     public static final File FileWebPageDB = new File(FileNameWebPageDB);
-    public static final String CreateTableWebSiteDB = "CREATE TABLE IF NOT EXISTS website (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, hostname VARCHAR(255) UNIQUE NOT NULL, ip VARCHAR(40), location VARCHAR(2), page_count INTEGER, status TINYINT, lastupdate DATETIME);";
-    public static final String CreateTableWebPageDB = "CREATE TABLE IF NOT EXISTS webpage (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, url VARCHAR(2048) UNIQUE NOT NULL, language VARCHAR(2), file_size INTEGER, comment_size INTEGER, js_size INTEGER, style_size INTEGER, content_size INTEGER, indegree INTEGER, outdegree INTEGER, pagerank DOUBLE, title_length INTEGER, title_max_freq INTEGER, content_max_freq INTEGER, content_length INTEGER, scc_no INTEGER, category VARCHAR(16));";
+    public static final String CreateTableWebSiteDB = "CREATE TABLE IF NOT EXISTS website (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, hostname VARCHAR(255) UNIQUE NOT NULL, ip VARCHAR(40), location VARCHAR(2), language VARCHAR(2), category VARCHAR(16), page_count INTEGER, status TINYINT, lastupdate DATETIME);";
+    public static final String CreateTableWebPageDB = "CREATE TABLE IF NOT EXISTS webpage (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, url VARCHAR(2048) UNIQUE NOT NULL, language VARCHAR(2), file_size INTEGER, comment_size INTEGER, js_size INTEGER, style_size INTEGER, content_size INTEGER, indegree INTEGER, outdegree INTEGER, pagerank DOUBLE, scc_no INTEGER, category VARCHAR(16));";
     public static void main(String[] args){
         createAllDB();
     }

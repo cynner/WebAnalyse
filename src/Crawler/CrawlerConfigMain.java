@@ -37,12 +37,13 @@ public class CrawlerConfigMain extends CrawlerConfig implements AutoCloseable{
     }
     
    @Override
-    public void Finishing(SiteCrawler s){
+    public void CrawlerFinishing(SiteCrawler s){
         dumpWebDB(s.WebDBFile);
         BGZFCompress.Compress(s.ArcFile, new File(s.ArcFile.getAbsolutePath() + ".gz"));
         s.ArcFile.delete();
         UpdatePageCount(s.HostName, s.URLLoaded.size(), CrawlerConfig.Status.Finished);
     }
+    
     
     
     @Override
@@ -89,6 +90,11 @@ public class CrawlerConfigMain extends CrawlerConfig implements AutoCloseable{
         } catch (InterruptedException ex) {
             Logger.getLogger(CrawlerConfig.class.getName()).log(Level.SEVERE, null, ex);
         }
+    }
+
+    @Override
+    public void CheckerFinishing(SiteCrawler s) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
  
     

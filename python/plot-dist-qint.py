@@ -94,10 +94,6 @@ plt.tight_layout()
 #plt.xlabel(r'$\alpha \sim \Gamma \leftarrow (M_{\odot})$',fontsize=17)
 #plt.ylabel(r'Text in Computer Modern font', fontsize=17)
 
-plt.title(title, fontsize=18)
-plt.xlabel(xlabel,fontsize=14)
-plt.ylabel(ylabel, fontsize=14)
-
 # Create the plot
 #plt.plot(x,y)
 #plt.scatter(xinl,yinl)

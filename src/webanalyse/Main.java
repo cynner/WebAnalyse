@@ -14,6 +14,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Map;
+import java.util.TimeZone;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -35,6 +36,8 @@ public class Main {
         // SET PROPERTIES
         System.setProperty("sun.jnu.encoding", "UTF-8");
         System.setProperty("file.encoding", "UTF-8");
+        System.setProperty("java.net.preferIPv4Stack" , "true");
+        TimeZone.setDefault(TimeZone.getTimeZone("GMT"));
         
         if(args.length > 0) {
             Class<?> cls = Class.forName(args[0]);

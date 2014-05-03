@@ -76,9 +76,8 @@ public class ImportPageDBTmp {
                 length = raf.readLong();
                 while (raf.getFilePointer() < length) {
                     Line = raf.readLine();
-                    cmd = "INSERT OR REPLACE INTO webpage(url,language,file_size,comment_size,js_size,style_size,content_size) VALUES(" + Line + ");";
-                    System.out.println(Line);
-                    db.exec(cmd);
+                    db.exec("INSERT OR IGNORE INTO webpage(url,language,file_size,comment_size,js_size,style_size,content_size) VALUES(" + Line +");");
+                    //DBDriver.SQlite3.InsertORUpdate(db, "webpage", "url,language,file_size,comment_size,js_size,style_size,content_size", Line);
                 }
                 System.out.println("COMMIT");
                 db.exec("COMMIT;");

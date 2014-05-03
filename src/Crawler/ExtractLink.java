@@ -120,6 +120,9 @@ public class ExtractLink {
             bwPageLink.seek(posPage);
             bwSiteLink.seek(posSite);
             bwHistFile.seek(posHist);
+            if(posHist == 0){
+                bwHistFile.writeLong(Long.SIZE);
+            }
             
             System.out.println("===Start runExtractLinkDir===");
             
@@ -186,7 +189,7 @@ public class ExtractLink {
                             dstID = st.columnString(0);
                             bwPageLink.write((";" + dstID + ":" + url.getValue().value).getBytes() );
                         } else {
-                            strRemain += url.getKey() + "\t" + url.getValue() + "\n";
+                            strRemain += url.getKey() + "\t" + url.getValue().value + "\n";
                         }
                     } catch (SQLiteException | IOException ex) {
                         Logger.getLogger(Utils.ExtractLink.class.getName()).log(Level.SEVERE, null, ex);
@@ -379,7 +382,7 @@ public class ExtractLink {
                 .dest("suffix_hist")
                 .metavar("SUFFIX")
                 .type(String.class)
-                .setDefault(DEFAULT_SUFFIX_PAGE)
+                .setDefault(DEFAULT_SUFFIX_HIST)
                 .help("Suffix store converted history file name");
         //parser.addArgument("-sb", "--suffix-bin")
         //        .dest("suffix_bin")
@@ -412,36 +415,18 @@ public class ExtractLink {
             Namespace res = parser.parseArgs(args);
             String strWorkDir = res.getString("dir");
             String TaskName = res.getString("TaskName");
-
+            File OutPageLink = new File(res.getString("out_prefix") + res.getString("suffix_page") + res.getString("suffix_csv"));
+            File OutSiteLink = new File(res.getString("out_prefix") + res.getString("suffix_site") + res.getString("suffix_csv"));
+            File OutRemainArc = new File(res.getString("out_prefix") + res.getString("suffix_arc"));
+            File OutHistFile = new File(res.getString("out_prefix") + res.getString("suffix_hist"));
+            
             CrawlerConfigList cfg = new CrawlerConfigList(TaskName, strWorkDir);
-
-            try (MyRandomAccessFile raf = new MyRandomAccessFile(cfg.fileMergeWebInfo, "r")) {
-                long length;
-                String Line, cmd, cols;
-                File dbFile = new File(res.getString("database"));
-                db = new SQLiteConnection(dbFile);
-                db.open(true);
-                db.exec(DBDriver.TableConfig.CreateTableWebPageDB); //CREATE TABLE IF NOT EXISTS
-                db.exec("BEGIN;");
-                System.out.println("BEGIN");
-                length = raf.readLong();
-                cols = raf.readLine();
-                while (raf.getFilePointer() < length) {
-                    Line = raf.readLine();
-                    cmd = "INSERT OR REPLACE INTO webpage(" + cols + ") VALUES(" + Line + ");";
-                    System.out.println(Line);
-                    db.exec(cmd);
-                }
-                System.out.println("COMMIT");
-                db.exec("COMMIT;");
-                System.out.println("SUCCESS");
-            } catch (FileNotFoundException ex) {
-                Logger.getLogger(ExtractLink.class.getName()).log(Level.SEVERE, null, ex);
-            } catch (SQLiteException | IOException ex) {
-                Logger.getLogger(ExtractLink.class.getName()).log(Level.SEVERE, null, ex);
-            } finally {
-                db.dispose();
-            }
+            
+            
+            ExtractLink el = new ExtractLink(new File(res.getString("pagedb")), 
+                    new File(res.getString("sitedb")), OutPageLink, OutSiteLink, OutRemainArc, OutHistFile);
+            el.loadHistFile();
+            el.DirExtractAll2CSV(new File(cfg.strDirArcGZ));
         } catch (ArgumentParserException e) {
             parser.handleError(e);
         } catch (IOException ex) {

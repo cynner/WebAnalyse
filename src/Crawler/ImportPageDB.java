@@ -77,9 +77,8 @@ public class ImportPageDB {
                 cols = raf.readLine();
                 while (raf.getFilePointer() < length) {
                     Line = raf.readLine();
-                    cmd = "INSERT OR REPLACE INTO webpage(" + cols + ") VALUES(" + Line + ");";
-                    System.out.println(Line);
-                    db.exec(cmd);
+                    db.exec("INSERT OR IGNORE INTO webpage(" + cols + ") VALUES(" + Line +");");
+                    //DBDriver.SQlite3.InsertORUpdate(db, "webpage", cols, Line);
                 }
                 System.out.println("COMMIT");
                 db.exec("COMMIT;");

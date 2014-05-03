@@ -41,10 +41,12 @@ public abstract class CrawlerConfig {
     public static final String DefaultRegAcceptedExt = "(\\.(?i)(html?|aspx?|php)|/)$";
     public static final String DefaultRegAcceptedPre = "^.*";
     public static final Pattern DefaultPatAcceptedPath = Pattern.compile("^.*(\\.(?i)(html?|aspx?|php)|/)$");
+    public static final int DefaultMaxPreCrawl = 3;
 
     public Pattern patAcceptedPath = DefaultPatAcceptedPath;
     
-    public abstract void Finishing(SiteCrawler s);
+    public abstract void CrawlerFinishing(SiteCrawler s);
+    public abstract void CheckerFinishing(SiteCrawler s);
     
     public abstract boolean isAccept(SiteCrawler s);
 }

@@ -45,7 +45,6 @@ public class LanguageDetector {
     }
     
     public static String Detect(String Content){
-        init();
         String lang = null;
         try {
             if(Content != null && Content.length() >= 3){

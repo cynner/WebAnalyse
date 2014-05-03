@@ -8,18 +8,13 @@ import ArcFileUtils.MyRandomAccessFile;
 import ArcFileUtils.WebArcReader;
 import ArcFileUtils.WebArcRecord;
 import ArcFileUtils.WebArcWriter;
-import java.io.DataInputStream;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
-import java.util.TimeZone;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import net.sf.samtools.util.BlockCompressedOutputStream;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
@@ -37,8 +32,6 @@ public class SiteCrawler implements Runnable {
 
     public SQLiteQueue dbq;
 
-    public boolean isSetTimeZone = false;
-    public static String MyIP = GetMyIP();
     public static String UserAgent = "princeofvamp@gmail.com";
     public String HostName;
     public ArrayList<String> URLQueue = new ArrayList<>();
@@ -48,6 +41,7 @@ public class SiteCrawler implements Runnable {
     private Robotstxt robots;
     //private BufferedWriter bw;
     private boolean isAppend = true;
+    private final boolean isCheckedOnly;
     //private boolean isOpenFile = false;
     public File ArcFile;
     public File WebDBFile;
@@ -64,69 +58,70 @@ public class SiteCrawler implements Runnable {
     public String curPageLanguage;
     
     private final WebUtils wu = new WebUtils();
-
-    public static String GetMyIP() {
-        String s = null;
-        try {
-            s = InetAddress.getLocalHost().getHostAddress();
-        } catch (UnknownHostException ex) {
-            System.err.println("Unknown Local IP");
-        }
-        return s;
+    
+    
+    public String SiteLang;
+    public String SiteLocale;
+    
+    
+    public SiteCrawler(String HostName, CrawlerConfig crawlConf){
+        this.isCheckedOnly = true;
+        this.HostName = HostName;
+        this.SiteLang = null;
+        this.SiteLocale = null;
+        this.crawlConf = crawlConf;
     }
 
     public SiteCrawler(String HostName, String HostIP, File ArcFile, File InfoFile, CrawlerConfig crawlConf, boolean isAppend) {
+        this.isCheckedOnly = false;
         this.HostName = HostName;
         this.HostIP = HostIP;
         this.isAppend = isAppend;
         this.crawlConf = crawlConf;
         this.ArcFile = ArcFile;
         this.WebDBFile = InfoFile;
-        
-        if (!isSetTimeZone) {
-            TimeZone.setDefault(TimeZone.getTimeZone("GMT"));
-            isSetTimeZone = true;
-        }
-
-        if (HostIP != null) {
-            this.HostIP = HostIP;
-        } else {
+    }
+    
+    
+    public void CheckIP(boolean CheckLocale){
+        if (this.HostIP == null) {
             try {
                 InetAddress address = InetAddress.getByName(HostName);
                 this.HostIP = address.getHostAddress();
+                if (CheckLocale) {
+                    this.SiteLocale = GeoIP.IP2ISOCountry(this.HostIP);
+                }
             } catch (UnknownHostException ex) {
                 this.HostIP = null;
+                Logger.getLogger(SiteCrawler.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
-        
     }
 
-    /*
-     public SiteCrawler(String HostName, String DirName, int MaxPage, String AcceptOnlyPrefixPath, boolean isAppend) {
-     this(HostName, null, new File(DirName + "/crawl-" + HostName + ".arc"), MaxPage, AcceptOnlyPrefixPath, isAppend, null, Mode.Crawl);
-     }
-    
-     public SiteCrawler(String HostName, String DirName, int MaxPage, String AcceptOnlyPrefixPath, boolean isAppend, CrawlerConfig mc) {
-     this(HostName, null, new File(DirName + "/crawl-" + HostName + ".arc"), MaxPage, AcceptOnlyPrefixPath, isAppend, mc, Mode.Crawl);
-     }
-
-     public SiteCrawler(String HostName, String HostIP, String DirName, int MaxPage, String AcceptOnlyPrefixPath, boolean isAppend) {
-     this(HostName, HostIP, new File(DirName + "/crawl-" + HostName + ".arc"), MaxPage, AcceptOnlyPrefixPath, isAppend, null, Mode.Crawl);
-     }
-
-     public SiteCrawler(String HostName, String HostIP, String DirName, int MaxPage, String AcceptOnlyPrefixPath, boolean isAppend, CrawlerConfig mc, Mode mode) {
-     this(HostName, HostIP, new File(DirName + "/crawl-" + HostName + ".arc"), MaxPage, AcceptOnlyPrefixPath, isAppend, mc, mode);
-     }
-     */
     @Override
     public void run() {
         System.out.println(Thread.currentThread().getName() + " " + HostName + " Start.");
-        if (this.HostIP != null) {
-            processCommand();
-        } else {
-            status = Status.NoHostIP;
+        if(!isCheckedOnly){
+            CheckIP(false);
+            if (this.HostIP != null) {
+                processCommand();
+            } else {
+                status = Status.NoHostIP;
+            }
+            crawlConf.CrawlerFinishing(this);
+        }else{
+            CheckIP(true);
+            if(this.HostIP != null){
+                this.Fetch = new Fetcher(UserAgent);
+                if (URLQueue.isEmpty()) {
+                    URLQueue.add("http://" + HostName + "/");
+                }
+            } else {
+                status = Status.NoHostIP;
+            }
+            Checker();
+            crawlConf.CheckerFinishing(this);
         }
-        crawlConf.Finishing(this);
         System.out.println(Thread.currentThread().getName() + " " + HostName + " End.");
     }
 
@@ -135,6 +130,8 @@ public class SiteCrawler implements Runnable {
         status = Status.Crawling;
         this.Fetch = new Fetcher(UserAgent);
         this.robots = new Robotstxt(HostName, UserAgent);
+        
+        this.Fetch.Details.IPAddress = this.HostIP;
         // 1. Load Robots.txt
         Fetch.fetch("http://" + HostName + "/robots.txt");
         if (Fetch.Details.WebContent != null) {
@@ -168,6 +165,48 @@ public class SiteCrawler implements Runnable {
                 Logger.getLogger(SiteCrawler.class.getName()).log(Level.SEVERE, null, ex1);
             }
         }
+    }
+    
+    public boolean Checker() {
+        String Url;
+        while (!URLQueue.isEmpty() && URLLoaded.size() < crawlConf.MaxPreCrawl) {
+            // 2.1 Fetch
+            Url = URLQueue.get(0);
+            System.out.println("Fetch: " + Url);
+            // 2.2 Compress html Extractlink & write to file
+            if (Fetch.getHeader(Url)) {
+                if (isAllowedResponseCode(Fetch.ResponseCode) && isAllowedHeader()) {
+                    if (Fetch.getDocument()) {
+                        //Fetch.Details.WebContent = wu.HTMLCompress(Fetch.Details.Doc);
+                        LinkFromRedir(Url, Fetch.Details.Doc);
+                        AnalyseLink(Url, Fetch.Details.Doc);
+                        URLLoaded.add(URLQueue.remove(0));
+                        curPageLanguage = LanguageDetector.Detect(Fetch.Details.Doc.text());
+                        try {
+                            //Success & delay
+                            Thread.sleep(crawlConf.CrawlDelay);
+                        } catch (InterruptedException ex) {
+                            System.err.println("Interupt while delay!...");
+                            Logger.getLogger(SiteChecker.class.getName()).log(Level.SEVERE, null, ex);
+                        }
+                        if ("th".equals(curPageLanguage)) {
+                            SiteLang = "th";
+                            return true;
+                        }
+                    } else {
+                        URLCrash.add(URLQueue.remove(0));
+                    }
+                } else {
+                    if (!CodeHandler()) {
+                        break;
+                    }
+                }
+            } else {
+                // Unknown and add to crash
+                URLCrash.add(URLQueue.remove(0));
+            }
+        }
+        return false;
     }
 
     public byte mySizeData;
@@ -235,9 +274,7 @@ public class SiteCrawler implements Runnable {
         try {
             if (rafWebDB.getFilePointer() <= 0){
                 rafWebDB.seek(0);
-                byte[] b = (strWebDBColumnHeader + "\n").getBytes();
-                rafWebDB.writeLong(Long.SIZE + b.length);
-                rafWebDB.write(b);
+                rafWebDB.writeLong(Long.SIZE);
             }
             rafWebDB.write(("\"" + Url.replace("\"", "\"\"") + "\"," + (curPageLanguage == null ? "null" : "\"" + curPageLanguage + "\"") + "," + wu.FileSize + "," + wu.CommentSize + "," + wu.ScriptSize + "," + wu.StyleSize + "," + wu.ContentSize + "\n").getBytes("utf-8"));
             pos = rafWebDB.getFilePointer();
@@ -454,19 +491,4 @@ public class SiteCrawler implements Runnable {
          }*/
     }
 
-    public void Compress(File Src, File Dst) {
-        try (DataInputStream br = new DataInputStream(new FileInputStream(Src))) {
-            try (BlockCompressedOutputStream BCOS = new BlockCompressedOutputStream(Dst)) {
-                byte[] bytes = new byte[4096];
-                int len;
-                while ((len = br.read(bytes)) >= 0) {
-                    BCOS.write(bytes, 0, len);
-                }
-            }
-        } catch (FileNotFoundException ex) {
-            Logger.getLogger(SiteCrawler.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (IOException ex) {
-            Logger.getLogger(SiteCrawler.class.getName()).log(Level.SEVERE, null, ex);
-        }
-    }
 }

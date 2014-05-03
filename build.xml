@@ -16,7 +16,17 @@
         <copy file="lib/sqlite4java-282/libsqlite4java-linux-amd64.so" flatten="true" todir="${dist.dir}/lib"/>  
         <copy file="lib/sqlite4java-282/libsqlite4java-linux-i386.so" flatten="true" todir="${dist.dir}/lib"/>  
         <copy file="lib/sqlite4java-282/sqlite4java-win32-x64.dll" flatten="true" todir="${dist.dir}/lib"/>  
-        <copy file="lib/sqlite4java-282/sqlite4java-win32-x86.dll" flatten="true" todir="${dist.dir}/lib"/>  
+        <copy file="lib/sqlite4java-282/sqlite4java-win32-x86.dll" flatten="true" todir="${dist.dir}/lib"/> 
+        <mkdir dir="${dist.dir}/resource" />
+        <!--
+        <mkdir dir="${dist.dir}/resource/profiles" />
+        <copy todir="${dist.dir}/resource/profiles">
+            <fileset dir="resource/profiles/" includes="*" />
+        </copy> 
+        -->
+        <copy todir="${dist.dir}/resource/">
+            <fileset dir="resource/" includes="**" />
+        </copy>
     </target> 
     <!--
 

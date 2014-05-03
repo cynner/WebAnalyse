@@ -63,7 +63,7 @@ public class WebArcRecord extends ArcRecord{
     }
     
     public int ParseArchiveHeader(BGZFReader BGZF){
-        int beg,end,tmpbeg,tmpend, HeaderLength;
+        int beg, end, tmpbeg, tmpend, HeaderLength;
         boolean End = false;
         String FieldName, Value, Line, tmp;
         
