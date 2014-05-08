@@ -4,11 +4,8 @@
  */
 package ContentClassifier;
 
-import ArcFileUtils.MalletArcIterator;
 import ArcFileUtils.MalletArcWebIterator;
-import cc.mallet.pipe.CharSequence2TokenSequence;
 import cc.mallet.pipe.FeatureSequence2FeatureVector;
-import cc.mallet.pipe.Input2CharSequence;
 import cc.mallet.pipe.Pipe;
 import cc.mallet.pipe.SerialPipes;
 import cc.mallet.pipe.Target2Label;
@@ -22,7 +19,10 @@ import java.io.File;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.regex.*;
+import net.sourceforge.argparse4j.ArgumentParsers;
+import net.sourceforge.argparse4j.inf.ArgumentParser;
+import net.sourceforge.argparse4j.inf.ArgumentParserException;
+import net.sourceforge.argparse4j.inf.Namespace;
 
 /**
  *
@@ -114,13 +114,41 @@ public class MalletWebArcImport {
 
     public static void main (String[] args) throws IOException {
 
-        // = new String[]{"001System.arc", "txtaomy.arc", "txtamnat.arc"};
-        String inputDir = args.length > 0 ? args[0] : "/data/Backup/WebAnalyse/data/Thai";
-        String ResultFile = args.length > 1 ? args[1] : "resource/NewPipeTHContent.mallet";
-        MalletWebArcImport importer = new MalletWebArcImport();
-        importer.readDirectories(new File(inputDir), true);
+        // SET PROPERTIES
+        System.setProperty("sun.jnu.encoding", "UTF-8");
+        System.setProperty("file.encoding", "UTF-8");
+
+        ArgumentParser parser = ArgumentParsers.newArgumentParser("ContentClassifier.MalletWebArcImport").defaultHelp(true)
+                .description("Import Site Arc to classified");
+        parser.addArgument("-o", "--output")
+                .dest("output")
+                .metavar("OUTPUT")
+                .type(String.class)
+                .required(true)
+                .help("Output file name");
+        parser.addArgument("DIR_IN")
+                .dest("dir_in")
+                .type(String.class)
+                .help("Web archives directory input");
         
-        importer.instances.save(new File(ResultFile));
+        
+        try {
+            Namespace res = parser.parseArgs(args);
+
+            System.out.println("Starting ...");
+            
+            String ResultFile = res.getString("output");
+            MalletWebArcImport importer = new MalletWebArcImport();
+            importer.readDirectories(new File(res.getString("dir_in")), true);
+        
+            importer.instances.save(new File(ResultFile));
+            System.out.println("Success");
+        
+       
+        } catch (ArgumentParserException e) {
+            parser.handleError(e);
+        }
+        
         
         
 

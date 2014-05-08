@@ -1,4 +1,3 @@
-
 #!/usr/bin/python
 
 # Numpy is a library for handling arrays (like data points)
@@ -16,7 +15,6 @@ parser.add_argument('-ct','--cuttail', metavar="Nth", type=int, nargs='?', const
 parser.add_argument('--nodisplay', action='store_true', help='no gui')
 parser.add_argument('-d', metavar='delim', default=':', help='delimiter default \':\'')
 parser.add_argument('-f', metavar='field_no',type=int,default=1,help='filed no start from 1 default 1')
-parser.add_argument('-s', metavar='Style', default='b.', help='Style default \'b.\'')
 parser.add_argument('-t', metavar='TITLE',default='',help='Title')
 parser.add_argument('-xl', metavar='x-label',help='x label')
 parser.add_argument('-yl', metavar='y-label',help='y label')
